@@ -4,13 +4,7 @@
  * or from FastAPI (including 422 validation detail). See architecture §7.
  */
 export type ApiErrorKind =
-  | 'unauthorized'
-  | 'forbidden'
-  | 'not_found'
-  | 'validation'
-  | 'rate_limited'
-  | 'network'
-  | 'server';
+  'unauthorized' | 'forbidden' | 'not_found' | 'validation' | 'rate_limited' | 'network' | 'server';
 
 export interface ApiError {
   readonly kind: ApiErrorKind;

@@ -11,7 +11,12 @@
     "typecheck": "tsr generate && tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests"
   },
-  "nx": { "tags": ["type:app", "platform:web"] },
+  "nx": {
+    "tags": [
+      "type:app",
+      "platform:web"
+    ]
+  },
   "dependencies": {
     "@radial-pulse/api-client": "workspace:*",
     "@radial-pulse/config": "workspace:*",

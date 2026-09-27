@@ -44,11 +44,23 @@ const depConstraints = [
   { sourceTag: 'type:tokens', onlyDependOnLibsWithTags: [] },
 ];
 
-const NATIVE = { group: ['@radial-pulse/*/native', 'react-native', 'react-native/*', 'expo', 'expo-*'], message: 'Native code cannot be used here (web/DOM context).' };
-const DOM = { group: ['@radial-pulse/*/web', 'react-dom', 'react-dom/*'], message: 'Web (DOM) code cannot be used here (native context).' };
-const NEUTRAL = { group: ['react-dom', 'react-dom/*', 'react-native', 'react-native/*', 'expo', 'expo-*'], message: 'Shared by web and mobile: keep it free of DOM and native imports.' };
+const NATIVE = {
+  group: ['@radial-pulse/*/native', 'react-native', 'react-native/*', 'expo', 'expo-*'],
+  message: 'Native code cannot be used here (web/DOM context).',
+};
+const DOM = {
+  group: ['@radial-pulse/*/web', 'react-dom', 'react-dom/*'],
+  message: 'Web (DOM) code cannot be used here (native context).',
+};
+const NEUTRAL = {
+  group: ['react-dom', 'react-dom/*', 'react-native', 'react-native/*', 'expo', 'expo-*'],
+  message: 'Shared by web and mobile: keep it free of DOM and native imports.',
+};
 const NO_APPS = { group: ['**/apps/**'], message: 'Packages must never import from apps.' };
-const NO_CROSS_MODULE = { group: ['**/modules/**'], message: 'Modules are independent: navigate via typed routes, share via packages.' };
+const NO_CROSS_MODULE = {
+  group: ['**/modules/**'],
+  message: 'Modules are independent: navigate via typed routes, share via packages.',
+};
 
 const restrict = (files, patterns, ignores = []) => ({
   files,
@@ -75,8 +87,14 @@ function importRestrictionBlocks() {
       ],
       [NEUTRAL, NO_APPS],
     ),
-    restrict([`packages/ui/src/web/${ts}`, `packages/platform-shell/src/web/${ts}`], [NATIVE, NO_APPS]),
-    restrict([`packages/ui/src/native/${ts}`, `packages/platform-shell/src/native/${ts}`], [DOM, NO_APPS]),
+    restrict(
+      [`packages/ui/src/web/${ts}`, `packages/platform-shell/src/web/${ts}`],
+      [NATIVE, NO_APPS],
+    ),
+    restrict(
+      [`packages/ui/src/native/${ts}`, `packages/platform-shell/src/native/${ts}`],
+      [DOM, NO_APPS],
+    ),
   ];
 }
 
@@ -125,8 +143,14 @@ export default tseslint.config(
     rules: {
       'no-restricted-syntax': [
         'error',
-        { selector: "MemberExpression[object.meta.name='import'][property.name='env']", message: envAccessMessage },
-        { selector: "MemberExpression[object.name='process'][property.name='env']", message: envAccessMessage },
+        {
+          selector: "MemberExpression[object.meta.name='import'][property.name='env']",
+          message: envAccessMessage,
+        },
+        {
+          selector: "MemberExpression[object.name='process'][property.name='env']",
+          message: envAccessMessage,
+        },
       ],
     },
   },

@@ -12,7 +12,12 @@
     "test": "jest --passWithNoTests",
     "doctor": "expo install --check"
   },
-  "nx": { "tags": ["type:app", "platform:native"] },
+  "nx": {
+    "tags": [
+      "type:app",
+      "platform:native"
+    ]
+  },
   "dependencies": {
     "@radial-pulse/api-client": "workspace:*",
     "@radial-pulse/config": "workspace:*",

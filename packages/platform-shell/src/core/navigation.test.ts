@@ -6,7 +6,16 @@ import { resolveNavigation } from './navigation';
 const modules: ModuleManifest[] = [
   {
     id: 'users',
-    navEntries: [{ id: 'users', label: 'Users', to: '/users', requiredCapability: 'users.manage', placement: 'primary', order: 30 }],
+    navEntries: [
+      {
+        id: 'users',
+        label: 'Users',
+        to: '/users',
+        requiredCapability: 'users.manage',
+        placement: 'primary',
+        order: 30,
+      },
+    ],
   },
   {
     id: 'clinics',
@@ -23,7 +32,9 @@ const modules: ModuleManifest[] = [
   },
   {
     id: 'dashboard',
-    navEntries: [{ id: 'dashboard', label: 'Dashboard', to: '/dashboard', placement: 'primary', order: 10 }],
+    navEntries: [
+      { id: 'dashboard', label: 'Dashboard', to: '/dashboard', placement: 'primary', order: 10 },
+    ],
   },
 ];
 

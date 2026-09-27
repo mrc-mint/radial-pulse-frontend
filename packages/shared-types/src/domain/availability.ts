@@ -10,5 +10,4 @@
  * against) the generated schema so the backend shape stays authoritative.
  */
 export type ComponentScore =
-  | { availability: 'available'; score: number }
-  | { availability: 'not_available' };
+  { availability: 'available'; score: number } | { availability: 'not_available' };
