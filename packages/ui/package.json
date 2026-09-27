@@ -1,0 +1,48 @@
+{
+  "name": "@radial-pulse/ui",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Presentational components: shared contracts plus separate web and native implementations.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./shared": "./src/shared/index.ts",
+    "./web": "./src/web/index.ts",
+    "./native": "./src/native/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:ui"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/design-tokens": "workspace:*",
+    "@radial-pulse/shared-types": "workspace:*",
+    "@radial-pulse/utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "@types/react": "~19.1.10",
+    "@types/react-dom": "~19.1.7",
+    "react-native": "0.81.4"
+  },
+  "peerDependenciesMeta": {
+    "react-dom": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    }
+  }
+}

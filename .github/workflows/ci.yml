@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Sets NX_BASE/NX_HEAD so `nx affected` compares against the last green main.
+      - uses: nrwl/nx-set-shas@v4
+
+      - name: Formatting
+        run: pnpm format:check
+
+      - name: API contract in sync
+        run: pnpm contract:check
+
+      - name: Lint, typecheck, test, build (affected)
+        run: pnpm nx affected -t lint typecheck test build --parallel=3
+
+# Deploy workflows (web → S3 + CloudFront via GitHub OIDC; mobile → EAS) are
+# added once the dev environment exists. Prod deploys will be gated by a
+# GitHub Environment with required reviewers.

@@ -1,0 +1,14 @@
+# Central Tech owns this repository in V1 (decision 1). Domain teams contribute
+# through backend/engine contracts, not frontend code.
+# PLACEHOLDER team handle — replace with the real GitHub team.
+*                          @REPLACE-ORG/central-tech
+
+# Cross-team surfaces: changes here always need Central Tech review.
+/contracts/                @REPLACE-ORG/central-tech
+/packages/platform-shell/  @REPLACE-ORG/central-tech
+/packages/shared-types/    @REPLACE-ORG/central-tech
+/packages/api-client/      @REPLACE-ORG/central-tech
+/packages/design-tokens/   @REPLACE-ORG/central-tech
+/packages/ui/              @REPLACE-ORG/central-tech
+/eslint.config.mjs         @REPLACE-ORG/central-tech
+/.github/                  @REPLACE-ORG/central-tech

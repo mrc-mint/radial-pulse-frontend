@@ -1,0 +1,21 @@
+{
+  "name": "@radial-pulse/shared-types",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Domain vocabulary and generated API contract types. Types only, zero runtime.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:types"
+    ]
+  }
+}

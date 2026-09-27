@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+node_modules
+dist
+.expo
+**/routeTree.gen.ts
+packages/shared-types/src/contract/generated.ts
+contracts/api/openapi.json

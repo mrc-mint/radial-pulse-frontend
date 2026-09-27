@@ -1,0 +1,37 @@
+{
+  "name": "@radial-pulse/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The only way the frontend talks to the platform API (via API Gateway).",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./react": "./src/react/index.ts",
+    "./mocks": "./src/mocks/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:data-access"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/shared-types": "workspace:*",
+    "@radial-pulse/config": "workspace:*",
+    "@radial-pulse/utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.1.0",
+    "@tanstack/react-query": "^5.85.0"
+  },
+  "devDependencies": {
+    "react": "19.1.0",
+    "@types/react": "~19.1.10",
+    "@tanstack/react-query": "^5.85.0"
+  }
+}

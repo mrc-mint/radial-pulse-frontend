@@ -1,0 +1,10 @@
+{
+  "appEnv": "local",
+  "apiBaseUrl": "https://api.dev.radialpulse.example",
+  "cognito": {
+    "userPoolId": "REPLACE_ME",
+    "userPoolClientId": "REPLACE_ME",
+    "domain": "REPLACE_ME"
+  },
+  "apiMocking": false
+}

@@ -1,0 +1,47 @@
+{
+  "name": "@radial-pulse/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "jest --passWithNoTests",
+    "doctor": "expo install --check"
+  },
+  "nx": { "tags": ["type:app", "platform:native"] },
+  "dependencies": {
+    "@radial-pulse/api-client": "workspace:*",
+    "@radial-pulse/config": "workspace:*",
+    "@radial-pulse/design-tokens": "workspace:*",
+    "@radial-pulse/platform-shell": "workspace:*",
+    "@radial-pulse/shared-types": "workspace:*",
+    "@radial-pulse/ui": "workspace:*",
+    "@radial-pulse/utils": "workspace:*",
+    "@tanstack/react-query": "^5.85.0",
+    "expo": "~54.0.0",
+    "expo-constants": "~18.0.0",
+    "expo-linking": "~8.0.0",
+    "expo-router": "~6.0.0",
+    "expo-status-bar": "~3.0.0",
+    "react": "19.1.0",
+    "react-native": "0.81.4",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/react": "~19.1.10",
+    "jest": "~29.7.0",
+    "jest-expo": "~54.0.0"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@radial-pulse/.*|zod)"
+    ]
+  }
+}

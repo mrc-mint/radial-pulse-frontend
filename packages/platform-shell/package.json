@@ -1,0 +1,51 @@
+{
+  "name": "@radial-pulse/platform-shell",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Central Tech platform shell: session, tenant and clinic context, module manifests, navigation.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./core": "./src/core/index.ts",
+    "./web": "./src/web/index.tsx",
+    "./native": "./src/native/index.tsx"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:shell"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/ui": "workspace:*",
+    "@radial-pulse/api-client": "workspace:*",
+    "@radial-pulse/config": "workspace:*",
+    "@radial-pulse/shared-types": "workspace:*",
+    "@radial-pulse/utils": "workspace:*",
+    "@radial-pulse/design-tokens": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "@types/react": "~19.1.10",
+    "@types/react-dom": "~19.1.7",
+    "react-native": "0.81.4"
+  },
+  "peerDependenciesMeta": {
+    "react-dom": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@radial-pulse/design-tokens",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Single source of design tokens: TS object (native) and CSS variables (web).",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./css": "./src/tokens.css"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:tokens"
+    ]
+  }
+}

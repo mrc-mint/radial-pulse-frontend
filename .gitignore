@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.nx/
+.expo/
+*.log
+.env
+.env.*
+!.env.example
+apps/web/src/routeTree.gen.ts
+apps/mobile/ios/
+apps/mobile/android/
+.DS_Store
