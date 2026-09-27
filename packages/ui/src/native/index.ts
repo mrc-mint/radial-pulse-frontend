@@ -1,6 +1,36 @@
 /**
- * @radial-pulse/ui/native — React Native implementations with the same
- * component names and shared prop contracts where they make sense.
- * PHASE 2 STUB (components arrive in Phase 3).
+ * @radial-pulse/ui/native — React Native implementations of the shared
+ * contracts, designed for touch (44pt targets, bottom sheets, segmented tabs).
+ * Presentational only: components receive data and never fetch.
+ *
+ * Web-only primitives (Table, Pagination, DropdownMenu, Drawer, SearchInput)
+ * have no native counterpart because no V1 mobile screen needs them.
  */
 export type * from '../shared';
+export {
+  avatarToneFor,
+  displayHost,
+  formatDateTime,
+  formatMetricValue,
+  getInitials,
+} from '../shared';
+
+export { Button, IconButton } from './button';
+export type { ButtonProps, IconButtonProps } from './button';
+export { Input, Select } from './field';
+export type { InputProps, SelectProps } from './field';
+export { Avatar, Badge, Card, PageHeader, Tabs } from './display';
+export type { AvatarProps, BadgeProps, CardProps, PageHeaderProps, TabsProps } from './display';
+export { Modal } from './overlay';
+export type { ModalProps } from './overlay';
+export { MetricCard, ScoreCard } from './metrics';
+export type { MetricCardProps, ScoreCardProps } from './metrics';
+export { FindingCard } from './finding';
+export type { FindingCardProps } from './finding';
+export { EmptyState, ErrorState, LoadingState, Skeleton } from './feedback';
+export type {
+  EmptyStateProps,
+  ErrorStateProps,
+  LoadingStateProps,
+  SkeletonProps,
+} from './feedback';

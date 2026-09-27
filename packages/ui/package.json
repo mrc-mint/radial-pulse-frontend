@@ -4,7 +4,9 @@
   "private": true,
   "description": "Presentational components: shared contracts plus separate web and native implementations.",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     "./shared": "./src/shared/index.ts",
     "./web": "./src/web/index.ts",
@@ -35,7 +37,9 @@
     "react-dom": "19.1.0",
     "@types/react": "~19.1.10",
     "@types/react-dom": "~19.1.7",
-    "react-native": "0.81.4"
+    "react-native": "0.81.4",
+    "jsdom": "^26.1.0",
+    "@types/node": "^26.6.3"
   },
   "peerDependenciesMeta": {
     "react-dom": {

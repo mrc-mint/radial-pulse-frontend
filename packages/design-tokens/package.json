@@ -12,6 +12,7 @@
     "./css": "./src/tokens.css"
   },
   "scripts": {
+    "generate": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/generate-css.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests"
@@ -20,5 +21,9 @@
     "tags": [
       "type:tokens"
     ]
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "prettier": "^3.6.0"
   }
 }

@@ -202,7 +202,14 @@ importers:
         specifier: ^4.1.0
         version: 4.6.5
 
-  packages/design-tokens: {}
+  packages/design-tokens:
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.3
+        version: 26.6.3
+      prettier:
+        specifier: ^3.6.0
+        version: 3.9.9
 
   packages/platform-shell:
     dependencies:
@@ -255,12 +262,18 @@ importers:
         specifier: workspace:*
         version: link:../utils
     devDependencies:
+      '@types/node':
+        specifier: ^26.6.3
+        version: 26.6.3
       '@types/react':
         specifier: ~19.1.10
         version: 19.1.17
       '@types/react-dom':
         specifier: ~19.1.7
         version: 19.1.11(@types/react@19.1.17)
+      jsdom:
+        specifier: ^26.1.0
+        version: 26.1.0
       react:
         specifier: 19.1.0
         version: 19.1.0
