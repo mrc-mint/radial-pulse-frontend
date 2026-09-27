@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ClinicSectionPlaceholder } from '../../../../app/clinic-section-placeholder';
+import { ClinicOverviewPage } from '../../../../modules/clinics/overview-page';
 
 export const Route = createFileRoute('/_app/clinics/$clinicId/')({
-  component: () => <ClinicSectionPlaceholder title="Overview" />,
+  component: ClinicOverviewPage,
 });

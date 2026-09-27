@@ -1,16 +1,46 @@
+import type { MeResponse } from '@radial-pulse/shared-types';
 import { describe, expect, it, vi } from 'vitest';
-import { createSessionController, type Session, type SessionAdapter } from './session';
+import { createSessionController, sessionFromMe, type SessionAdapter } from './session';
 
-const session: Session = {
-  user: {
-    id: 'u_1',
-    name: 'Priya Shah',
-    email: 'priya.shah@radialpulse.example',
-    roles: ['DIGITAL_SUCCESS_MANAGER'],
-  },
-  tenant: { id: 't_1', name: 'Radial Pulse' },
-  capabilities: new Set(['clinics.assigned_only']),
+const me: MeResponse = {
+  id: '7d9a2c4e-1f3b-4a5c-8d6e-2b1c0a9f8e71',
+  email: 'priya.shah@radialpulse.example',
+  full_name: 'Priya Shah',
+  platform_role: 'digital_success_manager',
+  permissions: ['clinics:create'],
+  all_clinics: false,
+  sign_in_method: 'google',
+  clinics: [
+    {
+      clinic_id: 'c1b2a3d4-0000-4000-8000-000000000001',
+      clinic_role: null,
+      assigned: true,
+      permissions: ['clinics:read', 'chat:read', 'chat:write'],
+    },
+  ],
 };
+const session = sessionFromMe(me);
+
+describe('sessionFromMe', () => {
+  it('maps the contract response to the shell session', () => {
+    expect(session.user).toEqual({
+      id: me.id,
+      name: 'Priya Shah',
+      email: me.email,
+      platformRole: 'digital_success_manager',
+      avatarUrl: null,
+    });
+    expect([...session.capabilities]).toEqual(['clinics:create']);
+    expect(session.allClinics).toBe(false);
+    const access = session.clinicAccess.get('c1b2a3d4-0000-4000-8000-000000000001');
+    expect(access?.assigned).toBe(true);
+    expect(access?.permissions.has('chat:write')).toBe(true);
+  });
+
+  it('falls back to the email when the name is not set', () => {
+    expect(sessionFromMe({ ...me, full_name: null }).user.name).toBe(me.email);
+  });
+});
 
 function adapter(overrides: Partial<SessionAdapter> = {}): SessionAdapter {
   return {

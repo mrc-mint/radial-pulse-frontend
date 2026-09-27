@@ -1,7 +1,6 @@
 import type { ModuleManifest } from '@radial-pulse/platform-shell/core';
-import { CAPABILITIES } from '../../app/capabilities';
 
-/** Platform Administrator only (docs/scope-v1.md). */
+/** Platform Administrator only (docs/scope-v1.md): gated on `users:read`. */
 export const usersModule: ModuleManifest = {
   id: 'users',
   navEntries: [
@@ -10,7 +9,7 @@ export const usersModule: ModuleManifest = {
       label: 'Users',
       to: '/users',
       icon: 'users',
-      requiredCapability: CAPABILITIES.manageUsers,
+      requiredCapability: 'users:read',
       placement: 'primary',
       order: 30,
     },

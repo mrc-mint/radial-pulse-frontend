@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ClinicSectionPlaceholder } from '../../../../app/clinic-section-placeholder';
+import { DigitalInformationPage } from '../../../../modules/clinics/digital-information-page';
 
 export const Route = createFileRoute('/_app/clinics/$clinicId/digital-information')({
-  component: () => <ClinicSectionPlaceholder title="Digital Information" />,
+  component: DigitalInformationPage,
 });

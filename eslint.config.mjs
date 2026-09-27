@@ -112,6 +112,7 @@ export default tseslint.config(
       'packages/shared-types/src/contract/generated.ts',
       'apps/mobile/ios/**',
       'apps/mobile/android/**',
+      'apps/web/public/mockServiceWorker.js',
     ],
   },
   js.configs.recommended,

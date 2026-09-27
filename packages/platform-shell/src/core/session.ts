@@ -1,31 +1,40 @@
 import type { AuthBridge } from '@radial-pulse/api-client';
-import type { Capability, RoleName } from '@radial-pulse/shared-types';
+import type {
+  Capability,
+  ClinicRole,
+  MeResponse,
+  Permission,
+  PlatformRole,
+} from '@radial-pulse/shared-types';
 
 /**
- * Session boundary (architecture: Auth, ADR 0006).
+ * Session boundary (architecture: Auth, ADR 0006, ADR 0008).
  *
  * The shell sees a session through a `SessionAdapter`. Phase 7 provides the
- * Cognito/Amplify adapter; until then the app supplies a development adapter.
- * Screens never see tokens: they read `useSession()` (user, tenant,
- * capabilities). Only the composition root hands `controller.authBridge`
- * to the API client.
+ * Cognito adapter; until then the app supplies a development adapter. The
+ * session content always comes from the contract's `GET /api/v1/auth/me`
+ * (`sessionFromMe`). Screens never see tokens: they read `useSession()`.
+ * Only the composition root hands `controller.authBridge` to the API client.
  */
 
-/** The shell's view of `GET /me`. Mapped from the contract once it is published. */
 export interface CurrentUser {
   id: string;
+  /** `full_name`, falling back to the email when the name is not set. */
   name: string;
   email: string;
-  roles: ReadonlyArray<RoleName>;
-  avatarUrl?: string | null;
+  platformRole: PlatformRole;
+  avatarUrl: string | null;
 }
 
-export interface Tenant {
-  id: string;
-  name: string;
+/** The caller's access inside one clinic (contract `ClinicAccess`). */
+export interface ClinicPermissions {
+  clinicRole: ClinicRole | null;
+  /** The caller is this clinic's Digital Success Manager. */
+  assigned: boolean;
+  permissions: ReadonlySet<Permission>;
 }
 
-/** A clinic the user can act on. Clinic Administrators may have several. */
+/** A clinic the user can act on (id + display name, from the clinics API). */
 export interface ClinicSummary {
   id: string;
   name: string;
@@ -33,11 +42,40 @@ export interface ClinicSummary {
 
 export interface Session {
   user: CurrentUser;
-  tenant: Tenant;
-  /** Capability strings from `GET /me`. UI affordances only; the backend enforces. */
+  /** Platform-level permissions (`MeResponse.permissions`). UI only; the backend enforces. */
   capabilities: ReadonlySet<Capability>;
-  /** Clinics available to a Clinic Administrator. Absent for platform staff. */
-  clinics?: ReadonlyArray<ClinicSummary>;
+  /**
+   * `MeResponse.all_clinics`: the caller can reach every clinic (Platform
+   * Administrator). API 0.1.0 then lists no per-clinic permissions.
+   */
+  allClinics: boolean;
+  /** Per-clinic access, keyed by clinic id (`MeResponse.clinics`). */
+  clinicAccess: ReadonlyMap<string, ClinicPermissions>;
+}
+
+/** Maps the contract's `MeResponse` to the shell session. */
+export function sessionFromMe(me: MeResponse): Session {
+  return {
+    user: {
+      id: me.id,
+      name: me.full_name?.trim() || me.email,
+      email: me.email,
+      platformRole: me.platform_role,
+      avatarUrl: me.avatar_url ?? null,
+    },
+    capabilities: new Set(me.permissions),
+    allClinics: me.all_clinics,
+    clinicAccess: new Map(
+      me.clinics.map((c) => [
+        c.clinic_id,
+        {
+          clinicRole: c.clinic_role ?? null,
+          assigned: c.assigned ?? false,
+          permissions: new Set(c.permissions),
+        },
+      ]),
+    ),
+  };
 }
 
 export interface SignInOption {

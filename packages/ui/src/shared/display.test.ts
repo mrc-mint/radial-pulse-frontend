@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vitest';
 import {
   avatarToneFor,
   displayHost,
+  formatDate,
   formatDateTime,
   formatMetricValue,
+  formatRelativeTime,
   getInitials,
 } from './display';
 
@@ -60,5 +62,21 @@ describe('displayHost', () => {
 
   it('returns the input when it is not a URL', () => {
     expect(displayHost('smiledentalcare.in')).toBe('smiledentalcare.in');
+  });
+});
+
+describe('formatDate / formatRelativeTime', () => {
+  it('formats a date without time', () => {
+    expect(formatDate('2024-09-12T05:00:00Z', { timeZone: 'Asia/Kolkata' })).toMatch(
+      /^12 Sept? 2024$/,
+    );
+    expect(formatDate('nope')).toBeNull();
+  });
+
+  it('describes time relative to now', () => {
+    const now = Date.parse('2026-09-27T10:00:00Z');
+    expect(formatRelativeTime('2026-09-27T09:55:00Z', now)).toBe('5 minutes ago');
+    expect(formatRelativeTime('2026-09-26T10:00:00Z', now)).toBe('yesterday');
+    expect(formatRelativeTime('2026-09-27T09:59:50Z', now)).toBe('now');
   });
 });

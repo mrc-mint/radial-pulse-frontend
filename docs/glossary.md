@@ -1,16 +1,17 @@
 # Glossary
 
-| Term                         | Meaning                                             | Notes                           |
-| ---------------------------- | --------------------------------------------------- | ------------------------------- |
-| Platform Administrator       | Platform-level administrator                        | Never "Internal Admin"          |
-| Digital Success Manager      | Operational user working with assigned clinics      | Never "Internal User"           |
-| Clinic Administrator         | Clinic-side owner/administrator                     | May have several clinics        |
-| Clinic Team Member           | Future role                                         | Not a V1 experience             |
-| Assessment                   | The one unified digital-presence assessment         | Code name                       |
-| Audit Report / Unified Audit | User-facing label for an Assessment                 | No "audit type" anywhere        |
-| Section                      | A component of an assessment (Website, GBP, GEO, …) | Keys come from the contract     |
-| Not Available                | A section with no engine available                  | Never a score of 0              |
-| Unverified / Human Confirmed | Verification status of discovered profile data      | Human-confirmed wins            |
-| Work item                    | A backend-produced action for a clinic              | Kinds owned by the backend      |
-| Capability                   | A permission string from `GET /me`                  | UI only; backend enforces       |
-| Module                       | A feature that registers a manifest with the shell  | Modules don't import each other |
+| Term                              | Meaning                                                                    | Notes                                                                                                                     |
+| --------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Platform Administrator            | Platform-level administrator (`platform_administrator`)                    | Never "Internal Admin"                                                                                                    |
+| Digital Success Manager           | Staff user working with assigned clinics (`digital_success_manager`)       | Never "Internal User"                                                                                                     |
+| Clinic Administrator              | Clinic-side owner (`clinic_user` + clinic role `clinic_administrator`)     | May have several clinics                                                                                                  |
+| Clinic Team Member                | Future role                                                                | Not a V1 experience                                                                                                       |
+| Assessment                        | The one unified digital-presence assessment                                | Code name                                                                                                                 |
+| Audit Report / Unified Audit      | User-facing label for an Assessment                                        | No "audit type" anywhere                                                                                                  |
+| Section / Component               | A component of an assessment (`AssessmentComponentKey`)                    | Website, Google Business Profile, Local Search, Search Readiness (SEO + AEO + GEO), Social Presence, Competitor Benchmark |
+| Not Available                     | Component status `not_available`: no engine available                      | Never a score of 0                                                                                                        |
+| Unverified / Confirmed / Rejected | `PresenceVerification` of a discovered profile                             | Human decisions win                                                                                                       |
+| Priority                          | `FindingPriority` of a finding (critical → info)                           | Never "severity" in code or copy                                                                                          |
+| Work item                         | A backend-produced action for a clinic                                     | Kinds owned by the backend                                                                                                |
+| Permission                        | A contract `Permission` from `GET /auth/me` (platform-level or per clinic) | UI only; backend enforces                                                                                                 |
+| Module                            | A feature that registers a manifest with the shell                         | Modules don't import each other                                                                                           |

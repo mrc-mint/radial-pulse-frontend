@@ -27,6 +27,8 @@ const header = `/**
 
 `;
 
-const ast = await openapiTS(JSON.parse(readFileSync(spec, 'utf8')));
+// defaultNonNullable: false — a property with a server-side default stays
+// optional, so request bodies need not send it (e.g. ClinicCreate.country).
+const ast = await openapiTS(JSON.parse(readFileSync(spec, 'utf8')), { defaultNonNullable: false });
 writeFileSync(out, header + astToString(ast));
 console.log(`Generated ${out} from contract ${version}.`);

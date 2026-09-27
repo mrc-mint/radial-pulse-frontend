@@ -16,5 +16,13 @@ export const assessmentsModule: ModuleManifest = {
       order: 40,
     },
   ],
-  clinicSections: [{ id: 'audit', label: 'Unified Audit', path: 'audit', order: 30 }],
+  clinicSections: [
+    {
+      id: 'audit',
+      label: 'Unified Audit',
+      path: 'audit',
+      order: 30,
+      requiredPermission: 'assessments:read',
+    },
+  ],
 };

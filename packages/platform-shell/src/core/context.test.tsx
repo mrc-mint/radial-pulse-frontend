@@ -10,8 +10,16 @@ import {
   useClinicSelection,
   useOptionalClinicId,
 } from './clinic-context';
-import { createSessionController, type Session } from './session';
-import { Can, SessionProvider, useCan, useSession } from './session-context';
+import type { MeResponse } from '@radial-pulse/shared-types';
+import { createSessionController, sessionFromMe } from './session';
+import {
+  Can,
+  SessionProvider,
+  useCan,
+  useClinicCan,
+  useClinicPermissions,
+  useSession,
+} from './session-context';
 
 afterEach(cleanup);
 
@@ -90,13 +98,18 @@ describe('ClinicSelectionProvider', () => {
 });
 
 describe('capabilities', () => {
-  const session: Session = {
-    user: { id: 'u', name: 'Rohan Agarwal', email: 'r@radialpulse.example', roles: [] },
-    tenant: { id: 't', name: 'Radial Pulse' },
-    capabilities: new Set(['users.manage']),
-  };
-
-  async function withSession() {
+  async function withSession(me: Partial<MeResponse> = {}) {
+    const session = sessionFromMe({
+      id: 'u-1',
+      email: 'rohan.agarwal@radialpulse.example',
+      full_name: 'Rohan Agarwal',
+      platform_role: 'platform_administrator',
+      permissions: ['users:read', 'users:manage'],
+      all_clinics: true,
+      sign_in_method: 'google',
+      clinics: [],
+      ...me,
+    });
     const controller = createSessionController({
       restore: async () => session,
       signIn: async () => session,
@@ -109,27 +122,53 @@ describe('capabilities', () => {
     );
   }
 
-  it('answers capability checks from the session', async () => {
+  it('answers platform permission checks from the session', async () => {
     const wrapper = await withSession();
-    const { result } = renderHook(() => [useCan('users.manage'), useCan('other')], { wrapper });
+    const { result } = renderHook(() => [useCan('users:manage'), useCan('settings:manage')], {
+      wrapper,
+    });
     expect(result.current).toEqual([true, false]);
   });
 
-  it('renders gated content only when the capability is held', async () => {
+  it('renders gated content only when the permission is held', async () => {
     const Wrapper = await withSession();
     render(
       <Wrapper>
-        <Can capability="users.manage">
+        <Can capability="users:manage">
           <p>Manage users</p>
         </Can>
-        <Can capability="other" fallback={<p>Hidden</p>}>
-          <p>Other</p>
+        <Can capability="settings:manage" fallback={<p>Hidden</p>}>
+          <p>Settings</p>
         </Can>
       </Wrapper>,
     );
     expect(screen.getByText('Manage users')).toBeTruthy();
     expect(screen.getByText('Hidden')).toBeTruthy();
-    expect(screen.queryByText('Other')).toBeNull();
+    expect(screen.queryByText('Settings')).toBeNull();
+  });
+
+  it('checks permissions inside a clinic from the clinic access list', async () => {
+    const wrapper = await withSession({
+      platform_role: 'digital_success_manager',
+      all_clinics: false,
+      permissions: ['clinics:create'],
+      clinics: [{ clinic_id: 'c-1', assigned: true, permissions: ['chat:read'] }],
+    });
+    const { result } = renderHook(
+      () => [
+        useClinicCan('c-1', 'chat:read'),
+        useClinicCan('c-1', 'chat:write'),
+        useClinicCan('c-2', 'chat:read'),
+      ],
+      { wrapper },
+    );
+    expect(result.current).toEqual([true, false, false]);
+  });
+
+  it('treats an all-clinics user without per-clinic permissions as unrestricted', async () => {
+    const wrapper = await withSession();
+    const { result } = renderHook(() => useClinicPermissions('any-clinic'), { wrapper });
+    expect(result.current).toBe('unrestricted');
   });
 
   it('never exposes the access token to screens', async () => {

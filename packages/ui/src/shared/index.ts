@@ -8,9 +8,12 @@ export type * from './contracts';
 export {
   avatarToneFor,
   displayHost,
+  formatDate,
   formatDateTime,
+  formatRelativeTime,
   formatMetricValue,
   getInitials,
 } from './display';
 export { getPageItems, getPageRange } from './pagination';
 export type { PageItem } from './pagination';
+export * from './tones';

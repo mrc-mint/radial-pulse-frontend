@@ -50,7 +50,6 @@
   line-height: var(--rp-text-metric-line-height);
   font-weight: var(--rp-text-metric-weight);
   letter-spacing: var(--rp-text-metric-tracking);
-  font-variant-numeric: tabular-nums;
 }
 
 .rp-metric__value--missing {
@@ -149,7 +148,6 @@
   line-height: var(--rp-text-display-line-height);
   font-weight: var(--rp-text-display-weight);
   letter-spacing: var(--rp-text-display-tracking);
-  font-variant-numeric: tabular-nums;
 }
 
 .rp-score__max {

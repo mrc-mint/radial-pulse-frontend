@@ -1,5 +1,4 @@
 import type { SeverityTone, StatusTone } from '@radial-pulse/design-tokens';
-import type { ComponentScore } from '@radial-pulse/shared-types';
 import type { ReactNode } from 'react';
 
 /**
@@ -9,7 +8,7 @@ import type { ReactNode } from 'react';
  * (onClick vs onPress), so each implementation adds its own. Components are
  * presentational: they receive data and never fetch.
  *
- * Tones are VISUAL. Contract values (assessment status, finding severity,
+ * Tones are VISUAL. Contract values (assessment status, finding priority,
  * clinic status) are mapped to a tone by the app, in one place — the UI never
  * interprets domain values or derives them from scores.
  */
@@ -161,15 +160,21 @@ export interface MetricCardBaseProps {
 }
 
 export interface ScoreComparison {
-  /** e.g. "Competitor average". */
+  /** e.g. "Competitor benchmark". */
   label: string;
-  score: ComponentScore;
+  score: number | null;
+  /** Shown instead of a number when `score` is null. */
+  emptyLabel?: string;
 }
 
 export interface ScoreCardBaseProps {
   label: string;
-  /** From the assessment contract. `not_available` renders "Not Available". */
-  score: ComponentScore;
+  /**
+   * Backend score. Null is never shown as 0: `emptyLabel` is shown instead,
+   * derived by the caller from the contract status (e.g. "Not Available").
+   */
+  score: number | null;
+  emptyLabel?: string;
   /** Scale maximum for display, e.g. 100. */
   max?: number;
   /**
@@ -190,7 +195,8 @@ export interface FindingEvidence {
   observedAt?: string;
 }
 
-export interface FindingSeverity {
+/** Contract `FindingPriority` as display label + visual tone. */
+export interface FindingPriorityDisplay {
   /** Contract value's display label, e.g. "High". */
   label: string;
   tone: SeverityTone;
@@ -199,7 +205,7 @@ export interface FindingSeverity {
 export interface FindingCardBaseProps {
   title: string;
   description?: string;
-  severity: FindingSeverity;
+  priority: FindingPriorityDisplay;
   /** Assessment section the finding belongs to, e.g. "Google Business Profile". */
   sectionLabel?: string;
   /** Backend recommendation text, rendered as-is. */

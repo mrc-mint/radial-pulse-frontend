@@ -1,4 +1,4 @@
-import { formatComponentScore } from '@radial-pulse/utils';
+import { formatScore, NOT_AVAILABLE_LABEL } from '@radial-pulse/utils';
 import type { CSSProperties } from 'react';
 import {
   formatMetricValue,
@@ -57,21 +57,23 @@ export interface ScoreCardProps extends ScoreCardBaseProps {
 
 /**
  * The overall assessment score (or a section score). Displays what the
- * backend sent: `not_available` reads "Not Available", never 0, and the tone
+ * backend sent: a null score shows `emptyLabel` (from the contract status),
+ * never 0, and the tone
  * is supplied by the caller rather than derived from the number.
  */
 export function ScoreCard({
   label,
   score,
+  emptyLabel = NOT_AVAILABLE_LABEL,
   max = 100,
   tone = 'brand',
   caption,
   comparison,
   className,
 }: ScoreCardProps) {
-  const available = score.availability === 'available';
-  const fraction = available ? Math.min(Math.max(score.score / max, 0), 1) : 0;
-  const text = formatComponentScore(score);
+  const available = score !== null;
+  const fraction = score !== null ? Math.min(Math.max(score / max, 0), 1) : 0;
+  const text = formatScore(score, emptyLabel);
 
   return (
     <section className={cx('rp-score', `rp-tone-${tone}`, className)} aria-label={label}>
@@ -101,7 +103,7 @@ export function ScoreCard({
             {comparison && (
               <p className="rp-score__comparison">
                 <span>{comparison.label}</span>
-                <strong>{formatComponentScore(comparison.score)}</strong>
+                <strong>{formatScore(comparison.score, comparison.emptyLabel)}</strong>
               </p>
             )}
           </div>

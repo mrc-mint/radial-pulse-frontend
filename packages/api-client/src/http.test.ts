@@ -90,10 +90,14 @@ describe('createApiClient', () => {
     expect(auth.onUnauthorized).not.toHaveBeenCalled();
   });
 
-  it('parses FastAPI 422 field errors', async () => {
+  it('parses problem+json validation issues', async () => {
     const { get } = setup(async () =>
       json(422, {
-        detail: [
+        type: 'validation_error',
+        title: 'Invalid input',
+        status: 422,
+        request_id: 'srv-422',
+        errors: [
           {
             loc: ['body', 'email'],
             msg: 'value is not a valid email address',
@@ -105,10 +109,34 @@ describe('createApiClient', () => {
     );
     const error = await failure(get());
     expect(error.kind).toBe('validation');
+    expect(error.code).toBe('validation_error');
+    expect(error.message).toBe('Invalid input');
     expect(error.fieldErrors).toEqual({
       email: ['value is not a valid email address'],
       'contacts.0.phone': ['field required'],
     });
+  });
+
+  it('maps 404 (no access to that clinic), 502 and 503 from problem+json', async () => {
+    const notFound = setup(async () =>
+      json(404, { type: 'not_found', title: 'Not found', status: 404, detail: 'Clinic not found' }),
+    );
+    const e404 = await failure(notFound.get());
+    expect([e404.kind, e404.code, e404.message]).toEqual([
+      'not_found',
+      'not_found',
+      'Clinic not found',
+    ]);
+
+    const upstream = setup(async () =>
+      json(502, { type: 'upstream_error', title: 'Refused', status: 502 }),
+    );
+    expect((await failure(upstream.get())).kind).toBe('upstream');
+
+    const unavailable = setup(async () =>
+      json(503, { type: 'not_configured', title: 'Not set up', status: 503 }),
+    );
+    expect((await failure(unavailable.get())).kind).toBe('unavailable');
   });
 
   it('reads Retry-After on throttling', async () => {
@@ -128,7 +156,13 @@ describe('createApiClient', () => {
   });
 
   it('keeps the server request id when the backend echoes one', async () => {
-    const { get } = setup(async () => json(500, { detail: 'boom' }, { 'x-request-id': 'srv-9' }));
+    const { get } = setup(async () =>
+      json(
+        500,
+        { type: 'internal', title: 'Error', status: 500, detail: 'boom' },
+        { 'x-request-id': 'srv-9' },
+      ),
+    );
     const error = await failure(get());
     expect(error.requestId).toBe('srv-9');
     expect(error.message).toBe('boom');

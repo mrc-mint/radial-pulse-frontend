@@ -4,10 +4,8 @@
  * The only way the frontend talks to the platform API (via API Gateway).
  * Components never call fetch directly; they use hooks from ./react.
  *
- * Phase 4 status: transport, error normalization, request ids, auth
- * injection and query infrastructure are in place. `services/` (one module
- * per contract resource) and the resource hooks are blocked on the first
- * published API contract — see docs/phase-4-contract-dependency.md.
+ * Services (./services) wrap each contract operation used by the screens;
+ * resource hooks live in ./react. All types come from the generated contract.
  */
 export type { ApiError, ApiErrorKind } from './errors';
 export {
@@ -24,3 +22,4 @@ export type { AuthBridge } from './auth-bridge';
 export type { ApiClient, ApiClientOptions } from './http';
 export { createApiClient, DEFAULT_TIMEOUT_MS, platformMiddleware, unwrap } from './http';
 export { createRequestId } from './request-id';
+export * from './services';

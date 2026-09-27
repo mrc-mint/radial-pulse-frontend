@@ -7,9 +7,16 @@ export type {
   ResolvedClinicSection,
   ResolvedNavEntry,
 } from './manifest';
-export { isRouteActive, resolveClinicSections, resolveNavigation } from './navigation';
+export {
+  hasClinicPermission,
+  isRouteActive,
+  resolveClinicSections,
+  resolveNavigation,
+} from './navigation';
+export type { ClinicPermissionSet } from './navigation';
 
 export type {
+  ClinicPermissions,
   ClinicSummary,
   CurrentUser,
   Session,
@@ -17,14 +24,15 @@ export type {
   SessionController,
   SessionState,
   SignInOption,
-  Tenant,
 } from './session';
-export { createSessionController } from './session';
+export { createSessionController, sessionFromMe } from './session';
 export {
   Can,
   SessionProvider,
   useCan,
   useCapabilities,
+  useClinicCan,
+  useClinicPermissions,
   useCurrentSession,
   useSession,
 } from './session-context';
@@ -41,4 +49,6 @@ export {
 export type { ClinicSelection } from './clinic-context';
 
 export { ConfigProvider, useConfig } from './config-context';
-export { ROLE_LABELS, roleLabel } from './roles';
+export { roleLabel } from './roles';
+export { clinicAdministratorClinicIds, productExperience } from './experience';
+export type { ProductExperience } from './experience';

@@ -1,4 +1,4 @@
-import { formatComponentScore } from '@radial-pulse/utils';
+import { formatScore, NOT_AVAILABLE_LABEL } from '@radial-pulse/utils';
 import { StyleSheet, Text, View } from 'react-native';
 import { formatMetricValue, type MetricCardBaseProps, type ScoreCardBaseProps } from '../shared';
 import { glyph, statusColors, t, text, weight } from './theme';
@@ -53,14 +53,15 @@ export type ScoreCardProps = ScoreCardBaseProps;
 export function ScoreCard({
   label,
   score,
+  emptyLabel = NOT_AVAILABLE_LABEL,
   max = 100,
   tone = 'brand',
   caption,
   comparison,
 }: ScoreCardProps) {
-  const available = score.availability === 'available';
-  const fraction = available ? Math.min(Math.max(score.score / max, 0), 1) : 0;
-  const formatted = formatComponentScore(score);
+  const available = score !== null;
+  const fraction = score !== null ? Math.min(Math.max(score / max, 0), 1) : 0;
+  const formatted = formatScore(score, emptyLabel);
   const colors = statusColors(tone);
 
   return (
@@ -87,7 +88,9 @@ export function ScoreCard({
       {comparison ? (
         <View style={styles.comparison}>
           <Text style={styles.comparisonLabel}>{comparison.label}</Text>
-          <Text style={styles.comparisonValue}>{formatComponentScore(comparison.score)}</Text>
+          <Text style={styles.comparisonValue}>
+            {formatScore(comparison.score, comparison.emptyLabel)}
+          </Text>
         </View>
       ) : null}
     </View>

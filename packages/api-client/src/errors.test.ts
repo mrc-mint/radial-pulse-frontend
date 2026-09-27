@@ -21,8 +21,9 @@ describe('kindForStatus', () => {
     [409, 'conflict'],
     [422, 'validation'],
     [429, 'rate_limited'],
-    [502, 'server'],
-    [503, 'server'],
+    [500, 'server'],
+    [502, 'upstream'],
+    [503, 'unavailable'],
     [504, 'timeout'],
   ])('%i → %s', (status, kind) => expect(kindForStatus(status)).toBe(kind));
 });
@@ -38,10 +39,12 @@ describe('parseRetryAfter', () => {
 });
 
 describe('parseFieldErrors', () => {
-  it('ignores non-list details and malformed items', () => {
-    expect(parseFieldErrors('Not found')).toBeUndefined();
-    expect(parseFieldErrors([{ msg: 'no loc' }])).toBeUndefined();
-    expect(parseFieldErrors([{ loc: ['query', 'page'], msg: 'bad' }])).toEqual({ page: ['bad'] });
+  it('ignores missing lists and malformed issues', () => {
+    expect(parseFieldErrors(null)).toBeUndefined();
+    expect(parseFieldErrors([{ loc: 'x', msg: 'no list', type: 't' } as never])).toBeUndefined();
+    expect(parseFieldErrors([{ loc: ['query', 'limit'], msg: 'too big', type: 't' }])).toEqual({
+      limit: ['too big'],
+    });
   });
 });
 
@@ -58,7 +61,9 @@ describe('retry policy', () => {
     expect(isRetryable(error({ kind: 'network', message: '' }))).toBe(true);
     expect(isRetryable(error({ kind: 'timeout', message: '' }))).toBe(true);
     expect(isRetryable(error({ kind: 'rate_limited', message: '' }))).toBe(true);
-    expect(isRetryable(error({ kind: 'server', message: '', status: 503 }))).toBe(true);
+    expect(isRetryable(error({ kind: 'server', message: '', status: 500 }))).toBe(true);
+    expect(isRetryable(error({ kind: 'upstream', message: '', status: 502 }))).toBe(false);
+    expect(isRetryable(error({ kind: 'unavailable', message: '', status: 503 }))).toBe(false);
     for (const kind of [
       'unauthorized',
       'forbidden',

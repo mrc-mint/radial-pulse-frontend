@@ -63,3 +63,37 @@ export function displayHost(url: string): string {
     return url;
   }
 }
+
+/** ISO timestamp or date → "12 Sep 2024" (en-GB). Returns null for invalid input. */
+export function formatDate(
+  iso: string,
+  options: { locale?: string; timeZone?: string } = {},
+): string | null {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat(options.locale ?? 'en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: options.timeZone,
+  }).format(date);
+}
+
+/** "5 minutes ago", "yesterday", "in 3 days" — relative to `now`. */
+export function formatRelativeTime(
+  iso: string,
+  now: number = Date.now(),
+  locale = 'en',
+): string | null {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return null;
+  const seconds = Math.round((then - now) / 1000);
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  const abs = Math.abs(seconds);
+  if (abs < 45) return rtf.format(0, 'second');
+  if (abs < 2_700) return rtf.format(Math.round(seconds / 60), 'minute');
+  if (abs < 79_200) return rtf.format(Math.round(seconds / 3_600), 'hour');
+  if (abs < 2_246_400) return rtf.format(Math.round(seconds / 86_400), 'day');
+  if (abs < 31_536_000) return rtf.format(Math.round(seconds / 2_592_000), 'month');
+  return rtf.format(Math.round(seconds / 31_536_000), 'year');
+}

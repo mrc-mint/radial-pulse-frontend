@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ClinicSectionPlaceholder } from '../../../../../app/clinic-section-placeholder';
+import { SocialMediaPage } from '../../../../../modules/social-media/social-media-page';
 
 export const Route = createFileRoute('/_app/clinics/$clinicId/social-media/')({
-  component: () => <ClinicSectionPlaceholder title="Social Media" />,
+  component: SocialMediaPage,
 });

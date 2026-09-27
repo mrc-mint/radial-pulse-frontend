@@ -10,6 +10,8 @@ export interface ClinicWorkspaceProps {
   renderLink: RenderLink;
   /** Clinic header (name, status, actions) supplied by the clinics module. */
   header: ReactNode;
+  /** Optional counts per section id (e.g. unread chat messages). */
+  badges?: Readonly<Partial<Record<string, { count: number; label: string }>>>;
   children: ReactNode;
 }
 
@@ -24,6 +26,7 @@ export function ClinicWorkspace({
   pathname,
   renderLink,
   header,
+  badges,
   children,
 }: ClinicWorkspaceProps) {
   return (
@@ -33,13 +36,24 @@ export function ClinicWorkspace({
         <ul className="rp-clinic__list">
           {sections.map((section) => {
             const active = isRouteActive(section.to, pathname, section.exact);
+            const badge = badges?.[section.id];
             return (
               <li key={section.id}>
                 {renderLink({
                   to: section.to,
                   className: 'rp-clinic__link',
                   'aria-current': active ? 'page' : undefined,
-                  children: section.label,
+                  children: (
+                    <>
+                      {section.label}
+                      {badge && badge.count > 0 && (
+                        <span className="rp-clinic__badge">
+                          {badge.count}
+                          <span className="rp-sr-only"> {badge.label}</span>
+                        </span>
+                      )}
+                    </>
+                  ),
                 })}
               </li>
             );

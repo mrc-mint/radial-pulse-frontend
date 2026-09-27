@@ -53,7 +53,7 @@ export interface FindingCardProps extends FindingCardBaseProps {
 export function FindingCard({
   title,
   description,
-  severity,
+  priority,
   sectionLabel,
   recommendation,
   evidence = [],
@@ -62,12 +62,12 @@ export function FindingCard({
   className,
 }: FindingCardProps) {
   return (
-    <article className={cx('rp-finding', `rp-severity-${severity.tone}`, className)}>
+    <article className={cx('rp-finding', `rp-severity-${priority.tone}`, className)}>
       <div className="rp-finding__meta">
         <span className="rp-finding__severity">
           <span className="rp-finding__severity-dot" aria-hidden="true" />
-          <span className="rp-sr-only">Severity: </span>
-          {severity.label}
+          <span className="rp-sr-only">Priority: </span>
+          {priority.label}
         </span>
         {sectionLabel && <span className="rp-finding__section">{sectionLabel}</span>}
       </div>

@@ -1,15 +1,17 @@
 import {
   ClinicScopeProvider,
   resolveClinicSections,
-  useCapabilities,
+  useClinicPermissions,
 } from '@radial-pulse/platform-shell/core';
 import { ClinicWorkspace } from '@radial-pulse/platform-shell/web';
-import { buttonClassName, PageHeader } from '@radial-pulse/ui/web';
+import { useChatInbox } from '@radial-pulse/api-client/react';
+import { buttonClassName } from '@radial-pulse/ui/web';
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
 import { useMemo } from 'react';
 import { webModules } from '../../../app/module-registry';
 import { renderShellLink, useNavLabel, usePathname } from '../../../app/shell';
+import { ClinicHeader } from '../../../modules/clinics/clinic-header';
 
 /**
  * Clinic workspace: every route below /clinics/$clinicId runs inside this
@@ -22,12 +24,17 @@ export const Route = createFileRoute('/_app/clinics/$clinicId')({
 
 function ClinicLayout() {
   const { clinicId } = Route.useParams();
-  const capabilities = useCapabilities();
+  const permissions = useClinicPermissions(clinicId);
   const pathname = usePathname();
   const backLabel = useNavLabel('clinics', 'Clinics');
+  // Slow poll for the Chat tab's unread badge; the chat itself polls faster.
+  const inbox = useChatInbox({
+    enabled: permissions === 'unrestricted' || permissions.has('chat:read'),
+  });
+  const unread = inbox.data?.items.find((t) => t.clinic_id === clinicId)?.unread_count ?? 0;
   const sections = useMemo(
-    () => resolveClinicSections(webModules, capabilities, clinicId),
-    [capabilities, clinicId],
+    () => resolveClinicSections(webModules, permissions, clinicId),
+    [permissions, clinicId],
   );
 
   return (
@@ -37,12 +44,10 @@ function ClinicLayout() {
         sections={sections}
         pathname={pathname}
         renderLink={renderShellLink}
+        badges={{ chat: { count: unread, label: 'unread messages' } }}
         header={
-          // Placeholder header: the clinics module renders name, status and
-          // actions from the clinic contract in the next phase.
-          <PageHeader
-            title="Clinic workspace"
-            description={`Clinic ${clinicId}`}
+          <ClinicHeader
+            clinicId={clinicId}
             back={
               <Link
                 to="/clinics"

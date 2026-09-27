@@ -7,9 +7,8 @@
  *                handful of platform rules that must hold on every screen.
  *   (view models live in the apps, not here.)
  *
- * Until the backend publishes its first contract version, domain/ holds only
- * rule-encoding types. Entity types (Clinic, Assessment, Finding, …) are added
- * in Phase 4 as aliases of generated contract schemas — not hand-written.
+ * Entity types are aliases of generated contract schemas (`Schema<'ClinicRead'>`),
+ * never hand-written.
  */
 export type * from './contract';
 export type * from './domain';

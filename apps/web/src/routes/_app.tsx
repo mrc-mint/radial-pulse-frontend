@@ -1,7 +1,13 @@
-import { roleLabel, useConfig, useSession } from '@radial-pulse/platform-shell/core';
+import {
+  productExperience,
+  roleLabel,
+  useConfig,
+  useSession,
+} from '@radial-pulse/platform-shell/core';
 import { FullPageError, FullPageLoading, WebAppShell } from '@radial-pulse/platform-shell/web';
 import { createFileRoute, Outlet, useRouter } from '@tanstack/react-router';
 import { useEffect } from 'react';
+import { MobileAppRequired } from '../app/mobile-app-required';
 import { environmentLabel, renderShellLink, useAppNavigation, usePathname } from '../app/shell';
 
 /**
@@ -43,13 +49,18 @@ function AuthenticatedLayout() {
     );
   }
 
+  // Clinic accounts use the mobile app; the internal portal is never rendered.
+  if (productExperience(state.session) !== 'internal-web') {
+    return <MobileAppRequired onSignOut={() => void signOut()} />;
+  }
+
   const { user } = state.session;
   return (
     <WebAppShell
       nav={nav}
       pathname={pathname}
       renderLink={renderShellLink}
-      user={{ name: user.name, roleLabel: roleLabel(user.roles), avatarUrl: user.avatarUrl }}
+      user={{ name: user.name, roleLabel: roleLabel(user.platformRole), avatarUrl: user.avatarUrl }}
       onSignOut={() => void signOut()}
       environmentLabel={environmentLabel(config.appEnv)}
     >

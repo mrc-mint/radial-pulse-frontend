@@ -70,3 +70,12 @@
 .rp-sign-in__option-description {
   font-size: var(--rp-text-body-sm-size);
 }
+
+.rp-sign-in__unavailable {
+  margin: 0;
+  padding: var(--rp-space-3) var(--rp-space-4);
+  border-radius: var(--rp-radius-md);
+  background: var(--rp-color-status-warning-bg);
+  color: var(--rp-color-status-warning-fg);
+  font-size: var(--rp-text-body-sm-size);
+}

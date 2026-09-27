@@ -73,25 +73,30 @@ describe('Select', () => {
 describe('ScoreCard', () => {
   it('shows "Not Available" and never a zero for a missing engine', () => {
     const { container } = render(
-      <ScoreCard label="GEO" score={{ availability: 'not_available' }} />,
+      <ScoreCard label="Search Readiness" score={null} emptyLabel="Not Available" />,
     );
     expect(container.textContent).toContain('Not Available');
     expect(container.textContent).not.toMatch(/\b0\b/);
+  });
+
+  it('shows the caller-supplied status label for a pending component', () => {
+    const { container } = render(<ScoreCard label="Website" score={null} emptyLabel="Pending" />);
+    expect(container.textContent).toContain('Pending');
   });
 
   it('renders the backend score with an accessible scale', () => {
     const { container } = render(
       <ScoreCard
         label="Overall score"
-        score={{ availability: 'available', score: 78 }}
+        score={78}
         comparison={{
-          label: 'Competitor average',
-          score: { availability: 'available', score: 71 },
+          label: 'Competitor benchmark',
+          score: 71,
         }}
       />,
     );
     expect(container.textContent).toContain('78 out of 100');
-    expect(container.textContent).toContain('Competitor average71');
+    expect(container.textContent).toContain('Competitor benchmark71');
   });
 });
 
@@ -272,7 +277,7 @@ describe('FindingCard', () => {
     const { container } = render(
       <FindingCard
         title="Opening hours differ between website and Google Business Profile"
-        severity={{ label: 'High', tone: 'high' }}
+        priority={{ label: 'High', tone: 'high' }}
         sectionLabel="Google Business Profile"
         evidence={[
           {
@@ -288,6 +293,6 @@ describe('FindingCard', () => {
     expect(link.getAttribute('rel')).toBe('noopener noreferrer');
     expect(link.textContent).toContain('smiledentalcare.in');
     expect(container.querySelector('time')?.getAttribute('dateTime')).toBe('2024-09-12T05:00:00Z');
-    expect(container.textContent).toContain('Severity: High');
+    expect(container.textContent).toContain('Priority: High');
   });
 });

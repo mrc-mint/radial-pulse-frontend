@@ -1,4 +1,4 @@
-import type { Capability } from '@radial-pulse/shared-types';
+import type { Capability, Permission } from '@radial-pulse/shared-types';
 
 /**
  * The seam between the Central Tech shell and feature modules
@@ -28,10 +28,14 @@ export interface NavEntry {
   id: string;
   /** Product label, e.g. "Clinics". */
   label: string;
-  /** Optional role-specific label, keyed by capability (e.g. "My Clinics"). */
-  labelWhen?: ReadonlyArray<{ capability: Capability; label: string }>;
+  /**
+   * Label for users who see only their own clinics (`all_clinics` is false),
+   * e.g. "My Clinics" for a Digital Success Manager.
+   */
+  scopedLabel?: string;
   to: string;
   icon: NavIcon;
+  /** Platform-level permission (`MeResponse.permissions`). */
   requiredCapability?: Capability;
   placement: NavPlacement;
   order: number;
@@ -47,7 +51,8 @@ export interface ClinicSectionEntry {
   label: string;
   /** Path relative to the clinic root; '' is the clinic's landing section. */
   path: string;
-  requiredCapability?: Capability;
+  /** Permission inside the clinic (`ClinicAccess.permissions`). */
+  requiredPermission?: Permission;
   order: number;
 }
 

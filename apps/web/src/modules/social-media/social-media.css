@@ -1,0 +1,42 @@
+.rp-social__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--rp-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rp-social__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-space-2);
+  padding: var(--rp-space-4) var(--rp-space-5);
+  border: 1px solid var(--rp-color-border-default);
+  border-radius: var(--rp-radius-lg);
+  background: var(--rp-color-bg-surface);
+  box-shadow: var(--rp-shadow-xs);
+}
+
+.rp-social__card p {
+  margin: 0;
+}
+
+.rp-social__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rp-space-2);
+}
+
+.rp-social__name {
+  margin: 0;
+  color: var(--rp-color-text-primary);
+  font-size: var(--rp-text-h3-size);
+  font-weight: var(--rp-text-h3-weight);
+}
+
+.rp-social__account {
+  color: var(--rp-color-text-secondary);
+  font-weight: var(--rp-font-weight-medium);
+}

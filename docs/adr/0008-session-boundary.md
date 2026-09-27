@@ -1,19 +1,24 @@
-# 0008 — Session boundary and development sign-in
+# 0008 — Session boundary and mock sign-in
 
-Status: accepted (platform shell phase; Cognito arrives in Phase 7, ADR 0006)
+Status: accepted (platform shell phase; revised when API contract 0.1.0 was
+imported; Cognito arrives in Phase 7, ADR 0006)
 
-`platform-shell/core` defines a `SessionAdapter` (restore, signIn, signOut,
-getAccessToken) and a framework-free `SessionController`. Screens use
-`useSession()` / `useCan()` and never see a token; only the composition root
-passes `controller.authBridge` to the API client (`AuthBridge`).
+`platform-shell/core` defines a `SessionAdapter` and a framework-free
+`SessionController`. The session content always comes from the contract's
+`GET /api/v1/auth/me` (`sessionFromMe`): platform role, platform permissions,
+`all_clinics` and per-clinic permissions. Screens use `useSession()`, `useCan()`
+and `useClinicCan()` and never see a token; only the composition root
+(`apps/web/src/app/services.ts`) connects the token provider to the API client.
 
-Until Cognito is wired, the web app uses a **development session adapter**
-(`apps/web/src/app/session/dev-session.ts`): persona sign-in (Platform
-Administrator, Digital Success Manager), no passwords, no tokens, persisted in
-sessionStorage. It throws when `appEnv` is `prod`, so it cannot ship.
+Token providers (`apps/web/src/app/session/auth.ts`):
 
-Capability strings are backend-owned (`GET /me`). Until the contract is
-published, the web app keeps its only capability identifiers in
-`apps/web/src/app/capabilities.ts`, marked as placeholders.
+- **Cognito** — Phase 7.
+- **Mock sign-in** — only when `apiMocking` is on (which `createConfig()` refuses
+  in prod): a persona becomes a `dev-persona:<id>` token that only the MSW
+  contract mocks accept. No passwords, no real tokens.
+- **Unconfigured** — otherwise; sign-in is unavailable, matching the backend's
+  "auth not configured" mode.
 
-Route protection in the web app is a UX boundary; the API enforces access.
+Permission values are the contract's `Permission` enum; the frontend defines no
+capability strings of its own. Route protection is a UX boundary; the API
+enforces access.

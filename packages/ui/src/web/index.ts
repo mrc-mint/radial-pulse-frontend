@@ -12,12 +12,15 @@ export type * from '../shared';
 export {
   avatarToneFor,
   displayHost,
+  formatDate,
   formatDateTime,
+  formatRelativeTime,
   formatMetricValue,
   getInitials,
   getPageItems,
   getPageRange,
 } from '../shared';
+export * from '../shared/tones';
 
 export { Button, IconButton, Spinner, buttonClassName } from './button';
 export type { ButtonClassOptions, ButtonProps, IconButtonProps } from './button';
@@ -44,3 +47,5 @@ export type {
   LoadingStateProps,
   SkeletonProps,
 } from './feedback';
+export { BarList, ColumnChart, niceTicks } from './charts';
+export type { ChartDatum } from './charts';

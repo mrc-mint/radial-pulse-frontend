@@ -1,110 +1,81 @@
-# Phase 4 — API contract dependency
+# API contract dependency and status
 
-Status: Phase 4 infrastructure **complete and approved**. Contract-dependent
-work is **blocked on the first published API contract** (`contracts/api/VERSION`
-is `none`). Phase 5 does not start until that contract is provided and approved.
+Contract in use: **0.1.0, unreleased local import** (`contracts/api/VERSION` is
+`0.1.0-unreleased`). It is byte-identical to the backend repository's committed
+`openapi/openapi.json`; replace it with `pnpm api:sync --version 0.1.0` once the
+backend tags `v0.1.0`.
 
-Domain and entity types (clinic, user, assessment, finding, social account,
-chat message, work item, …) come **only** from the generated contract
-(architecture §9, `packages/shared-types`). The frontend does not hand-write
-them, not even temporarily. This document lists what is ready, what waits for
-the contract, and exactly what the backend must publish.
+Domain and entity types come **only** from the generated contract
+(`packages/shared-types`: `Schema<'ClinicRead'>`, `Permission`, `PlatformRole`,
+…). The frontend does not hand-write them. Where a screen needs something the
+contract lacks, the screen shows a clear "not available yet" state and the gap
+is listed below — nothing is invented.
 
-## Ready (contract-independent)
+## Built on the contract (Phase 5, web)
 
-| Area                                                                                                                                                                                                           | Where                              |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| Contract pipeline: `api:sync` (tagged release → `contracts/api/`), type generation, CI drift check. Generation now uses openapi-typescript's API, so it also works on Windows. Verified with a throwaway spec. | `tools/scripts/*`                  |
-| Typed transport: openapi-fetch client parameterized by the generated `paths`; unknown endpoints are type errors                                                                                                | `api-client/src/http.ts`           |
-| `x-request-id` on every request, echoed into every error                                                                                                                                                       | `http.ts`, `request-id.ts`         |
-| Bearer token from the injected `AuthBridge`; 401 → session `onUnauthorized`                                                                                                                                    | `http.ts`                          |
-| Error normalization: API Gateway 401/403/429/504, FastAPI 422 field errors, `Retry-After`, network failures, client timeout (30s, above the gateway's 29s)                                                     | `api-client/src/errors.ts`         |
-| `unwrap()` — services return data or throw `ApiRequestError`                                                                                                                                                   | `http.ts`                          |
-| Query defaults: retry only transient failures, honour `Retry-After`, never auto-retry mutations                                                                                                                | `api-client/react/query-client.ts` |
-| `ApiClientProvider`, `clinicQueryKey` / `platformQueryKey`, `invalidateClinic`                                                                                                                                 | `api-client/react`                 |
-| Web composition root: client wired to `config.apiBaseUrl` + `session.authBridge`; query cache cleared on sign-out                                                                                              | `apps/web/src/app/app.tsx`         |
+| Area        | Operations                                                                         | Screen                                                            |
+| ----------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Session     | `GET /auth/me`                                                                     | Sign-in, navigation, permissions (`sessionFromMe`)                |
+| Dashboard   | `GET /dashboard/summary`, `GET /chat/inbox`                                        | Dashboard (both roles)                                            |
+| Clinics     | `GET/POST /clinics`, `GET/PATCH /clinics/{id}`                                     | Clinics / My Clinics, Add clinic, clinic header, Edit clinic      |
+| Assignment  | `GET …/assignments`, `PUT …/assignment`, `GET /users`                              | Overview → Digital Success Manager                                |
+| Work items  | `GET …/work-items`                                                                 | Overview → Open work                                              |
+| Presence    | `GET/PATCH …/presence-profiles`                                                    | Digital Information (confirm / reject)                            |
+| Assessments | `GET/POST …/assessments`, `GET …/assessments/{id}`                                 | Unified Audit, canonical `/clinics/$clinicId/audit/$assessmentId` |
+| Connections | `GET …/connections`                                                                | Social Media → Connected accounts                                 |
+| Chat        | `GET/POST …/chat/messages`, `POST …/chat/read`, assets upload/confirm/download-url | Chat (polling via `useChatMessages`)                              |
+| Users       | `GET/POST /users`, `POST /users/{id}/resend-invite`                                | Users                                                             |
+| Settings    | `GET/PATCH /settings/platform`                                                     | Settings → General                                                |
 
-## Blocked until the contract is published
+Contract conventions applied: problem+json errors (`errors[]`, `request_id`,
+`type` → `ApiError.code`; 404 = not found or no access; 502 → `upstream`; 503 →
+`unavailable`), `limit`/`offset`/`total` paging, two-level permissions
+(`MeResponse.permissions` + per-clinic `ClinicAccess.permissions`),
+`all_clinics` for the "My Clinics" label, `ComponentStatus` (`not_available`,
+`pending`, `failed` never shown as a number), `FindingPriority`,
+`PresenceVerification`. Enum display labels are owned by the frontend
+(`@radial-pulse/utils` labels, typed `Record<ContractEnum, string>`).
 
-- `shared-types/src/domain`: entity aliases over generated schemas; re-pointing
-  `ComponentScore` (availability) and `VerificationStatus` at the contract.
-- `api-client/src/services/*`: one module per contract resource.
-- Resource hooks in `api-client/react` (query keys per operation, invalidation rules).
-- `api-client/mocks`: MSW handlers — allowed only for endpoints that are in the
-  published contract (see `mocks/README.md`).
-- Replacing the placeholder capability identifiers in
-  `apps/web/src/app/capabilities.ts` with contract values.
+All of the above run against contract-based MSW mocks
+(`packages/api-client/src/mocks`, `apiMocking: true` in local config).
 
-## What the backend must provide
+## Backend gaps — each blocks only the screens listed
 
-### Delivery
+| #   | Gap                                                                                                                                                                                         | Blocked screen / behaviour                                                         |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| 1   | No allowed actions on an approval or assessment (`available_actions`); transitions live only in backend code                                                                                | Unified Audit: submit / approve / reject / publish buttons                         |
+| 2   | Stage groups (Prospects / In progress / Active) exist only in the dashboard counts and backend code; the list has no group field or filter (the `stage` parameter documents Prospects only) | Clinics list uses per-stage tabs instead of grouped tabs                           |
+| 3   | No cross-clinic assessments list                                                                                                                                                            | Audit Reports page                                                                 |
+| 4   | No cross-clinic work-item list (dashboard has counts only)                                                                                                                                  | DSM work-queue list on the dashboard                                               |
+| 5   | No recent activity, highlights, tile deltas or period filter in `DashboardSummary`                                                                                                          | Those dashboard widgets (omitted)                                                  |
+| 6   | Social metrics are free-form `metric_key` snapshots with an untyped `value`; no catalog of keys, labels or units                                                                            | Social Media → Performance; mobile Social Media Detail                             |
+| 7   | No social posts endpoint                                                                                                                                                                    | Mobile Social Media Detail posts/reels                                             |
+| 8   | Enum labels: codes only (except `ConnectionRead.label`)                                                                                                                                     | Resolved on the frontend; confirm ownership                                        |
+| 9   | Contract not yet released on GitHub (`v0.1.0`), repo name for `BACKEND_REPO`                                                                                                                | `pnpm api:sync`                                                                    |
+| 10  | Backend docs say "no fake login anywhere"; the frontend's persona sign-in works only against MSW mocks and is refused in prod                                                               | Confirm acceptable for mock development                                            |
+| 11  | `MeResponse.clinics` is empty for `all_clinics` users, so a Platform Administrator's per-clinic permissions are unknown                                                                     | Admins see every clinic section; the API remains the authority                     |
+| 12  | `ChatMessageRead` has only `attachment_asset_id`; no filename/type and no single-asset GET                                                                                                  | Chat shows "Open attachment" without the file name                                 |
+| 13  | `ClinicRead` lacks `dsm` and `primary_practitioner_name` (the list item has them)                                                                                                           | Clinic overview resolves the DSM name via `GET /users` (admins) or "You" (the DSM) |
 
-1. An OpenAPI 3.x document generated by FastAPI, attached as `openapi.json` to a
-   GitHub release tagged `v<major>.<minor>.<patch>` in the backend repository (ADR 0004).
-2. The backend repository name (`BACKEND_REPO=<owner>/<repo>`) and read access for
-   Central Tech developers and frontend CI.
-3. The contract may be published **before** the endpoints are implemented; the
-   frontend can then build against MSW mocks of published operations.
+## Other dependencies
 
-### Conventions to fix in the contract
+1. **Authenticated API access in development:** the gateway needs a Cognito
+   access token (Phase 7). Until then only the MSW mocks can be used.
+2. **Dev environment:** the dev API base URL for `config.json`, and backend
+   `CORS_ALLOWED_ORIGINS` including `http://localhost:4200` (its example lists
+   5173 and 8081).
+3. **Auth library:** ADR 0006 chose Amplify `signInWithRedirect`; the backend docs
+   assume `oidc-client-ts` / `react-oidc-context` with Hosted UI + Google + PKCE.
+   Decide before Phase 7.
+4. **Tooling:** `pnpm api:sync` needs the GitHub CLI (`gh`, authenticated).
 
-- Error bodies: FastAPI defaults (`detail` string, 422 `detail[]` with `loc`/`msg`).
-  Confirm whether the backend echoes `x-request-id`.
-- Pagination shape and parameters (page/size or cursor), total counts.
-- Timestamps (ISO 8601, UTC) and ID format.
-- Enum values for clinic status, assessment status, finding severity, work-item
-  kind, verification status, social connection state — and whether responses
-  carry **display labels** or only codes (if only codes, who owns the labels).
-- How an unavailable assessment section is represented (must not be a score of 0).
+## Agreed workflow
 
-### Operations the V1 screens need
-
-Described by need; request/response shapes are the backend's to define.
-
-| Need                                                                                                                                                                                                                                | Used by                                       |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `GET /me`: user, roles, **capability strings**, tenant, clinics available to the user                                                                                                                                               | Session, navigation (web + mobile)            |
-| Clinics: list (search, status filter, per-status counts, paging; assigned-only for Digital Success Managers), detail, create, update                                                                                                | Clinics / My Clinics, clinic workspace        |
-| Assign / change a clinic's Digital Success Manager; list assignable managers                                                                                                                                                        | Clinic overview                               |
-| Discovered digital profiles with verification status; confirm a profile                                                                                                                                                             | Digital Information                           |
-| Work items (for the viewer, and per clinic) with kind and target                                                                                                                                                                    | DSM dashboard, clinic Actions panel           |
-| Dashboard summary for the viewer and a period (counts, trend, highlights, activity) — or confirmation that some of these are out of V1                                                                                              | Dashboards                                    |
-| Assessments: list (all clinics; per clinic), detail with overall score, section scores with availability, findings with severity and evidence (source URL, excerpt, provider, observed time), competitor comparison, status history | Audit Reports, Unified Audit, mobile Reports  |
-| Assessment workflow: allowed actions for the viewer (review → approve → publish), perform an action; published-only listing for Clinic Administrators                                                                               | Unified Audit, mobile Reports                 |
-| Social media: connected accounts per clinic, platform metrics (platform-specific), posts, connect/permission flow (OAuth start + callback)                                                                                          | Social Media (web + mobile), Connect Accounts |
-| Chat per clinic: list messages (incremental, for polling), send text, attachment upload (e.g. pre-signed URL), unread count, mark read                                                                                              | Chat (web + mobile)                           |
-| Users: list, invite, change role/status                                                                                                                                                                                             | Users                                         |
-| Organization settings: read, update                                                                                                                                                                                                 | Settings                                      |
-
-## Agreed Phase 5 workflow
-
-Phase 5 does not wait for the whole backend implementation. It starts from the
-first approved contract version:
-
-1. Backend publishes the first versioned OpenAPI 3.x contract (tagged release).
-2. Frontend syncs it: `pnpm api:sync --version <x.y.z>`, in its own reviewed PR.
-3. TypeScript types are generated from it (`shared-types/src/contract/generated.ts`);
-   domain aliases are added over the generated schemas.
-4. API services (`api-client/src/services/*`) and React Query hooks are
-   implemented from the generated types.
-5. MSW mocks are created **only** for endpoints present in the published
-   contract, each listed in `api-client/src/mocks/README.md` with its contract version.
+1. Backend publishes a versioned OpenAPI 3.x contract (tagged release).
+2. Frontend syncs it (`pnpm api:sync --version <x.y.z>`) in its own reviewed PR.
+3. Types are generated; domain aliases are added over the generated schemas.
+4. Services and React Query hooks are implemented from the generated types.
+5. MSW mocks exist **only** for operations in the published contract.
 6. The UI is built against those mocks (`apiMocking: true`, never in prod).
-7. Each screen integrates with the real API as its endpoints become available;
-   the corresponding mock is then removed.
-
-Throughout: no invented API fields, enum values or capabilities. Anything the
-screens need that the contract lacks is raised with the backend as a contract
-change, not filled in on the frontend.
-
-## Other blockers for Phase 5 (web screens)
-
-1. **The contract** (above). Every Phase 5 screen renders contract data.
-2. **Authenticated API access in development.** The API Gateway authorizer needs
-   a Cognito JWT, which arrives in Phase 7; the development session issues no
-   token. Until then, Phase 5 needs either MSW mocks of published operations
-   (`apiMocking: true` in local config) or a dev-environment auth decision.
-3. **Dev environment details:** the dev API base URL for `config.json` and CORS
-   allowing `http://localhost:4200` and the dev web domain.
-4. **Tooling:** the GitHub CLI (`gh`, authenticated) is required by `pnpm api:sync`
-   and is not installed on every workstation.
+7. Each screen switches to the real API as its endpoints become available; the
+   mock is then removed.

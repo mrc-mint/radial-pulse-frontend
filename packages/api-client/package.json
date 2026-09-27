@@ -24,6 +24,7 @@
     "@radial-pulse/config": "workspace:*",
     "@radial-pulse/shared-types": "workspace:*",
     "@radial-pulse/utils": "workspace:*",
+    "msw": "^2.15.0",
     "openapi-fetch": "^0.17.0"
   },
   "peerDependencies": {

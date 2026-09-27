@@ -40,14 +40,14 @@ export interface FindingCardProps extends FindingCardBaseProps {
 export function FindingCard({
   title,
   description,
-  severity,
+  priority,
   sectionLabel,
   recommendation,
   evidence = [],
   evidenceOpen = false,
 }: FindingCardProps) {
   const [open, setOpen] = useState(evidenceOpen);
-  const colors = severityColors(severity.tone);
+  const colors = severityColors(priority.tone);
 
   return (
     <View style={[styles.card, { borderLeftColor: colors.solid }]}>
@@ -55,10 +55,10 @@ export function FindingCard({
         <View
           style={[styles.severity, { backgroundColor: colors.bg }]}
           accessible
-          accessibilityLabel={`Severity: ${severity.label}`}
+          accessibilityLabel={`Priority: ${priority.label}`}
         >
           <View style={[styles.dot, { backgroundColor: colors.solid }]} />
-          <Text style={[styles.severityText, { color: colors.fg }]}>{severity.label}</Text>
+          <Text style={[styles.severityText, { color: colors.fg }]}>{priority.label}</Text>
         </View>
         {sectionLabel ? <Text style={styles.metaText}>{sectionLabel}</Text> : null}
       </View>

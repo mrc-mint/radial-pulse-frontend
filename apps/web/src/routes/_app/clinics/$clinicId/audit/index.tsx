@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ClinicSectionPlaceholder } from '../../../../../app/clinic-section-placeholder';
+import { AuditPage } from '../../../../../modules/assessments/audit-page';
 
 export const Route = createFileRoute('/_app/clinics/$clinicId/audit/')({
-  component: () => <ClinicSectionPlaceholder title="Unified Audit" />,
+  component: () => <AuditPage />,
 });

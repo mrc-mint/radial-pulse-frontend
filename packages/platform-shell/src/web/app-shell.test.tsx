@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import type { Permission } from '@radial-pulse/shared-types';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -12,10 +13,6 @@ import {
 } from './index';
 
 afterEach(cleanup);
-
-// Fixture capability strings; real values come from GET /me.
-const MANAGE_USERS = 'fixture.users.manage';
-const ASSIGNED_ONLY = 'fixture.clinics.assigned_only';
 
 const modules: ModuleManifest[] = [
   {
@@ -37,7 +34,7 @@ const modules: ModuleManifest[] = [
       {
         id: 'clinics',
         label: 'Clinics',
-        labelWhen: [{ capability: ASSIGNED_ONLY, label: 'My Clinics' }],
+        scopedLabel: 'My Clinics',
         to: '/clinics',
         icon: 'clinics',
         placement: 'primary',
@@ -54,7 +51,7 @@ const modules: ModuleManifest[] = [
         label: 'Users',
         to: '/users',
         icon: 'users',
-        requiredCapability: MANAGE_USERS,
+        requiredCapability: 'users:read',
         placement: 'primary',
         order: 30,
       },
@@ -104,12 +101,13 @@ const renderLink: RenderLink = ({ to, children, onClick, ...rest }) => (
 );
 
 function renderShell({
-  capabilities = [MANAGE_USERS],
+  capabilities = ['users:read'] as Permission[],
+  allClinics = true,
   pathname = '/dashboard',
   onSignOut = vi.fn(),
   environmentLabel = 'Local' as string | null,
 } = {}) {
-  const nav = resolveNavigation(modules, new Set(capabilities));
+  const nav = resolveNavigation(modules, new Set(capabilities), { allClinics });
   const props = {
     nav,
     renderLink,
@@ -152,12 +150,12 @@ describe('WebAppShell', () => {
   });
 
   it('shows the Platform Administrator navigation', () => {
-    renderShell({ capabilities: [MANAGE_USERS] });
+    renderShell({ capabilities: ['users:read'], allClinics: true });
     expect(mainNavLabels()).toEqual(['Dashboard', 'Clinics', 'Users', 'Audit Reports', 'Settings']);
   });
 
   it('shows the Digital Success Manager navigation', () => {
-    renderShell({ capabilities: [ASSIGNED_ONLY] });
+    renderShell({ capabilities: ['clinics:create'], allClinics: false });
     expect(mainNavLabels()).toEqual(['Dashboard', 'My Clinics', 'Audit Reports', 'Settings']);
   });
 
@@ -234,7 +232,7 @@ describe('WebAppShell', () => {
 
 describe('ClinicWorkspace', () => {
   function renderWorkspace(pathname: string) {
-    const sections = resolveClinicSections(modules, new Set(), 'c_smile');
+    const sections = resolveClinicSections(modules, 'unrestricted', 'c_smile');
     render(
       <ClinicWorkspace
         sections={sections}
@@ -268,13 +266,19 @@ describe('ClinicWorkspace', () => {
 
 describe('RequireCapability', () => {
   it('shows access denied without a session capability', async () => {
-    const { SessionProvider, createSessionController } = await import('../core');
+    const { SessionProvider, createSessionController, sessionFromMe } = await import('../core');
     const controller = createSessionController({
-      restore: async () => ({
-        user: { id: 'u', name: 'Priya Shah', email: 'p@radialpulse.example', roles: [] },
-        tenant: { id: 't', name: 'Radial Pulse' },
-        capabilities: new Set([ASSIGNED_ONLY]),
-      }),
+      restore: async () =>
+        sessionFromMe({
+          id: 'u-2',
+          email: 'priya.shah@radialpulse.example',
+          full_name: 'Priya Shah',
+          platform_role: 'digital_success_manager',
+          permissions: ['clinics:create'],
+          all_clinics: false,
+          sign_in_method: 'google',
+          clinics: [],
+        }),
       signIn: async () => null,
       signOut: async () => {},
       getAccessToken: async () => null,
@@ -282,7 +286,7 @@ describe('RequireCapability', () => {
     await controller.restore();
     render(
       <SessionProvider controller={controller}>
-        <RequireCapability capability={MANAGE_USERS}>
+        <RequireCapability capability="users:read">
           <p>User management</p>
         </RequireCapability>
       </SessionProvider>,

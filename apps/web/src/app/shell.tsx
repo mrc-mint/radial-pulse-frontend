@@ -1,5 +1,5 @@
 import type { AppEnv } from '@radial-pulse/config';
-import { resolveNavigation, useCapabilities } from '@radial-pulse/platform-shell/core';
+import { resolveNavigation, useSession } from '@radial-pulse/platform-shell/core';
 import type { RenderLink } from '@radial-pulse/platform-shell/web';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useMemo } from 'react';
@@ -31,8 +31,15 @@ export function usePathname(): string {
 
 /** Sidebar entries for the signed-in user. */
 export function useAppNavigation() {
-  const capabilities = useCapabilities();
-  return useMemo(() => resolveNavigation(webModules, capabilities), [capabilities]);
+  const { state } = useSession();
+  const session = state.status === 'authenticated' ? state.session : null;
+  return useMemo(
+    () =>
+      session
+        ? resolveNavigation(webModules, session.capabilities, { allClinics: session.allClinics })
+        : [],
+    [session],
+  );
 }
 
 /** The label the current user sees for a nav entry (e.g. "My Clinics"). */

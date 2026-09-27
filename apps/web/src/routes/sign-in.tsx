@@ -1,6 +1,6 @@
 import { useConfig, useSession } from '@radial-pulse/platform-shell/core';
 import { AuthLayout, FullPageLoading } from '@radial-pulse/platform-shell/web';
-import { Badge, Button, Card, ErrorState } from '@radial-pulse/ui/web';
+import { Badge, Card, ErrorState } from '@radial-pulse/ui/web';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { ChevronRight } from 'lucide-react';
 import { useEffect } from 'react';
@@ -82,9 +82,12 @@ function SignInPage() {
               </ul>
             </>
           ) : (
-            <Button size="lg" fullWidth onClick={() => void signIn()}>
-              Continue to sign in
-            </Button>
+            // Cognito sign-in arrives in Phase 7 (ADR 0006). Until then only the
+            // API mocks provide sign-in options.
+            <p className="rp-sign-in__unavailable" role="status">
+              Sign-in isn’t configured for this environment yet. Use a build with API mocking
+              enabled, or wait for Cognito sign-in.
+            </p>
           )}
         </div>
       </Card>

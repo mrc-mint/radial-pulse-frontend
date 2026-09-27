@@ -60,6 +60,21 @@
   background: var(--rp-color-action-primary-bg);
 }
 
+.rp-clinic__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: var(--rp-space-1-5);
+  padding: 0 var(--rp-space-1);
+  border-radius: var(--rp-radius-full);
+  background: var(--rp-color-action-primary-bg);
+  color: var(--rp-color-action-primary-fg);
+  font-size: var(--rp-text-overline-size);
+  font-weight: var(--rp-font-weight-bold);
+}
+
 .rp-clinic__content {
   min-width: 0;
 }

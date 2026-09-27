@@ -10,10 +10,13 @@ export type * from '../shared';
 export {
   avatarToneFor,
   displayHost,
+  formatDate,
   formatDateTime,
+  formatRelativeTime,
   formatMetricValue,
   getInitials,
 } from '../shared';
+export * from '../shared/tones';
 
 export { Button, IconButton } from './button';
 export type { ButtonProps, IconButtonProps } from './button';

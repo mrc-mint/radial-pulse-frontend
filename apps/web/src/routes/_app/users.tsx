@@ -1,12 +1,11 @@
 import { RequireCapability } from '@radial-pulse/platform-shell/web';
 import { createFileRoute } from '@tanstack/react-router';
-import { CAPABILITIES } from '../../app/capabilities';
-import { PagePlaceholder } from '../../app/page-placeholder';
+import { UsersPage } from '../../modules/users/users-page';
 
 export const Route = createFileRoute('/_app/users')({
   component: () => (
-    <RequireCapability capability={CAPABILITIES.manageUsers}>
-      <PagePlaceholder title="Users" description="Manage platform users and their access" />
+    <RequireCapability capability="users:read">
+      <UsersPage />
     </RequireCapability>
   ),
 });

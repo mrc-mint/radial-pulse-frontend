@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { ModuleManifest } from './manifest';
-import { isRouteActive, resolveClinicSections, resolveNavigation } from './navigation';
+import {
+  hasClinicPermission,
+  isRouteActive,
+  resolveClinicSections,
+  resolveNavigation,
+} from './navigation';
 
-// Capability strings here are test fixtures; real values come from GET /me.
+// Permission values are the contract's (`Permission` enum).
 const modules: ModuleManifest[] = [
   {
     id: 'users',
@@ -12,7 +17,7 @@ const modules: ModuleManifest[] = [
         label: 'Users',
         to: '/users',
         icon: 'users',
-        requiredCapability: 'users.manage',
+        requiredCapability: 'users:read',
         placement: 'primary',
         order: 30,
       },
@@ -24,7 +29,7 @@ const modules: ModuleManifest[] = [
       {
         id: 'clinics',
         label: 'Clinics',
-        labelWhen: [{ capability: 'clinics.assigned_only', label: 'My Clinics' }],
+        scopedLabel: 'My Clinics',
         to: '/clinics',
         icon: 'clinics',
         placement: 'primary',
@@ -32,8 +37,20 @@ const modules: ModuleManifest[] = [
       },
     ],
     clinicSections: [
-      { id: 'overview', label: 'Overview', path: '', order: 10 },
-      { id: 'internal', label: 'Internal', path: 'internal', order: 5, requiredCapability: 'x' },
+      {
+        id: 'overview',
+        label: 'Overview',
+        path: '',
+        order: 10,
+        requiredPermission: 'clinics:read',
+      },
+      {
+        id: 'audit',
+        label: 'Unified Audit',
+        path: 'audit',
+        order: 30,
+        requiredPermission: 'assessments:read',
+      },
     ],
   },
   {
@@ -49,37 +66,64 @@ const modules: ModuleManifest[] = [
       },
     ],
   },
-  { id: 'chat', clinicSections: [{ id: 'chat', label: 'Chat', path: 'chat', order: 50 }] },
+  {
+    id: 'chat',
+    clinicSections: [
+      { id: 'chat', label: 'Chat', path: 'chat', order: 50, requiredPermission: 'chat:read' },
+    ],
+  },
 ];
 
 describe('resolveNavigation', () => {
-  it('hides entries whose capability the user lacks, in order', () => {
-    const nav = resolveNavigation(modules, new Set(['clinics.assigned_only']));
+  it('uses the scoped label and hides entries without the platform permission', () => {
+    const nav = resolveNavigation(modules, new Set(['clinics:create']), { allClinics: false });
     expect(nav.map((n) => n.label)).toEqual(['Dashboard', 'My Clinics']);
   });
 
-  it('shows capability-gated entries when held', () => {
-    const nav = resolveNavigation(modules, new Set(['users.manage']));
+  it('shows permission-gated entries and the full label for all-clinics users', () => {
+    const nav = resolveNavigation(modules, new Set(['users:read']), { allClinics: true });
     expect(nav.map((n) => n.label)).toEqual(['Dashboard', 'Clinics', 'Users']);
   });
 
   it('carries the icon name through', () => {
-    expect(resolveNavigation(modules, new Set())[0]?.icon).toBe('dashboard');
+    expect(resolveNavigation(modules, new Set(), { allClinics: true })[0]?.icon).toBe('dashboard');
   });
 });
 
 describe('resolveClinicSections', () => {
-  it('builds clinic-scoped URLs in order and filters by capability', () => {
-    const sections = resolveClinicSections(modules, new Set(), 'clinic_42');
+  it('filters sections by the permissions inside that clinic', () => {
+    const sections = resolveClinicSections(
+      modules,
+      new Set(['clinics:read', 'chat:read']),
+      'clinic_42',
+    );
     expect(sections).toEqual([
       { id: 'overview', label: 'Overview', to: '/clinics/clinic_42', exact: true },
       { id: 'chat', label: 'Chat', to: '/clinics/clinic_42/chat', exact: false },
     ]);
   });
 
+  it('shows every section when the API reports no per-clinic permissions', () => {
+    const sections = resolveClinicSections(modules, 'unrestricted', 'clinic_42');
+    expect(sections.map((s) => s.id)).toEqual(['overview', 'audit', 'chat']);
+  });
+
+  it('shows nothing for a clinic the user cannot access', () => {
+    expect(resolveClinicSections(modules, new Set(), 'clinic_42')).toEqual([]);
+  });
+
   it('encodes the clinicId', () => {
-    const [overview] = resolveClinicSections(modules, new Set(), 'a/b');
+    const [overview] = resolveClinicSections(modules, 'unrestricted', 'a/b');
     expect(overview?.to).toBe('/clinics/a%2Fb');
+  });
+});
+
+describe('hasClinicPermission', () => {
+  it('checks the clinic set, and allows everything when unrestricted', () => {
+    expect(hasClinicPermission(new Set(['chat:read']), 'chat:read')).toBe(true);
+    expect(hasClinicPermission(new Set(['chat:read']), 'chat:write')).toBe(false);
+    expect(hasClinicPermission('unrestricted', 'chat:write')).toBe(true);
+    expect(hasClinicPermission(new Set(), undefined)).toBe(true);
   });
 });
 
