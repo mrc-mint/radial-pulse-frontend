@@ -2,7 +2,13 @@ import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { ApiRequestError } from '../errors';
 import { createApiClient } from '../http';
-import { assessmentsService, authService, chatService, clinicsService } from '../services';
+import {
+  assessmentsService,
+  authService,
+  chatService,
+  clinicsService,
+  connectionsService,
+} from '../services';
 import { createMockDb } from './data';
 import { createMockHandlers } from './handlers';
 import { MOCK_TOKEN_PREFIX, type PersonaId } from './personas';
@@ -90,6 +96,33 @@ describe('contract mocks', () => {
     await chatService.send(api, smile, { body: 'Following up on the Google hours.' });
     const next = await chatService.messages(api, smile, { after: newest.id });
     expect(next.items.map((m) => m.body)).toEqual(['Following up on the Google hours.']);
+  });
+
+  it('connects an account with a one-time state, then disconnects it', async () => {
+    const admin = as('clinic-administrator');
+    const smile = db.clinics[0]!.id;
+    const redirect_uri = 'radialpulse-local://connect/callback';
+    const started = await connectionsService.start(admin, smile, 'youtube', { redirect_uri });
+    const state = new URL(started.authorization_url).searchParams.get('state')!;
+    expect((await connectionsService.get(admin, smile, 'youtube')).status).toBe('pending');
+
+    const done = await connectionsService.complete(admin, smile, 'youtube', { code: 'x', state });
+    expect(done).toMatchObject({ status: 'connected', external_account_name: 'Smile Dental Care' });
+    const replay = (await connectionsService
+      .complete(admin, smile, 'youtube', { code: 'x', state })
+      .catch((e: unknown) => e)) as ApiRequestError;
+    expect(replay.kind).toBe('conflict');
+
+    const off = await connectionsService.disconnect(admin, smile, 'youtube');
+    expect(off.status).toBe('disconnected');
+  });
+
+  it('refuses to start a platform the server has not set up', async () => {
+    const admin = as('clinic-administrator');
+    const error = (await connectionsService
+      .start(admin, db.clinics[0]!.id, 'x', { redirect_uri: 'radialpulse-local://cb' })
+      .catch((e: unknown) => e)) as ApiRequestError;
+    expect(error.kind).toBe('unavailable');
   });
 
   it('returns problem+json validation issues', async () => {

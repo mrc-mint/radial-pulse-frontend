@@ -39,23 +39,42 @@ Contract conventions applied: problem+json errors (`errors[]`, `request_id`,
 All of the above run against contract-based MSW mocks
 (`packages/api-client/src/mocks`, `apiMocking: true` in local config).
 
+## Built on the contract (Phase 6, mobile — Clinic Administrator)
+
+| Area             | Operations                                                                                            | Screen                                                                 |
+| ---------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Session / access | `GET /auth/me`, `GET /clinics`                                                                        | Sign-in, "use the web portal" / no-access gates, clinic switcher       |
+| Assessments      | `GET …/assessments` (published only for clinic users), `GET …/assessments/{id}`                       | Home, Insights (overview + six components), Reports, assessment detail |
+| Connections      | `GET …/connections`, `GET …/connections/{platform}`, `POST …/start`, `…/complete`, `…/disconnect`     | Connect Your Accounts, Social Media, connection detail                 |
+| Clinic           | `GET/PATCH /clinics/{id}`, `ClinicListItem.dsm` / `primary_practitioner_name`                         | Profile, Clinic information (edit with `clinics:write`)                |
+| Chat             | `GET /chat/inbox`, `GET/POST …/chat/messages`, `POST …/chat/read`, assets upload/confirm/download-url | Chat modal and floating button badge                                   |
+
+Not built (outside V1 or not in the contract): posts/reels, follower and
+engagement metrics, rating bands ("Good") and trends, activity feed, bell /
+notifications, password and security settings, help & support, Team
+management, approvals, work items. The Clinic Team Member portal is future
+scope.
+
 ## Backend gaps — each blocks only the screens listed
 
-| #   | Gap                                                                                                                                                                                         | Blocked screen / behaviour                                                         |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| 1   | No allowed actions on an approval or assessment (`available_actions`); transitions live only in backend code                                                                                | Unified Audit: submit / approve / reject / publish buttons                         |
-| 2   | Stage groups (Prospects / In progress / Active) exist only in the dashboard counts and backend code; the list has no group field or filter (the `stage` parameter documents Prospects only) | Clinics list uses per-stage tabs instead of grouped tabs                           |
-| 3   | No cross-clinic assessments list                                                                                                                                                            | Audit Reports page                                                                 |
-| 4   | No cross-clinic work-item list (dashboard has counts only)                                                                                                                                  | DSM work-queue list on the dashboard                                               |
-| 5   | No recent activity, highlights, tile deltas or period filter in `DashboardSummary`                                                                                                          | Those dashboard widgets (omitted)                                                  |
-| 6   | Social metrics are free-form `metric_key` snapshots with an untyped `value`; no catalog of keys, labels or units                                                                            | Social Media → Performance; mobile Social Media Detail                             |
-| 7   | No social posts endpoint                                                                                                                                                                    | Mobile Social Media Detail posts/reels                                             |
-| 8   | Enum labels: codes only (except `ConnectionRead.label`)                                                                                                                                     | Resolved on the frontend; confirm ownership                                        |
-| 9   | Contract not yet released on GitHub (`v0.1.0`), repo name for `BACKEND_REPO`                                                                                                                | `pnpm api:sync`                                                                    |
-| 10  | Backend docs say "no fake login anywhere"; the frontend's persona sign-in works only against MSW mocks and is refused in prod                                                               | Confirm acceptable for mock development                                            |
-| 11  | `MeResponse.clinics` is empty for `all_clinics` users, so a Platform Administrator's per-clinic permissions are unknown                                                                     | Admins see every clinic section; the API remains the authority                     |
-| 12  | `ChatMessageRead` has only `attachment_asset_id`; no filename/type and no single-asset GET                                                                                                  | Chat shows "Open attachment" without the file name                                 |
-| 13  | `ClinicRead` lacks `dsm` and `primary_practitioner_name` (the list item has them)                                                                                                           | Clinic overview resolves the DSM name via `GET /users` (admins) or "You" (the DSM) |
+| #   | Gap                                                                                                                                                                                         | Blocked screen / behaviour                                                                                     |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 1   | No allowed actions on an approval or assessment (`available_actions`); transitions live only in backend code                                                                                | Unified Audit: submit / approve / reject / publish buttons                                                     |
+| 2   | Stage groups (Prospects / In progress / Active) exist only in the dashboard counts and backend code; the list has no group field or filter (the `stage` parameter documents Prospects only) | Clinics list uses per-stage tabs instead of grouped tabs                                                       |
+| 3   | No cross-clinic assessments list                                                                                                                                                            | Audit Reports page                                                                                             |
+| 4   | No cross-clinic work-item list (dashboard has counts only)                                                                                                                                  | DSM work-queue list on the dashboard                                                                           |
+| 5   | No recent activity, highlights, tile deltas or period filter in `DashboardSummary`                                                                                                          | Those dashboard widgets (omitted)                                                                              |
+| 6   | Social metrics are free-form `metric_key` snapshots with an untyped `value`; no catalog of keys, labels or units                                                                            | Social Media → Performance; mobile Social Media Detail                                                         |
+| 7   | No social posts endpoint                                                                                                                                                                    | Mobile Social Media Detail posts/reels                                                                         |
+| 8   | Enum labels: codes only (except `ConnectionRead.label`)                                                                                                                                     | Resolved on the frontend; confirm ownership                                                                    |
+| 9   | Contract not yet released on GitHub (`v0.1.0`), repo name for `BACKEND_REPO`                                                                                                                | `pnpm api:sync`                                                                                                |
+| 10  | Backend docs say "no fake login anywhere"; the frontend's persona sign-in works only against MSW mocks and is refused in prod                                                               | Confirm acceptable for mock development                                                                        |
+| 11  | `MeResponse.clinics` is empty for `all_clinics` users, so a Platform Administrator's per-clinic permissions are unknown                                                                     | Admins see every clinic section; the API remains the authority                                                 |
+| 12  | `ChatMessageRead` has only `attachment_asset_id`; no filename/type and no single-asset GET                                                                                                  | Chat shows "Open attachment" without the file name                                                             |
+| 13  | `ClinicRead` lacks `dsm` and `primary_practitioner_name` (the list item has them)                                                                                                           | Clinic overview resolves the DSM name via `GET /users` (admins) or "You" (the DSM); mobile reads the list item |
+| 14  | `ComponentDetail.status_reason` is a backend code (e.g. `no_engine_deployed`) with no published list or display text                                                                        | Never shown; screens explain the component from its `status`                                                   |
+| 15  | No clinic-facing activity feed; notification categories are internal workflows only                                                                                                         | Mobile Home "Recent activity" and bell (omitted)                                                               |
+| 16  | No export/download of an assessment (report files under `/reports` exist but V1 Reports = published assessments)                                                                            | Mobile Reports download button (omitted); `reportsService` kept in the API layer                               |
 
 ## Other dependencies
 
@@ -64,10 +83,16 @@ All of the above run against contract-based MSW mocks
 2. **Dev environment:** the dev API base URL for `config.json`, and backend
    `CORS_ALLOWED_ORIGINS` including `http://localhost:4200` (its example lists
    5173 and 8081).
-3. **Auth library:** ADR 0006 chose Amplify `signInWithRedirect`; the backend docs
-   assume `oidc-client-ts` / `react-oidc-context` with Hosted UI + Google + PKCE.
-   Decide before Phase 7.
+3. **Auth library:** decided — Amplify Auth (`signInWithRedirect`, ADR 0006) on
+   web and mobile, Phase 7. Mobile then needs an Expo development build
+   (Amplify's native modules do not run in Expo Go).
 4. **Tooling:** `pnpm api:sync` needs the GitHub CLI (`gh`, authenticated).
+5. **Mobile Connect redirect:** the app's `<scheme>://connect/callback` (per
+   environment: `radialpulse-local`, `radialpulse-dev`, `radialpulse`) must be
+   on the backend's `OAUTH_REDIRECT_URIS`, and the mobile scheme on Cognito's
+   allowed callback URLs (Phase 7).
+6. **Platform brand marks:** Lucide has no brand logos; connected platforms use
+   neutral icons beside their names until official marks are supplied.
 
 ## Agreed workflow
 

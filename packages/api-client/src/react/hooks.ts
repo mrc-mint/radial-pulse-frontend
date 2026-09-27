@@ -242,6 +242,65 @@ export function useConnections(clinicId: string) {
   });
 }
 
+type ConnectionPlatform = Schema<'ConnectionPlatform'>;
+
+export function useConnection(clinicId: string, platform: ConnectionPlatform) {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: clinicQueryKey(clinicId, 'connections', platform),
+    queryFn: () => connectionsService.get(api, clinicId, platform),
+  });
+}
+
+function useInvalidateConnections(clinicId: string) {
+  const queryClient = useQueryClient();
+  return () => queryClient.invalidateQueries({ queryKey: clinicQueryKey(clinicId, 'connections') });
+}
+
+/** Step 1 of Connect: the platform's sign-in address for this redirect URI. */
+export function useStartConnection(clinicId: string) {
+  const api = useApiClient();
+  const invalidate = useInvalidateConnections(clinicId);
+  return useMutation({
+    mutationFn: ({
+      platform,
+      redirectUri,
+    }: {
+      platform: ConnectionPlatform;
+      redirectUri: string;
+    }) => connectionsService.start(api, clinicId, platform, { redirect_uri: redirectUri }),
+    onSettled: invalidate,
+  });
+}
+
+/** Step 2 of Connect: hand the platform's `code` + `state` back to the API. */
+export function useCompleteConnection(clinicId: string) {
+  const api = useApiClient();
+  const invalidate = useInvalidateConnections(clinicId);
+  return useMutation({
+    mutationFn: ({
+      platform,
+      code,
+      state,
+    }: {
+      platform: ConnectionPlatform;
+      code: string;
+      state: string;
+    }) => connectionsService.complete(api, clinicId, platform, { code, state }),
+    onSettled: invalidate,
+  });
+}
+
+export function useDisconnectConnection(clinicId: string) {
+  const api = useApiClient();
+  const invalidate = useInvalidateConnections(clinicId);
+  return useMutation({
+    mutationFn: (platform: ConnectionPlatform) =>
+      connectionsService.disconnect(api, clinicId, platform),
+    onSettled: invalidate,
+  });
+}
+
 /** A short-lived download URL for a clinic file (e.g. a chat attachment). */
 export function useAssetDownloadUrl(clinicId: string, assetId: string | null) {
   const api = useApiClient();
@@ -341,21 +400,37 @@ export function useChatMessages(
   );
 }
 
+/**
+ * A file to attach: a web `File`, or (React Native) a Blob read from the
+ * picked document with its name passed alongside.
+ */
+export interface ChatAttachment {
+  data: Blob;
+  name: string;
+}
+
 /** Sends text and/or one attachment; attachments are uploaded first (contract flow). */
 export function useSendChatMessage(clinicId: string) {
   const api = useApiClient();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ body, file }: { body: string | null; file?: File | null }) => {
+    mutationFn: async ({
+      body,
+      file,
+    }: {
+      body: string | null;
+      file?: File | ChatAttachment | null;
+    }) => {
       let attachmentId: string | null = null;
       if (file) {
+        const { data, name } = 'data' in file ? file : { data: file, name: file.name };
         const upload = await assetsService.requestUpload(api, clinicId, {
           kind: 'chat_attachment',
-          mime_type: file.type || 'application/octet-stream',
-          size_bytes: file.size,
-          original_filename: file.name,
+          mime_type: data.type || 'application/octet-stream',
+          size_bytes: data.size,
+          original_filename: name,
         });
-        await uploadToPresignedUrl(upload, file);
+        await uploadToPresignedUrl(upload, data);
         attachmentId = (await assetsService.confirm(api, clinicId, upload.asset.id)).id;
       }
       return chatService.send(api, clinicId, { body, attachment_asset_id: attachmentId });

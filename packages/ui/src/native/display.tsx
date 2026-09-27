@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -17,7 +18,7 @@ import {
   type PageHeaderBaseProps,
   type TabsBaseProps,
 } from '../shared';
-import { statusColors, t, text, weight } from './theme';
+import { statusColors, t, text, font } from './theme';
 
 // ── Card ────────────────────────────────────────────────────────────────────
 
@@ -135,10 +136,79 @@ export function Avatar({ name, src, size = 'md', decorative }: AvatarProps) {
 
 // ── Tabs (segmented control) ────────────────────────────────────────────────
 
-export type TabsProps<V extends string = string> = TabsBaseProps<V>;
+export interface TabsProps<V extends string = string> extends TabsBaseProps<V> {
+  /**
+   * `segmented` (default) fits a few tabs in one row; `scroll` is a
+   * horizontally scrolling underline bar for longer lists.
+   */
+  variant?: 'segmented' | 'scroll';
+}
 
-/** Segmented control: the native presentation of in-screen tabs. */
-export function Tabs<V extends string = string>({ label, items, value, onChange }: TabsProps<V>) {
+/** In-screen tabs: a segmented control, or a scrolling underline bar. */
+export function Tabs<V extends string = string>({ variant = 'segmented', ...props }: TabsProps<V>) {
+  return variant === 'scroll' ? <ScrollTabs {...props} /> : <SegmentedTabs {...props} />;
+}
+
+function ScrollTabs<V extends string>({ label, items, value, onChange }: TabsBaseProps<V>) {
+  const scroller = useRef<ScrollView>(null);
+  const offsets = useRef(new Map<V, number>());
+  const reveal = (x: number, animated: boolean) =>
+    scroller.current?.scrollTo({ x: Math.max(0, x - t.space[4]), animated });
+
+  // Keep the selected tab in view when it changes from outside (e.g. a link).
+  useEffect(() => {
+    const x = offsets.current.get(value);
+    if (x !== undefined) reveal(x, true);
+  }, [value]);
+
+  return (
+    <View style={styles.scrollTabs}>
+      <ScrollView
+        ref={scroller}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollTabsContent}
+        accessibilityRole="tablist"
+        accessibilityLabel={label}
+      >
+        {items.map((item) => {
+          const selected = item.value === value;
+          return (
+            <Pressable
+              key={item.value}
+              accessibilityRole="tab"
+              accessibilityState={{ selected, disabled: Boolean(item.disabled) }}
+              disabled={item.disabled}
+              onPress={() => onChange(item.value)}
+              onLayout={(e) => {
+                const { x } = e.nativeEvent.layout;
+                offsets.current.set(item.value, x);
+                // Opened on a tab further along: show it once it is measured.
+                if (selected) reveal(x, false);
+              }}
+              style={styles.scrollTab}
+            >
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.scrollTabText,
+                  selected && styles.scrollTabTextSelected,
+                  item.disabled && styles.segmentTextDisabled,
+                ]}
+              >
+                {item.label}
+                {item.count !== undefined ? ` ${item.count.toLocaleString()}` : ''}
+              </Text>
+              <View style={[styles.scrollTabBar, selected && styles.scrollTabBarSelected]} />
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
+function SegmentedTabs<V extends string>({ label, items, value, onChange }: TabsBaseProps<V>) {
   return (
     <View style={styles.segmented} accessibilityRole="tablist" accessibilityLabel={label}>
       {items.map((item) => {
@@ -219,7 +289,7 @@ const styles = StyleSheet.create({
   },
   badgeSm: { height: 20, paddingHorizontal: t.space['1.5'] },
   dot: { width: 6, height: 6, borderRadius: t.radius.full },
-  badgeText: { ...text('caption'), fontWeight: weight(t.font.weight.medium) },
+  badgeText: { ...text('caption'), ...font(t.font.weight.medium) },
 
   avatar: {
     alignItems: 'center',
@@ -230,9 +300,9 @@ const styles = StyleSheet.create({
   avatarText: {
     ...text('caption'),
     color: t.color.text.inverse,
-    fontWeight: weight(t.font.weight.semibold),
+    ...font(t.font.weight.semibold),
   },
-  avatarTextLg: { ...text('bodyLg'), fontWeight: weight(t.font.weight.semibold) },
+  avatarTextLg: { ...text('bodyLg'), ...font(t.font.weight.semibold) },
 
   segmented: {
     flexDirection: 'row',
@@ -253,8 +323,20 @@ const styles = StyleSheet.create({
     ...text('label'),
     color: t.color.text.secondary,
   },
-  segmentTextSelected: { color: t.color.text.primary, fontWeight: weight(t.font.weight.semibold) },
+  segmentTextSelected: { color: t.color.text.primary, ...font(t.font.weight.semibold) },
   segmentTextDisabled: { color: t.color.text.disabled },
+
+  scrollTabs: { borderBottomWidth: 1, borderBottomColor: t.color.border.default },
+  scrollTabsContent: { gap: t.space[5] },
+  scrollTab: { justifyContent: 'flex-end', minHeight: t.size.touchTarget },
+  scrollTabText: {
+    ...text('label'),
+    color: t.color.text.tertiary,
+    paddingBottom: t.space[2],
+  },
+  scrollTabTextSelected: { ...font(t.font.weight.semibold), color: t.color.text.link },
+  scrollTabBar: { height: 2, borderRadius: t.radius.full, backgroundColor: 'transparent' },
+  scrollTabBarSelected: { backgroundColor: t.color.action.primary.bg },
 
   pageHeader: { gap: t.space[1], paddingBottom: t.space[2] },
   pageHeaderBar: {

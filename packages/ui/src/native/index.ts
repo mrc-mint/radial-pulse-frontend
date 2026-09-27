@@ -17,6 +17,10 @@ export {
   getInitials,
 } from '../shared';
 export * from '../shared/tones';
+export { findingCardProps, sortByPriority } from '../shared/findings';
+
+/** Typography helpers for app-level native styles (Inter faces + token text styles). */
+export { font as fontStyle, text as textStyle } from './theme';
 
 export { Button, IconButton } from './button';
 export type { ButtonProps, IconButtonProps } from './button';
@@ -27,6 +31,8 @@ export type { AvatarProps, BadgeProps, CardProps, PageHeaderProps, TabsProps } f
 export { Modal } from './overlay';
 export type { ModalProps } from './overlay';
 export { MetricCard, ScoreCard } from './metrics';
+export { ScoreRing } from './score-ring';
+export type { ScoreRingProps } from './score-ring';
 export type { MetricCardProps, ScoreCardProps } from './metrics';
 export { FindingCard } from './finding';
 export type { FindingCardProps } from './finding';

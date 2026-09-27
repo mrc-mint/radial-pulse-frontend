@@ -54,8 +54,13 @@ TanStack Router, file-based. Canonical report URL
 
 ## §7 Mobile navigation / API Gateway
 
-Expo Router groups `(public)`, `(setup)`, `(app)/(tabs)`, chat as modal.
-Built in Phase 6. The API client handles gateway-level 401/403/429/504 and
+Expo Router groups `(public)` (Welcome, Sign in), `(app)` guarded by the
+Clinic Administrator gate with `(setup)/connect-accounts`, `(tabs)` (Home,
+Insights, Social Media, Reports, Profile — from the modules' manifests,
+filtered by the selected clinic's permissions), `chat` as a modal from the
+floating button, and detail screens. `ClinicSelectionProvider` scopes the whole
+signed-in tree to one clinic. App composition lives in `src/shell` (not
+`src/app`, which Expo Router would treat as routes). Built in Phase 6. The API client handles gateway-level 401/403/429/504 and
 sends `x-request-id` on every request.
 
 ## §8 Environments

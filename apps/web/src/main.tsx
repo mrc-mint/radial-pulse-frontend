@@ -1,12 +1,11 @@
 import '@fontsource-variable/inter';
 import '@radial-pulse/design-tokens/css';
+import { createAppServices, unconfiguredAuth } from '@radial-pulse/platform-shell/core';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/app';
 import './app/global.css';
 import { createAppRouter } from './app/router';
-import { createAppServices } from './app/services';
-import { unconfiguredAuth } from './app/session/auth';
 import { loadRuntimeConfig } from './lib/config';
 
 const root = createRoot(document.getElementById('root')!);

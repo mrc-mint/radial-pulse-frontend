@@ -1,6 +1,6 @@
 import { authService, isApiError, type ApiClient } from '@radial-pulse/api-client';
-import { sessionFromMe, type SessionAdapter } from '@radial-pulse/platform-shell/core';
-import type { AuthProvider } from './auth';
+import type { AuthProvider } from './auth-provider';
+import { sessionFromMe, type SessionAdapter } from './session';
 
 /**
  * The session always comes from the contract's `GET /api/v1/auth/me`,

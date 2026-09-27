@@ -1,9 +1,9 @@
 import type { AppConfig } from '@radial-pulse/config';
-import type { SignInOption } from '@radial-pulse/platform-shell/core';
+import type { SignInOption } from './session';
 
 /**
- * How the app obtains an access token. Phase 7 provides the Cognito
- * implementation (managed login, Google, PKCE). Until then:
+ * How an app obtains an access token (web and mobile). Phase 7 provides the
+ * Cognito implementation (managed login via Amplify Auth). Until then:
  *   - `createMockAuth`  — only with API mocking: persona tokens the MSW
  *                         `/auth/me` understands. Never real credentials.
  *   - `unconfiguredAuth` — no sign-in available, matching the backend's
@@ -32,10 +32,15 @@ export const unconfiguredAuth: AuthProvider = {
   signOut: async () => {},
 };
 
-type TokenStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
+export interface TokenStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+}
 
 const STORAGE_KEY = 'rp.mock-auth.token';
 
+/** The browser's sessionStorage where there is one (web); otherwise memory only. */
 function defaultStorage(): TokenStorage | null {
   try {
     return typeof sessionStorage === 'undefined' ? null : sessionStorage;

@@ -131,6 +131,13 @@ export default tseslint.config(
     },
   },
 
+  // Metro (Expo) loads its config as CommonJS.
+  {
+    files: ['apps/mobile/metro.config.js'],
+    languageOptions: { sourceType: 'commonjs' },
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
+
   // ── Environment access: only the app config modules may read env ──────────
   {
     files: ['apps/**/*.{ts,tsx}', 'packages/**/*.{ts,tsx}'],

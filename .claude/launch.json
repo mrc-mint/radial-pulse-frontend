@@ -6,6 +6,25 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@radial-pulse/web", "dev"],
       "port": 4200
+    },
+    {
+      "name": "mobile-web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@radial-pulse/mobile",
+        "exec",
+        "expo",
+        "start",
+        "--web",
+        "--port",
+        "8081"
+      ],
+      "port": 8081,
+      "env": {
+        "CI": "1",
+        "EXPO_NO_TELEMETRY": "1"
+      }
     }
   ]
 }

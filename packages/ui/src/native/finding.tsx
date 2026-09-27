@@ -6,7 +6,7 @@ import {
   type FindingCardBaseProps,
   type FindingEvidence,
 } from '../shared';
-import { glyph, severityColors, t, text, weight } from './theme';
+import { glyph, severityColors, t, text, font } from './theme';
 
 function EvidenceItem({ evidence }: { evidence: FindingEvidence }) {
   const observed = evidence.observedAt ? formatDateTime(evidence.observedAt) : null;
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     borderRadius: t.radius.full,
   },
   dot: { width: 6, height: 6, borderRadius: t.radius.full },
-  severityText: { ...text('caption'), fontWeight: weight(t.font.weight.semibold) },
+  severityText: { ...text('caption'), ...font(t.font.weight.semibold) },
   metaText: { ...text('caption'), color: t.color.text.tertiary },
   title: { ...text('h3'), color: t.color.text.primary },
   description: { ...text('body'), color: t.color.text.secondary },
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   toggleText: {
     ...text('label'),
     color: t.color.text.link,
-    fontWeight: weight(t.font.weight.semibold),
+    ...font(t.font.weight.semibold),
   },
   evidenceList: { gap: t.space[3] },
   evidence: { gap: t.space['1.5'] },
@@ -152,5 +152,5 @@ const styles = StyleSheet.create({
     borderLeftColor: t.color.border.strong,
   },
   evidenceMeta: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: t.space[3] },
-  link: { ...text('caption'), color: t.color.text.link, fontWeight: weight(t.font.weight.medium) },
+  link: { ...text('caption'), color: t.color.text.link, ...font(t.font.weight.medium) },
 });

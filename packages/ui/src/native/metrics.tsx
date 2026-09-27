@@ -1,7 +1,7 @@
 import { formatScore, NOT_AVAILABLE_LABEL } from '@radial-pulse/utils';
 import { StyleSheet, Text, View } from 'react-native';
 import { formatMetricValue, type MetricCardBaseProps, type ScoreCardBaseProps } from '../shared';
-import { glyph, statusColors, t, text, weight } from './theme';
+import { glyph, statusColors, t, text, font } from './theme';
 
 const TREND_WORD = { up: 'Up', down: 'Down', flat: 'No change' } as const;
 
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   metricValue: { ...text('metric'), color: t.color.text.primary, fontVariant: ['tabular-nums'] },
   metricMissing: { ...text('bodyLg'), color: t.color.text.tertiary, paddingVertical: t.space[1] },
   changeRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: t.space['1.5'] },
-  change: { ...text('caption'), fontWeight: weight(t.font.weight.semibold) },
+  change: { ...text('caption'), ...font(t.font.weight.semibold) },
   period: { ...text('caption'), color: t.color.text.tertiary },
 
   score: { ...surface, gap: t.space[3], padding: t.space[5] },

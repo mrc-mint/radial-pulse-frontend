@@ -17,3 +17,4 @@ export {
 export { getPageItems, getPageRange } from './pagination';
 export type { PageItem } from './pagination';
 export * from './tones';
+export { findingCardProps, sortByPriority } from './findings';

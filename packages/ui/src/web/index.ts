@@ -21,6 +21,7 @@ export {
   getPageRange,
 } from '../shared';
 export * from '../shared/tones';
+export { findingCardProps, sortByPriority } from '../shared/findings';
 
 export { Button, IconButton, Spinner, buttonClassName } from './button';
 export type { ButtonClassOptions, ButtonProps, IconButtonProps } from './button';

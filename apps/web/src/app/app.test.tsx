@@ -7,6 +7,7 @@ import {
   type PersonaId,
 } from '@radial-pulse/api-client/mocks';
 import { createConfig } from '@radial-pulse/config';
+import { createAppServices, createMockAuth } from '@radial-pulse/platform-shell/core';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from '@tanstack/react-router';
@@ -14,8 +15,6 @@ import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { App } from './app';
 import { createAppRouter } from './router';
-import { createAppServices } from './services';
-import { createMockAuth } from './session/auth';
 
 const config = createConfig({
   appEnv: 'local',

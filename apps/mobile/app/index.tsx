@@ -1,9 +1,10 @@
-import { Text, View } from 'react-native';
+import { useSession } from '@radial-pulse/platform-shell/core';
+import { FullScreenLoading } from '@radial-pulse/platform-shell/native';
+import { Redirect } from 'expo-router';
 
+/** Launch: signed-in people go to Home, everyone else to Welcome. */
 export default function Index() {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Radial Pulse — mobile scaffold</Text>
-    </View>
-  );
+  const { state } = useSession();
+  if (state.status === 'loading') return <FullScreenLoading />;
+  return <Redirect href={state.status === 'authenticated' ? '/home' : '/welcome'} />;
 }

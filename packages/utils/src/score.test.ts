@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { formatComponentScore, formatScore, NOT_AVAILABLE_LABEL } from './score';
+import {
+  formatComponentScore,
+  formatScore,
+  NOT_AVAILABLE_LABEL,
+  overallScoreEmptyLabel,
+} from './score';
 
 describe('formatComponentScore', () => {
   it('renders "Not Available" for a component without an engine, never 0', () => {
@@ -27,5 +32,13 @@ describe('formatScore', () => {
     expect(formatScore(null)).toBe(NOT_AVAILABLE_LABEL);
     expect(formatScore(undefined, 'Pending')).toBe('Pending');
     expect(formatScore(0)).toBe('0');
+  });
+});
+
+describe('overallScoreEmptyLabel', () => {
+  it('explains a missing overall score from the assessment status', () => {
+    expect(overallScoreEmptyLabel('running')).toBe('In progress');
+    expect(overallScoreEmptyLabel('failed')).toBe('Failed');
+    expect(overallScoreEmptyLabel('partial')).toBe('Not Available');
   });
 });

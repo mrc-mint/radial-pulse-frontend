@@ -189,7 +189,7 @@ const color = {
 
 const font = {
   family: {
-    /** Web only. Native uses the platform system font. */
+    /** Web. Native uses `nativeFontFamily` (one registered face per weight). */
     sans: "'Inter Variable', Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
     mono: "ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace",
   },
@@ -309,3 +309,16 @@ export type SeverityTone = keyof Tokens['color']['severity'];
 export type AvatarTone = keyof Tokens['color']['avatar'];
 export type TextStyle = keyof Tokens['text'];
 export type SpaceKey = keyof Tokens['space'];
+
+/**
+ * Native font faces: Inter, one registered family per weight (React Native
+ * cannot pick a weight from a single custom family on Android). The app loads
+ * these names with expo-font (@expo-google-fonts/inter); kept out of `tokens`
+ * so they never become CSS variables.
+ */
+export const nativeFontFamily = {
+  400: 'Inter_400Regular',
+  500: 'Inter_500Medium',
+  600: 'Inter_600SemiBold',
+  700: 'Inter_700Bold',
+} as const satisfies Record<Tokens['font']['weight'][keyof Tokens['font']['weight']], string>;

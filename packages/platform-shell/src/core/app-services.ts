@@ -1,8 +1,8 @@
 import { createApiClient, type ApiClient, type ApiClientOptions } from '@radial-pulse/api-client';
 import type { AppConfig } from '@radial-pulse/config';
-import { createSessionController, type SessionController } from '@radial-pulse/platform-shell/core';
-import type { AuthProvider } from './session/auth';
-import { createApiSessionAdapter } from './session/api-session';
+import { createApiSessionAdapter } from './api-session';
+import type { AuthProvider } from './auth-provider';
+import { createSessionController, type SessionController } from './session';
 
 export interface AppServices {
   api: ApiClient;
@@ -15,7 +15,7 @@ export interface AppServices {
  * user from the API. Screens receive neither tokens nor the client.
  */
 export function createAppServices(
-  config: AppConfig,
+  config: Pick<AppConfig, 'apiBaseUrl'>,
   auth: AuthProvider,
   /** Test seam: a fetch implementation for the API client. */
   options: { fetch?: ApiClientOptions['fetch'] } = {},

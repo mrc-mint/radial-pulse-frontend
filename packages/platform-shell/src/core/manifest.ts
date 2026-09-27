@@ -42,15 +42,17 @@ export interface NavEntry {
 }
 
 /**
- * A section of the clinic workspace (web: /clinics/$clinicId/<path>).
- * Clinic-scoped features (audit, social media, chat) contribute sections
- * instead of global navigation entries.
+ * A clinic-scoped section. Web: a tab of the clinic workspace
+ * (/clinics/$clinicId/<path>). Mobile: a bottom tab of the Clinic
+ * Administrator app, whose `path` is the tab's route name.
  */
 export interface ClinicSectionEntry {
   id: string;
   label: string;
-  /** Path relative to the clinic root; '' is the clinic's landing section. */
+  /** Web: path relative to the clinic root ('' = landing). Mobile: tab route name. */
   path: string;
+  /** Mobile tab icon. */
+  icon?: NavIcon;
   /** Permission inside the clinic (`ClinicAccess.permissions`). */
   requiredPermission?: Permission;
   order: number;

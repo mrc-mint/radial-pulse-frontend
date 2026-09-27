@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import type { ControlSize, FieldBaseProps, SelectBaseProps } from '../shared';
 import { Modal } from './overlay';
-import { glyph, t, text, weight } from './theme';
+import { glyph, t, text, font } from './theme';
 
 function FieldFrame({
   label,
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: t.radius.md,
   },
   optionLabel: { ...text('bodyLg'), color: t.color.text.primary },
-  optionSelected: { color: t.color.text.link, fontWeight: weight(t.font.weight.semibold) },
+  optionSelected: { color: t.color.text.link, ...font(t.font.weight.semibold) },
   optionDisabled: { color: t.color.text.disabled },
   check: { ...text('bodyLg'), color: t.color.text.link },
 });

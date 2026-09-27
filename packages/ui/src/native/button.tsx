@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -9,7 +10,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import type { ButtonBaseProps, ButtonVariant, ControlSize, IconButtonBaseProps } from '../shared';
-import { t, text, weight } from './theme';
+import { t, text, font } from './theme';
 
 const VARIANT = {
   primary: {
@@ -48,6 +49,12 @@ type NativePressable = Omit<PressableProps, 'children' | 'style' | 'disabled'> &
 };
 
 export interface ButtonProps extends ButtonBaseProps, NativePressable {}
+
+/** Plain text children, including interpolations like `Connect {label}` (an array). */
+function isTextContent(children: ReactNode): boolean {
+  const parts = Array.isArray(children) ? children : [children];
+  return parts.every((p) => typeof p === 'string' || typeof p === 'number');
+}
 
 export function Button({
   variant = 'primary',
@@ -88,7 +95,7 @@ export function Button({
       {loading && <ActivityIndicator color={v.fg} size="small" style={styles.spinner} />}
       <View style={[styles.content, loading && styles.hidden]}>
         {leadingIcon}
-        {typeof children === 'string' ? (
+        {isTextContent(children) ? (
           <Text
             style={[size === 'sm' ? styles.labelSm : styles.label, { color: v.fg }]}
             numberOfLines={1}
@@ -158,6 +165,6 @@ const styles = StyleSheet.create({
   content: { flexDirection: 'row', alignItems: 'center', gap: t.space[2] },
   hidden: { opacity: 0 },
   spinner: { position: 'absolute' },
-  label: { ...text('bodyLg'), fontWeight: weight(t.font.weight.semibold) },
-  labelSm: { ...text('label'), fontWeight: weight(t.font.weight.semibold) },
+  label: { ...text('bodyLg'), ...font(t.font.weight.semibold) },
+  labelSm: { ...text('label'), ...font(t.font.weight.semibold) },
 });

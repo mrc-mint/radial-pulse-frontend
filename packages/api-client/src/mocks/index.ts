@@ -11,6 +11,7 @@
  * production bundle.
  */
 export { createMockHandlers } from './handlers';
+export { createMockFetch } from './in-process';
 export type { MockOptions } from './handlers';
 export { createMockDb } from './data';
 export type { MockDb } from './data';
@@ -37,6 +38,10 @@ export const mockedEndpoints: ReadonlyArray<{ operation: string; contractVersion
   'GET /api/v1/clinics/{clinic_id}/assessments/{assessment_id}',
   'GET /api/v1/clinics/{clinic_id}/work-items',
   'GET /api/v1/clinics/{clinic_id}/connections',
+  'GET /api/v1/clinics/{clinic_id}/connections/{platform}',
+  'POST /api/v1/clinics/{clinic_id}/connections/{platform}/start',
+  'POST /api/v1/clinics/{clinic_id}/connections/{platform}/complete',
+  'POST /api/v1/clinics/{clinic_id}/connections/{platform}/disconnect',
   'GET /api/v1/chat/inbox',
   'GET /api/v1/clinics/{clinic_id}/chat/messages',
   'POST /api/v1/clinics/{clinic_id}/chat/messages',

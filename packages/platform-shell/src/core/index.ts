@@ -49,6 +49,12 @@ export {
 export type { ClinicSelection } from './clinic-context';
 
 export { ConfigProvider, useConfig } from './config-context';
+
+export { createMockAuth, SignInUnavailableError, unconfiguredAuth } from './auth-provider';
+export type { AuthProvider, TokenStorage } from './auth-provider';
+export { createApiSessionAdapter } from './api-session';
+export { createAppServices } from './app-services';
+export type { AppServices } from './app-services';
 export { roleLabel } from './roles';
 export { clinicAdministratorClinicIds, productExperience } from './experience';
 export type { ProductExperience } from './experience';

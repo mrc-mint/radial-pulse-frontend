@@ -171,6 +171,15 @@ export function createMockHandlers(options: MockOptions) {
     ).length;
   };
 
+  const connectionOf = (clinicId: string, platform: string) =>
+    db.connections.get(clinicId)?.find((c) => c.platform === platform);
+
+  /** One-time Connect `state` values issued by `start` (the backend stores their hash). */
+  const pendingConnects = new Map<
+    string,
+    { clinicId: string; platform: Schema<'ConnectionPlatform'>; userId: string }
+  >();
+
   const sideOf = (me: Principal): Schema<'ChatSide'> =>
     me.user.platform_role === 'clinic_user' ? 'clinic' : 'radial_pulse';
 
@@ -621,6 +630,129 @@ export function createMockHandlers(options: MockOptions) {
       route<{ clinic_id: string }>(
         ({ params }) => HttpResponse.json(db.connections.get(params.clinic_id) ?? []),
         { clinic: true, permission: 'connections:read' },
+      ),
+    ),
+
+    http.get(
+      `${api}/clinics/:clinic_id/connections/:platform`,
+      route<{ clinic_id: string; platform: string }>(
+        ({ params }) => {
+          const row = connectionOf(params.clinic_id, params.platform);
+          return row ? HttpResponse.json(row) : notFound();
+        },
+        { clinic: true, permission: 'connections:read' },
+      ),
+    ),
+
+    // Connect: start returns a sign-in address carrying a one-time `state`;
+    // complete accepts that state once (the platform's `code` is not checked).
+    http.post(
+      `${api}/clinics/:clinic_id/connections/:platform/start`,
+      route<{ clinic_id: string; platform: string }>(
+        async ({ request, params, me }) => {
+          const row = connectionOf(params.clinic_id, params.platform);
+          if (!row) return notFound();
+          if (!row.available) {
+            return problem(
+              503,
+              'service_unavailable',
+              'Service unavailable',
+              `${row.label} connection is not set up yet`,
+            );
+          }
+          const body = (await request.json()) as Schema<'ConnectionStartRequest'>;
+          if (!body.redirect_uri) {
+            return problem(422, 'validation_error', 'Invalid request', undefined, [
+              { loc: ['body', 'redirect_uri'], msg: 'Field required', type: 'missing' },
+            ]);
+          }
+          const state = `mock-state-${Math.random().toString(16).slice(2, 12)}`;
+          pendingConnects.set(state, {
+            clinicId: params.clinic_id,
+            platform: row.platform,
+            userId: me.user.id,
+          });
+          if (row.status !== 'connected') row.status = 'pending';
+          const authorization = new URL(`https://mock-oauth.radialpulse.example/${row.platform}`);
+          authorization.searchParams.set('state', state);
+          authorization.searchParams.set('redirect_uri', body.redirect_uri);
+          return HttpResponse.json({
+            platform: row.platform,
+            authorization_url: authorization.toString(),
+            expires_at: new Date(Date.now() + 10 * 60_000).toISOString(),
+          } satisfies Schema<'ConnectionStartResponse'>);
+        },
+        { clinic: true, permission: 'connections:manage' },
+      ),
+    ),
+
+    http.post(
+      `${api}/clinics/:clinic_id/connections/:platform/complete`,
+      route<{ clinic_id: string; platform: string }>(
+        async ({ request, params, me }) => {
+          const row = connectionOf(params.clinic_id, params.platform);
+          if (!row) return notFound();
+          const body = (await request.json()) as Schema<'ConnectionCompleteRequest'>;
+          const pending = pendingConnects.get(body.state);
+          if (!pending) {
+            return problem(
+              409,
+              'invalid_state',
+              'Action not allowed in the current state',
+              'No connection is in progress. Press Connect again.',
+            );
+          }
+          if (
+            pending.clinicId !== params.clinic_id ||
+            pending.platform !== row.platform ||
+            pending.userId !== me.user.id
+          ) {
+            return problem(
+              422,
+              'validation_error',
+              'Invalid request',
+              'This sign-in does not match the one that was started',
+            );
+          }
+          pendingConnects.delete(body.state);
+          const clinic = db.clinics.find((c) => c.id === params.clinic_id)!;
+          Object.assign(row, {
+            status: 'connected',
+            external_account_name: clinic.name,
+            connected_at: nextTimestamp(),
+            connected_by_user_id: me.user.id,
+            last_synced_at: null,
+            last_error: null,
+            scopes: ['read_insights'],
+          } satisfies Partial<Schema<'ConnectionRead'>>);
+          return HttpResponse.json(row);
+        },
+        { clinic: true, permission: 'connections:manage' },
+      ),
+    ),
+
+    http.post(
+      `${api}/clinics/:clinic_id/connections/:platform/disconnect`,
+      route<{ clinic_id: string; platform: string }>(
+        ({ params }) => {
+          const row = connectionOf(params.clinic_id, params.platform);
+          if (!row) return notFound();
+          if (row.status === 'not_connected' || row.status === 'disconnected') {
+            return problem(404, 'not_found', 'Not found', `${row.label} is not connected`);
+          }
+          Object.assign(row, {
+            status: 'disconnected',
+            external_account_name: null,
+            connected_at: null,
+            connected_by_user_id: null,
+            last_synced_at: null,
+            last_error: null,
+            scopes: [],
+            token_expires_at: null,
+          } satisfies Partial<Schema<'ConnectionRead'>>);
+          return HttpResponse.json(row);
+        },
+        { clinic: true, permission: 'connections:manage' },
       ),
     ),
 

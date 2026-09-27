@@ -13,8 +13,8 @@ import {
   Card,
   COMPONENT_STATUS_TONES,
   EmptyState,
-  FINDING_PRIORITY_TONES,
   FindingCard,
+  findingCardProps,
   formatDate,
   PUBLICATION_STATE_TONES,
   ScoreCard,
@@ -24,8 +24,8 @@ import {
   APPROVAL_STATE_LABELS,
   ASSESSMENT_COMPONENT_LABELS,
   ASSESSMENT_STATUS_LABELS,
-  FINDING_PRIORITY_LABELS,
   formatComponentScore,
+  overallScoreEmptyLabel,
   PUBLICATION_STATE_LABELS,
 } from '@radial-pulse/utils';
 import { useNavigate } from '@tanstack/react-router';
@@ -178,7 +178,7 @@ function AssessmentReport({
         <ScoreCard
           label="Overall score"
           score={a.overall_score}
-          emptyLabel={inFlight ? 'In progress' : a.status === 'failed' ? 'Failed' : 'Not Available'}
+          emptyLabel={overallScoreEmptyLabel(a.status)}
           caption={a.summary ?? undefined}
           comparison={
             competitor
@@ -227,23 +227,7 @@ function AssessmentReport({
                 <span className="rp-muted"> · {c.findings.length}</span>
               </h3>
               {c.findings.map((f) => (
-                <FindingCard
-                  key={f.id}
-                  titleAs="h4"
-                  title={f.title}
-                  description={f.description ?? undefined}
-                  recommendation={f.recommendation ?? undefined}
-                  priority={{
-                    label: FINDING_PRIORITY_LABELS[f.priority],
-                    tone: FINDING_PRIORITY_TONES[f.priority],
-                  }}
-                  evidence={f.evidence.map((e) => ({
-                    sourceUrl: e.source_url ?? undefined,
-                    excerpt: e.excerpt ?? undefined,
-                    provider: e.provider,
-                    observedAt: e.observed_at,
-                  }))}
-                />
+                <FindingCard key={f.id} titleAs="h4" {...findingCardProps(f)} />
               ))}
             </section>
           ))
