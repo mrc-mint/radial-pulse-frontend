@@ -33,10 +33,14 @@ Packages expose only their entry points via `exports`, so deep imports fail.
 
 ## §4 Platform shell
 
-`platform-shell/core` holds the `ModuleManifest` contract and
-`resolveNavigation()` (capabilities from `GET /me`, never role-name checks).
-`/web` and `/native` hold the platform layouts. Composition is compile-time;
-no micro-frontends.
+`platform-shell/core` holds the `ModuleManifest` contract (nav entries and
+clinic sections), `resolveNavigation()` / `resolveClinicSections()`
+(capabilities from `GET /me`, never role-name checks), the session boundary
+(ADR 0008), config context and clinic context (`useClinicId()`; route-driven
+on web, `ClinicSelectionProvider` on mobile). `/web` holds the router-agnostic
+app shell (sidebar ≥1024px, icon rail 768–1023px, drawer below), the clinic
+workspace frame and shell states; `/native` the mobile layouts. Composition is
+compile-time; no micro-frontends.
 
 ## §5 Work queue
 

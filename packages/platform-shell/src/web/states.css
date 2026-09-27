@@ -1,0 +1,13 @@
+.rp-full-page {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--rp-space-6);
+  background: var(--rp-color-bg-app);
+  font-family: var(--rp-font-family-sans);
+}
+
+.rp-full-page > * {
+  width: 100%;
+  max-width: 480px;
+}

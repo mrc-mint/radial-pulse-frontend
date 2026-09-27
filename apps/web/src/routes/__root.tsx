@@ -1,10 +1,6 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { WebAppShell } from '@radial-pulse/platform-shell/web';
 
+// Layout lives below: `_app` (authenticated shell) and `sign-in` (auth layout).
 export const Route = createRootRoute({
-  component: () => (
-    <WebAppShell>
-      <Outlet />
-    </WebAppShell>
-  ),
+  component: Outlet,
 });

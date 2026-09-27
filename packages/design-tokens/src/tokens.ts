@@ -190,7 +190,7 @@ const color = {
 const font = {
   family: {
     /** Web only. Native uses the platform system font. */
-    sans: "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    sans: "'Inter Variable', Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
     mono: "ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace",
   },
   weight: { regular: 400, medium: 500, semibold: 600, bold: 700 },

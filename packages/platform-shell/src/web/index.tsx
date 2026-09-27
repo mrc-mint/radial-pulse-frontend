@@ -1,11 +1,22 @@
-import type { ReactNode } from 'react';
-
 /**
- * Web platform shell. PHASE 2 STUB: renders children only.
- * Phase 5: sidebar + header built from resolveNavigation(), ClinicLayout,
- * forbidden/error/empty states. Phase 7: SessionProvider (Amplify, managed
- * login, tokens in sessionStorage).
+ * @radial-pulse/platform-shell/web — the web layouts (architecture §4):
+ * app shell, clinic workspace frame and shell-level states. Router-agnostic:
+ * the app supplies the pathname and a `renderLink` bound to its router.
+ * Requires @radial-pulse/design-tokens/css to be loaded by the app.
  */
-export function WebAppShell({ children }: { children: ReactNode }) {
-  return <div data-rp-shell="web">{children}</div>;
-}
+export { WebAppShell } from './app-shell';
+export type { ShellUser, WebAppShellProps } from './app-shell';
+export { ClinicWorkspace } from './clinic-workspace';
+export type { ClinicWorkspaceProps } from './clinic-workspace';
+export { AuthLayout } from './auth-layout';
+export { Brand, BrandMark } from './brand';
+export type { RenderLink, ShellLinkProps } from './link';
+export { NAV_ICONS } from './nav-icons';
+export {
+  AccessDenied,
+  FullPageError,
+  FullPageLoading,
+  FullPageStatus,
+  NotFound,
+  RequireCapability,
+} from './states';
