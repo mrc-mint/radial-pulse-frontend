@@ -37,7 +37,7 @@
     "react-dom": "19.1.0",
     "@types/react": "~19.1.10",
     "@types/react-dom": "~19.1.7",
-    "react-native": "0.81.4",
+    "react-native": "0.81.5",
     "jsdom": "^26.1.0",
     "@types/node": "^26.6.3"
   },
