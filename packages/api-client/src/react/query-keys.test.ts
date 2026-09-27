@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clinicQueryKey } from './index';
+import { clinicQueryKey } from './query-keys';
 
 describe('clinicQueryKey', () => {
   it('always places the clinicId in the key', () => {
