@@ -23,6 +23,31 @@
   color: var(--rp-color-status-brand-fg);
 }
 
+.rp-metric__icon--neutral {
+  background: var(--rp-color-status-neutral-bg);
+  color: var(--rp-color-status-neutral-fg);
+}
+
+.rp-metric__icon--info {
+  background: var(--rp-color-status-info-bg);
+  color: var(--rp-color-status-info-fg);
+}
+
+.rp-metric__icon--success {
+  background: var(--rp-color-status-success-bg);
+  color: var(--rp-color-status-success-fg);
+}
+
+.rp-metric__icon--warning {
+  background: var(--rp-color-status-warning-bg);
+  color: var(--rp-color-status-warning-fg);
+}
+
+.rp-metric__icon--danger {
+  background: var(--rp-color-status-danger-bg);
+  color: var(--rp-color-status-danger-fg);
+}
+
 .rp-metric__body {
   display: flex;
   flex-direction: column;

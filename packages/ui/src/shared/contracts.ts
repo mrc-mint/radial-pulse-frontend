@@ -155,6 +155,8 @@ export interface MetricCardBaseProps {
    */
   value: string | number | null | undefined;
   icon?: ReactNode;
+  /** Tint of the icon square (web). Identity only: never derived from the value. */
+  iconTone?: StatusTone;
   change?: MetricChange;
   hint?: string;
 }

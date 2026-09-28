@@ -65,6 +65,9 @@ interface ClinicSeed {
   dsm: number | null;
   lat: number;
   lng: number;
+  /** Archived (inactive, e.g. the clinic said no): the required archive reason. */
+  archived?: string;
+  createdDaysAgo?: number;
 }
 
 const CLINICS: ClinicSeed[] = [
@@ -211,6 +214,35 @@ const CLINICS: ClinicSeed[] = [
     dsm: 3,
     lat: 22.7196,
     lng: 75.8577,
+  },
+  // Inactive (archived) clinics: out of the active totals, counted as `archived`.
+  {
+    name: 'Pearl Dental Studio',
+    doctor: 'Dr. Meera Nair',
+    city: 'Chennai',
+    state: 'Tamil Nadu',
+    specialty: 'General Dentistry',
+    site: null,
+    stage: 'prospective_client',
+    dsm: null,
+    lat: 13.0827,
+    lng: 80.2707,
+    archived: 'Not interested in digital marketing services right now.',
+    createdDaysAgo: 120,
+  },
+  {
+    name: 'Sunrise Dental Care',
+    doctor: 'Dr. Vikram Rao',
+    city: 'Kochi',
+    state: 'Kerala',
+    specialty: 'Pediatric Dentistry',
+    site: 'https://www.sunrisedentalcare.in',
+    stage: 'client_discussion',
+    dsm: 4,
+    lat: 9.9312,
+    lng: 76.2673,
+    archived: 'Chose to continue with their current agency.',
+    createdDaysAgo: 75,
   },
 ];
 
@@ -513,31 +545,38 @@ export function createMockDb(): MockDb {
     user(101, 'Dr. Rahul Mehta', 'rahul.mehta@smiledentalcare.in', 'clinic_user'),
   ];
 
-  const clinics = CLINICS.map((c, i) => ({
-    id: uuid('c1', i + 1),
-    organization_id: ORG,
-    name: c.name,
-    primary_practitioner_name: c.doctor,
-    specialty: c.specialty,
-    description: `${c.specialty} for families in ${c.city}.`,
-    website_url: c.site,
-    email: c.site ? `info@${new URL(c.site).hostname.replace(/^www\./, '')}` : null,
-    phone: `+91 98${String(76543210 + i * 1111).slice(0, 8)}`,
-    address_line: `${12 + i * 7}, Main Road`,
-    city: c.city,
-    state: c.state,
-    postal_code: String(500001 + i * 713).slice(0, 6),
-    country: 'IN',
-    latitude: c.lat,
-    longitude: c.lng,
-    stage: c.stage,
-    stage_changed_at: ago(5 + i * 3),
-    is_active: true,
-    archived_reason: null,
-    cover_asset_id: null,
-    created_at: ago(170 - i * 12),
-    updated_at: ago(1 + i),
-  }));
+  const clinics = CLINICS.map((c, i) => {
+    const createdDays = c.createdDaysAgo ?? 160 - i * 14;
+    // A new clinic starts as a prospective client; later stages were reached
+    // after creation.
+    const stageDays =
+      c.stage === 'prospective_client' ? createdDays : Math.min(5 + i * 3, createdDays - 1);
+    return {
+      id: uuid('c1', i + 1),
+      organization_id: ORG,
+      name: c.name,
+      primary_practitioner_name: c.doctor,
+      specialty: c.specialty,
+      description: `${c.specialty} for families in ${c.city}.`,
+      website_url: c.site,
+      email: c.site ? `info@${new URL(c.site).hostname.replace(/^www\./, '')}` : null,
+      phone: `+91 98${String(76543210 + i * 1111).slice(0, 8)}`,
+      address_line: `${12 + i * 7}, Main Road`,
+      city: c.city,
+      state: c.state,
+      postal_code: String(500001 + i * 713).slice(0, 6),
+      country: 'IN',
+      latitude: c.lat,
+      longitude: c.lng,
+      stage: c.stage,
+      stage_changed_at: ago(stageDays),
+      is_active: !c.archived,
+      archived_reason: c.archived ?? null,
+      cover_asset_id: null,
+      created_at: ago(createdDays),
+      updated_at: ago(Math.min(1 + i, stageDays)),
+    };
+  });
 
   const assignments = new Map<string, S<'AssignmentRead'>>();
   CLINICS.forEach((c, i) => {

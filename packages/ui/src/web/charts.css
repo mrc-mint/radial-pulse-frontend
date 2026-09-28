@@ -155,3 +155,135 @@
 .rp-columns__tooltip strong {
   color: var(--rp-color-text-primary);
 }
+
+/* ── Donut ── */
+.rp-donut {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rp-space-6) var(--rp-space-8);
+  margin: 0;
+}
+
+.rp-donut__ring {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.rp-donut__ring circle {
+  transition:
+    stroke-width 120ms ease,
+    opacity 120ms ease;
+}
+
+.rp-donut__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.rp-donut__total {
+  color: var(--rp-color-text-primary);
+  font-size: var(--rp-text-h1-size);
+  line-height: var(--rp-text-h1-line-height);
+  font-weight: var(--rp-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.rp-donut__center-label {
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-caption-size);
+}
+
+.rp-donut__legend {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--rp-space-2);
+  min-width: 200px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rp-donut__legend-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--rp-space-3);
+  padding: var(--rp-space-1-5) var(--rp-space-2);
+  border-radius: var(--rp-radius-md);
+}
+
+.rp-donut__legend-row[data-active] {
+  background: var(--rp-color-bg-hover);
+}
+
+.rp-donut__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--rp-radius-full);
+}
+
+.rp-donut__legend-label {
+  color: var(--rp-color-text-secondary);
+}
+
+.rp-donut__legend-value {
+  display: inline-flex;
+  gap: var(--rp-space-1-5);
+  color: var(--rp-color-text-primary);
+  font-weight: var(--rp-font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.rp-donut__legend-share {
+  color: var(--rp-color-text-tertiary);
+  font-weight: var(--rp-font-weight-regular);
+}
+
+/* ── Line ── */
+.rp-line {
+  margin: 0;
+  min-width: 0;
+}
+
+.rp-line__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.rp-line__marker {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--rp-radius-full);
+  box-shadow: 0 0 0 2px var(--rp-color-bg-surface);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.rp-line__marker[data-active] {
+  width: 10px;
+  height: 10px;
+}
+
+.rp-line__crosshair {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--rp-color-border-strong);
+  pointer-events: none;
+}
+
+.rp-line__slot:hover,
+.rp-line__slot[data-active] {
+  background: transparent;
+}

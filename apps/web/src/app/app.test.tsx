@@ -91,6 +91,32 @@ describe('web app against the contract mocks', () => {
     expect(screen.getByText('Rohan Agarwal')).toBeTruthy();
   });
 
+  it('gives a Platform Administrator the platform overview dashboard', async () => {
+    await renderApp('/dashboard', 'platform-administrator');
+    await screen.findByText('Overview of clinics, progress and impact');
+    const total = await screen.findByRole('region', { name: 'Total clinics' });
+    expect(within(total).getByText('12')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Active clinics' })).toBeTruthy();
+    const inactive = screen.getByRole('region', { name: 'Inactive clinics' });
+    expect(within(inactive).getByText('2')).toBeTruthy();
+    const legend = screen.getByRole('list', { name: 'Clinics by status' });
+    expect(
+      within(legend)
+        .getAllByRole('listitem')
+        .map((li) => li.textContent),
+    ).toEqual(['Active4(29%)', 'Prospects4(29%)', 'In progress4(29%)', 'Inactive2(14%)']);
+    // Feed and highlights come from the clinics list only.
+    const feed = await screen.findByRole('list', { name: 'Recent activity' });
+    expect(within(feed).getAllByRole('link').length).toBeGreaterThan(0);
+    const highlights = await screen.findByRole('list', { name: 'Key highlights' });
+    expect(within(highlights).getByText(/new prospects? added this month/)).toBeTruthy();
+    expect(within(highlights).getByText(/% of prospects have a website/)).toBeTruthy();
+    expect(screen.getByRole('combobox', { name: 'Growth measure' })).toBeTruthy();
+    // Digital Success Manager widgets are not part of this dashboard.
+    expect(screen.queryByRole('region', { name: 'Assessments awaiting review' })).toBeNull();
+    expect(screen.queryByText('Recent conversations')).toBeNull();
+  });
+
   it('labels the list "My Clinics" for users who do not see all clinics', async () => {
     await renderApp('/dashboard', 'digital-success-manager');
     expect(await navLabels()).toEqual(['Dashboard', 'My Clinics', 'Audit Reports', 'Settings']);

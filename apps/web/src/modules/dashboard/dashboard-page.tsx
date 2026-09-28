@@ -25,15 +25,25 @@ import {
 } from 'lucide-react';
 import { QueryError } from '../../app/page-kit';
 import './dashboard.css';
+import { PlatformDashboard } from './platform-dashboard';
 
-const MONTH = new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'UTC' });
+const MONTH = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' });
 
 /**
- * Dashboard for Platform Administrators and Digital Success Managers. The API
- * scopes every number to the clinics the caller can see, so both roles share
- * one page. Only contract fields are shown (DashboardSummary, ChatInbox).
+ * Dashboard. A Platform Administrator (`all_clinics`) sees the platform-wide
+ * overview; a Digital Success Manager sees their clinics' work. The API scopes
+ * every number to the clinics the caller can see.
  */
 export function DashboardPage() {
+  const session = useCurrentSession();
+  return session.allClinics ? <PlatformDashboard /> : <ClinicWorkDashboard />;
+}
+
+/**
+ * Digital Success Manager dashboard. Only contract fields are shown
+ * (DashboardSummary, ChatInbox).
+ */
+function ClinicWorkDashboard() {
   const session = useCurrentSession();
   const summary = useDashboardSummary();
   const inbox = useChatInbox();
@@ -44,11 +54,7 @@ export function DashboardPage() {
     <div className="rp-page">
       <PageHeader
         title="Dashboard"
-        description={
-          session.allClinics
-            ? 'Overview of every clinic on Radial Pulse'
-            : `Welcome back, ${firstName}. Here is how your clinics are doing.`
-        }
+        description={`Welcome back, ${firstName}. Here is how your clinics are doing.`}
       />
 
       {summary.isError ? (

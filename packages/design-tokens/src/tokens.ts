@@ -185,6 +185,18 @@ const color = {
   overlay: 'rgba(7, 18, 43, 0.48)',
   skeleton: palette.slate[100],
   focusRing: 'rgba(51, 102, 238, 0.35)',
+  /**
+   * Categorical chart hues, in fixed order (dataviz method). Validated with the
+   * palette checker against the white card surface: CVD and normal-vision
+   * separation and 3:1 contrast all pass. Assign by entity, never by rank.
+   */
+  chart: {
+    series1: palette.blue[600],
+    series2: palette.green[600],
+    series3: palette.amber[600],
+    /** Neutral remainder slot (e.g. inactive): deliberately grey, never a fourth hue. */
+    neutral: palette.slate[500],
+  },
 } as const;
 
 const font = {

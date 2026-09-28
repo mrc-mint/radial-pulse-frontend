@@ -48,5 +48,5 @@ export type {
   LoadingStateProps,
   SkeletonProps,
 } from './feedback';
-export { BarList, ColumnChart, niceTicks } from './charts';
-export type { ChartDatum } from './charts';
+export { BarList, ColumnChart, DonutChart, donutShare, LineChart, niceTicks } from './charts';
+export type { ChartDatum, DonutDatum } from './charts';

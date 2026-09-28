@@ -97,6 +97,10 @@
   --rp-color-overlay: rgba(7, 18, 43, 0.48);
   --rp-color-skeleton: #eef1f6;
   --rp-color-focus-ring: rgba(51, 102, 238, 0.35);
+  --rp-color-chart-series1: #2152d6;
+  --rp-color-chart-series2: #039855;
+  --rp-color-chart-series3: #dc6803;
+  --rp-color-chart-neutral: #697586;
   --rp-font-family-sans:
     'Inter Variable', Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;

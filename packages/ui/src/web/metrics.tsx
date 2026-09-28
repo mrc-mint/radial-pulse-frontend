@@ -31,13 +31,21 @@ export interface MetricCardProps extends MetricCardBaseProps {
 }
 
 /** A single backend-provided figure (clinic counts, followers, reach…). */
-export function MetricCard({ label, value, icon, change, hint, className }: MetricCardProps) {
+export function MetricCard({
+  label,
+  value,
+  icon,
+  iconTone = 'brand',
+  change,
+  hint,
+  className,
+}: MetricCardProps) {
   const text = formatMetricValue(value);
   const missing = value === null || value === undefined || value === '';
   return (
     <section className={cx('rp-metric', className)} aria-label={label}>
       {icon && (
-        <div className="rp-metric__icon" aria-hidden="true">
+        <div className={cx('rp-metric__icon', `rp-metric__icon--${iconTone}`)} aria-hidden="true">
           {icon}
         </div>
       )}

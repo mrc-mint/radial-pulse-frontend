@@ -224,7 +224,10 @@ export function createMockHandlers(options: MockOptions) {
       `${api}/dashboard/summary`,
       route(({ me }) => {
         const visible = new Set(me.visibleClinicIds());
-        const clinics = db.clinics.filter((c) => visible.has(c.id));
+        // Totals and stage counts cover active clinics; archived are counted apart
+        // (backend: total_clinics = prospects + in_progress + active).
+        const all = db.clinics.filter((c) => visible.has(c.id));
+        const clinics = all.filter((c) => c.is_active);
         const stages: Array<Schema<'ClinicStage'>> = [
           'prospective_client',
           'profile_enriched',
@@ -241,14 +244,15 @@ export function createMockHandlers(options: MockOptions) {
         });
         return HttpResponse.json({
           total_clinics: clinics.length,
-          archived: 0,
+          archived: all.length - clinics.length,
           prospects: count('prospective_client') + count('profile_enriched'),
           in_progress: count('assessment_completed') + count('client_discussion'),
           active: count('active_client'),
           by_stage: stages.map((stage) => ({ stage, count: count(stage) })),
           new_clinics_by_month: months.map((month) => ({
             month,
-            count: clinics.filter((c) => c.created_at.startsWith(month)).length,
+            // Every clinic created that month, archived since or not (as the backend).
+            count: all.filter((c) => c.created_at.startsWith(month)).length,
           })),
           assessments_awaiting_review: db.assessments.filter(
             (a) => visible.has(a.clinic_id) && a.approval_state === 'submitted',
@@ -268,8 +272,10 @@ export function createMockHandlers(options: MockOptions) {
         const stages = url.searchParams.getAll('stage');
         const dsm = url.searchParams.get('dsm_user_id');
         const unassigned = url.searchParams.get('unassigned') === 'true';
+        const archived = url.searchParams.get('archived') === 'true';
         const rows = db.clinics
           .filter((c) => visible.has(c.id))
+          .filter((c) => c.is_active !== archived)
           .filter((c) => stages.length === 0 || stages.includes(c.stage))
           .filter((c) => !dsm || db.assignments.get(c.id)?.user_id === dsm)
           .filter((c) => !unassigned || !db.assignments.has(c.id))
