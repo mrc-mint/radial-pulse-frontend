@@ -91,6 +91,34 @@ describe('web app against the contract mocks', () => {
     expect(screen.getByText('Rohan Agarwal')).toBeTruthy();
   });
 
+  it('lists clinics by status, with inactive (archived) clinics on their own tab', async () => {
+    const user = userEvent.setup();
+    await renderApp('/clinics', 'platform-administrator');
+    const tabs = within(await screen.findByRole('tablist', { name: 'Filter by status' }));
+    expect(tabs.getAllByRole('tab').map((t) => t.firstChild?.textContent)).toEqual([
+      'All clinics',
+      'Active',
+      'Prospects',
+      'In progress',
+      'Inactive',
+    ]);
+    expect(screen.queryByRole('columnheader', { name: 'Open work' })).toBeNull();
+    // Contract stages are shown as their group, never as the raw stage.
+    await screen.findByText('Showing 1–10 of 12 clinics');
+    expect(screen.queryByText('Profile enriched')).toBeNull();
+    expect(screen.queryByText('Client discussion')).toBeNull();
+
+    await user.click(tabs.getByRole('tab', { name: /Inactive/ }));
+    expect(await screen.findByRole('link', { name: 'Lotus Dental Studio' })).toBeTruthy();
+    expect(screen.getByText('Showing 1–2 of 2 clinics')).toBeTruthy();
+    expect((screen.getByRole('combobox', { name: 'Status' }) as HTMLSelectElement).value).toBe(
+      'inactive',
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Reset' }));
+    expect(await screen.findByText('Showing 1–10 of 12 clinics')).toBeTruthy();
+  });
+
   it('gives a Platform Administrator the platform overview dashboard', async () => {
     await renderApp('/dashboard', 'platform-administrator');
     await screen.findByText('Overview of clinics, progress and impact');

@@ -16,7 +16,6 @@ import {
   Badge,
   Button,
   Card,
-  CLINIC_STAGE_TONES,
   displayHost,
   EmptyState,
   formatDate,
@@ -26,7 +25,6 @@ import {
   WORK_ITEM_STATUS_TONES,
 } from '@radial-pulse/ui/web';
 import {
-  CLINIC_STAGE_LABELS,
   WORK_AREA_LABELS,
   WORK_ITEM_PRIORITY_LABELS,
   WORK_ITEM_STATUS_LABELS,
@@ -35,6 +33,7 @@ import { Pencil } from 'lucide-react';
 import { useState } from 'react';
 import {
   CardSkeleton,
+  ClinicStatusBadge,
   DefinitionList,
   ExternalLink,
   mutationErrorMessage,
@@ -201,12 +200,10 @@ function StageCard({ clinicId }: { clinicId: string }) {
   const clinic = useClinic(clinicId);
   const c = clinic.data;
   return (
-    <Card title="Stage">
+    <Card title="Status">
       {c ? (
         <div className="rp-stack-sm">
-          <Badge tone={CLINIC_STAGE_TONES[c.stage]} dot>
-            {CLINIC_STAGE_LABELS[c.stage]}
-          </Badge>
+          <ClinicStatusBadge clinic={c} />
           <span className="rp-muted rp-small">Since {formatDate(c.stage_changed_at)}</span>
         </div>
       ) : (

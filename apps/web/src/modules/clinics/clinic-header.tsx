@@ -1,9 +1,8 @@
 import { useClinic } from '@radial-pulse/api-client/react';
-import { Badge, CLINIC_STAGE_TONES, displayHost, PageHeader, Skeleton } from '@radial-pulse/ui/web';
-import { CLINIC_STAGE_LABELS } from '@radial-pulse/utils';
+import { displayHost, PageHeader, Skeleton } from '@radial-pulse/ui/web';
 import { Globe, Mail, MapPin, Phone } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { ExternalLink, mapsUrl, QueryError } from '../../app/page-kit';
+import { ClinicStatusBadge, ExternalLink, mapsUrl, QueryError } from '../../app/page-kit';
 import './clinic.css';
 
 /** Clinic workspace header from the contract `ClinicRead`. */
@@ -42,11 +41,7 @@ export function ClinicHeader({ clinicId, back }: { clinicId: string; back: React
         description={[c.specialty, [c.city, c.state].filter(Boolean).join(', ')]
           .filter(Boolean)
           .join(' · ')}
-        actions={
-          <Badge tone={CLINIC_STAGE_TONES[c.stage]} dot>
-            {CLINIC_STAGE_LABELS[c.stage]}
-          </Badge>
-        }
+        actions={<ClinicStatusBadge clinic={c} />}
       />
       <ul className="rp-clinic-header__contacts" aria-label="Clinic contact details">
         {c.website_url && (

@@ -217,7 +217,7 @@ const CLINICS: ClinicSeed[] = [
   },
   // Inactive (archived) clinics: out of the active totals, counted as `archived`.
   {
-    name: 'Pearl Dental Studio',
+    name: 'Lotus Dental Studio',
     doctor: 'Dr. Meera Nair',
     city: 'Chennai',
     state: 'Tamil Nadu',

@@ -7,7 +7,6 @@ import {
   Button,
   buttonClassName,
   Card,
-  CLINIC_STAGE_TONES,
   displayHost,
   DropdownMenu,
   EmptyState,
@@ -19,24 +18,50 @@ import {
   Tabs,
   type TableColumn,
 } from '@radial-pulse/ui/web';
-import { CLINIC_STAGE_LABELS } from '@radial-pulse/utils';
+import {
+  CLINIC_STATUS_GROUP_LABELS,
+  CLINIC_STATUS_STAGES,
+  CLINIC_STATUSES,
+  type ClinicStatus,
+} from '@radial-pulse/utils';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { MapPin, Plus } from 'lucide-react';
 import { useDeferredValue, useState } from 'react';
-import { ExternalLink, mapsUrl, QueryError } from '../../app/page-kit';
+import { ClinicStatusBadge, ExternalLink, mapsUrl, QueryError } from '../../app/page-kit';
 import { useNavLabel } from '../../app/shell';
 import { AddClinicDrawer } from './add-clinic-drawer';
 
 type ClinicRow = Schema<'ClinicListItem'>;
-type Stage = Schema<'ClinicStage'>;
+type StatusFilter = 'all' | ClinicStatus;
 
 const PAGE_SIZE = 10;
-const STAGES = Object.keys(CLINIC_STAGE_LABELS) as Stage[];
 const UNASSIGNED = '__unassigned';
+
+/** `DashboardSummary` field holding each status's count. */
+const COUNT_FIELD = {
+  active: 'active',
+  prospect: 'prospects',
+  in_progress: 'in_progress',
+  inactive: 'archived',
+} as const satisfies Record<ClinicStatus, keyof Schema<'DashboardSummary'>>;
+
+/** List query for a status: its stage group, or archived clinics for Inactive. */
+function statusQuery(status: StatusFilter) {
+  if (status === 'all') return {};
+  if (status === 'inactive') return { archived: true };
+  return { stage: CLINIC_STATUS_STAGES[status] };
+}
+
+const STATUS_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
+  { value: 'all', label: 'All' },
+  ...CLINIC_STATUSES.map((s) => ({ value: s, label: CLINIC_STATUS_GROUP_LABELS[s] })),
+];
 
 /**
  * Clinics (Platform Administrator) / My Clinics (Digital Success Manager).
  * One screen: the API scopes the list to the clinics the caller can see.
+ * Clinics show a status (the backend's stage groups, or Inactive when
+ * archived); the tabs and the Status filter select the same thing.
  */
 export function ClinicsPage() {
   const title = useNavLabel('clinics', 'Clinics');
@@ -45,7 +70,7 @@ export function ClinicsPage() {
   const canSeeUsers = useCan('users:read');
   const navigate = useNavigate();
 
-  const [stage, setStage] = useState<'all' | Stage>('all');
+  const [status, setStatus] = useState<StatusFilter>('all');
   const [search, setSearch] = useState('');
   const [dsm, setDsm] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -59,37 +84,48 @@ export function ClinicsPage() {
   );
   const clinics = useClinics({
     q: q || undefined,
-    stage: stage === 'all' ? undefined : [stage],
+    ...statusQuery(status),
     dsm_user_id: dsm && dsm !== UNASSIGNED ? dsm : undefined,
     unassigned: dsm === UNASSIGNED || undefined,
     limit: PAGE_SIZE,
     offset: (page - 1) * PAGE_SIZE,
   });
 
-  const counts = new Map(summary.data?.by_stage.map((s) => [s.stage, s.count]));
   const resetPage =
     <T,>(set: (v: T) => void) =>
     (v: T) => {
       set(v);
       setPage(1);
     };
+  const filtered = Boolean(q) || status !== 'all' || dsm !== null;
+  const reset = () => {
+    setSearch('');
+    setStatus('all');
+    setDsm(null);
+    setPage(1);
+  };
 
   const columns: TableColumn<ClinicRow>[] = [
     {
+      id: 'number',
+      header: '#',
+      width: 48,
+      cell: (_, index) => (
+        <span className="rp-muted rp-nowrap">{(page - 1) * PAGE_SIZE + index + 1}</span>
+      ),
+    },
+    {
       id: 'name',
-      header: 'Clinic',
+      header: 'Clinic name',
       cell: (c) => (
-        <span className="rp-cell-title">
-          <Link to="/clinics/$clinicId" params={{ clinicId: c.id }} className="rp-link">
-            {c.name}
-          </Link>
-          <span>{c.specialty ?? 'Specialty not set'}</span>
-        </span>
+        <Link to="/clinics/$clinicId" params={{ clinicId: c.id }} className="rp-link rp-nowrap">
+          {c.name}
+        </Link>
       ),
     },
     {
       id: 'doctor',
-      header: 'Doctor',
+      header: 'Doctor name',
       cell: (c) =>
         c.primary_practitioner_name ? (
           <span className="rp-nowrap">{c.primary_practitioner_name}</span>
@@ -109,18 +145,16 @@ export function ClinicsPage() {
     },
     {
       id: 'location',
-      header: 'Location',
+      header: 'Map location',
       cell: (c) => {
         const url = mapsUrl(c);
-        return (
-          <span className="rp-cell-title">
-            <span>{c.city ?? '—'}</span>
-            {url && (
-              <ExternalLink href={url}>
-                <MapPin size={12} aria-hidden="true" /> View map
-              </ExternalLink>
-            )}
-          </span>
+        return url ? (
+          <ExternalLink href={url}>
+            <MapPin size={14} aria-hidden="true" /> View map
+            <span className="rp-sr-only"> for {c.name}</span>
+          </ExternalLink>
+        ) : (
+          <span className="rp-muted">Not set</span>
         );
       },
     },
@@ -128,7 +162,7 @@ export function ClinicsPage() {
       ? [
           {
             id: 'dsm',
-            header: 'Digital Success Manager',
+            header: 'Assigned user',
             cell: (c: ClinicRow) =>
               c.dsm ? (
                 <span className="rp-person">
@@ -144,29 +178,15 @@ export function ClinicsPage() {
         ]
       : []),
     {
-      id: 'stage',
-      header: 'Stage',
-      cell: (c) => (
-        <Badge tone={CLINIC_STAGE_TONES[c.stage]} dot>
-          {CLINIC_STAGE_LABELS[c.stage]}
-        </Badge>
-      ),
-    },
-    {
-      id: 'work',
-      header: 'Open work',
-      align: 'end',
-      cell: (c) => {
-        const open = c.open_work.reduce((n, a) => n + a.open_count, 0);
-        return open > 0 ? open : <span className="rp-muted">0</span>;
-      },
+      id: 'status',
+      header: 'Status',
+      cell: (c) => <ClinicStatusBadge clinic={c} />,
     },
     {
       id: 'actions',
-      header: '',
-      headerLabel: 'Actions',
-      width: 56,
-      align: 'end',
+      header: 'Actions',
+      width: 72,
+      align: 'center',
       cell: (c) => (
         <DropdownMenu
           label={`Actions for ${c.name}`}
@@ -195,15 +215,13 @@ export function ClinicsPage() {
     },
   ];
 
-  const filtered = Boolean(q) || stage !== 'all' || dsm !== null;
-
   return (
     <div className="rp-page">
       <PageHeader
         title={title}
         description={
           session.allClinics
-            ? 'All clinics and prospects on Radial Pulse'
+            ? 'Manage all clinics and prospects'
             : 'The clinics you are responsible for'
         }
         actions={
@@ -218,15 +236,19 @@ export function ClinicsPage() {
       <Card padding="none">
         <div className="rp-clinics__tabs">
           <Tabs
-            label="Filter by stage"
-            value={stage}
-            onChange={resetPage(setStage)}
+            label="Filter by status"
+            value={status}
+            onChange={resetPage(setStatus)}
             items={[
-              { value: 'all', label: 'All', count: summary.data?.total_clinics },
-              ...STAGES.map((s) => ({
+              {
+                value: 'all',
+                label: session.allClinics ? 'All clinics' : 'All',
+                count: summary.data?.total_clinics,
+              },
+              ...CLINIC_STATUSES.map((s) => ({
                 value: s,
-                label: CLINIC_STAGE_LABELS[s],
-                count: counts.get(s),
+                label: CLINIC_STATUS_GROUP_LABELS[s],
+                count: summary.data?.[COUNT_FIELD[s]],
               })),
             ]}
           />
@@ -235,19 +257,27 @@ export function ClinicsPage() {
           <div className="rp-grow">
             <SearchInput
               label="Search clinics"
-              placeholder="Search by clinic, doctor or website"
+              placeholder="Search by clinic name, doctor name or website"
               value={search}
               onValueChange={resetPage(setSearch)}
+            />
+          </div>
+          <div className="rp-fixed">
+            <Select
+              label="Status"
+              value={status}
+              onChange={resetPage(setStatus)}
+              options={STATUS_OPTIONS}
             />
           </div>
           {canSeeUsers && (
             <div className="rp-fixed">
               <Select
-                label="Digital Success Manager"
+                label="Assigned user"
                 value={dsm ?? 'all'}
                 onChange={(v) => resetPage(setDsm)(v === 'all' ? null : v)}
                 options={[
-                  { value: 'all', label: 'All managers' },
+                  { value: 'all', label: 'All' },
                   { value: UNASSIGNED, label: 'Unassigned' },
                   ...(managers.data?.items ?? []).map((u) => ({
                     value: u.id,
@@ -257,6 +287,9 @@ export function ClinicsPage() {
               />
             </div>
           )}
+          <Button variant="secondary" onClick={reset} disabled={!filtered}>
+            Reset
+          </Button>
         </div>
         <Table
           caption={title}
@@ -273,17 +306,12 @@ export function ClinicsPage() {
             filtered ? (
               <EmptyState
                 title="No clinics match these filters"
-                description="Try a different search or stage."
+                description="Try a different search or status."
                 action={
                   <button
                     type="button"
                     className={buttonClassName({ variant: 'secondary', size: 'sm' })}
-                    onClick={() => {
-                      setSearch('');
-                      setStage('all');
-                      setDsm(null);
-                      setPage(1);
-                    }}
+                    onClick={reset}
                   >
                     Clear filters
                   </button>

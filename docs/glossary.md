@@ -15,3 +15,14 @@
 | Work item                         | A backend-produced action for a clinic                                     | Kinds owned by the backend                                                                                                |
 | Permission                        | A contract `Permission` from `GET /auth/me` (platform-level or per clinic) | UI only; backend enforces                                                                                                 |
 | Module                            | A feature that registers a manifest with the shell                         | Modules don't import each other                                                                                           |
+
+## Clinic status
+
+What the web app shows for a clinic. It groups the contract `ClinicStage` values the way the backend dashboard does, and adds Inactive for archived clinics:
+
+| Status      | Contract data                                             |
+| ----------- | --------------------------------------------------------- |
+| Prospect    | `prospective_client`, `profile_enriched`                  |
+| In progress | `assessment_completed`, `client_discussion`               |
+| Active      | `active_client`                                           |
+| Inactive    | archived clinic (`is_active` false; a reason is required) |

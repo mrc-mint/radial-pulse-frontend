@@ -6,3 +6,4 @@ export {
 } from './score';
 export { can } from './capabilities';
 export * from './labels';
+export * from './clinic-status';

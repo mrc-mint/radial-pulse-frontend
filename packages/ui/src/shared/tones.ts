@@ -1,5 +1,6 @@
 import type { SeverityTone, StatusTone } from '@radial-pulse/design-tokens';
 import type { components, Schema } from '@radial-pulse/shared-types';
+import type { ClinicStatus } from '@radial-pulse/utils';
 
 /**
  * Visual tone for each contract enum value — the ONE place contract codes
@@ -10,6 +11,14 @@ import type { components, Schema } from '@radial-pulse/shared-types';
 type Tones<K extends keyof components['schemas']> = Readonly<
   Record<Schema<K> & string, StatusTone>
 >;
+
+/** Clinic status (utils `ClinicStatus`): same colours as the dashboard chart. */
+export const CLINIC_STATUS_TONES: Readonly<Record<ClinicStatus, StatusTone>> = {
+  prospect: 'info',
+  in_progress: 'warning',
+  active: 'success',
+  inactive: 'neutral',
+};
 
 export const CLINIC_STAGE_TONES: Tones<'ClinicStage'> = {
   prospective_client: 'neutral',

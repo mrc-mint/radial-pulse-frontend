@@ -12,7 +12,7 @@ import {
   PageHeader,
   Skeleton,
 } from '@radial-pulse/ui/web';
-import { CLINIC_STAGE_LABELS } from '@radial-pulse/utils';
+import { CLINIC_STATUS_GROUP_LABELS } from '@radial-pulse/utils';
 import { Link } from '@tanstack/react-router';
 import {
   Building2,
@@ -102,16 +102,19 @@ function ClinicWorkDashboard() {
           </div>
 
           <div className="rp-grid rp-grid--2">
-            <Card title="Clinics by stage" description="Where each clinic is in the journey">
+            <Card title="Clinics by status" description="Where each clinic is in the journey">
               {data ? (
                 <BarList
-                  label="Clinics by stage"
+                  label="Clinics by status"
                   unit="clinics"
-                  items={data.by_stage.map((s) => ({
-                    id: s.stage,
-                    label: CLINIC_STAGE_LABELS[s.stage],
-                    value: s.count,
-                  }))}
+                  items={(
+                    [
+                      { id: 'prospect', value: data.prospects },
+                      { id: 'in_progress', value: data.in_progress },
+                      { id: 'active', value: data.active },
+                      { id: 'inactive', value: data.archived },
+                    ] as const
+                  ).map((s) => ({ ...s, label: CLINIC_STATUS_GROUP_LABELS[s.id] }))}
                 />
               ) : (
                 <ChartSkeleton />

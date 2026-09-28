@@ -25,7 +25,7 @@ describe('clinicActivity', () => {
         stage_changed_at: '2026-09-20T10:00:00Z',
       }),
     ]);
-    expect(events.map((e) => e.text)).toEqual(['B moved to Active client', 'A added', 'B added']);
+    expect(events.map((e) => e.text)).toEqual(['B moved to Active', 'A added', 'B added']);
   });
 
   it('does not report the starting stage as a move', () => {

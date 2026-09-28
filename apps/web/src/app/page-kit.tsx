@@ -1,5 +1,14 @@
 import { isApiError } from '@radial-pulse/api-client';
-import { Card, EmptyState, ErrorState, Skeleton } from '@radial-pulse/ui/web';
+import type { Schema } from '@radial-pulse/shared-types';
+import {
+  Badge,
+  Card,
+  CLINIC_STATUS_TONES,
+  EmptyState,
+  ErrorState,
+  Skeleton,
+} from '@radial-pulse/ui/web';
+import { CLINIC_STATUS_LABELS, clinicStatus } from '@radial-pulse/utils';
 import { Unplug } from 'lucide-react';
 import type { ReactNode } from 'react';
 import './page-kit.css';
@@ -27,6 +36,23 @@ export function QueryError({
       requestId={api?.requestId}
       onRetry={api?.kind === 'not_found' || api?.kind === 'forbidden' ? undefined : onRetry}
     />
+  );
+}
+
+/**
+ * A clinic's status badge: its stage group (Prospect, In progress, Active) or
+ * Inactive when archived. The one way a clinic stage is shown on web.
+ */
+export function ClinicStatusBadge({
+  clinic,
+}: {
+  clinic: Pick<Schema<'ClinicRead'>, 'stage' | 'is_active'>;
+}) {
+  const status = clinicStatus(clinic);
+  return (
+    <Badge tone={CLINIC_STATUS_TONES[status]} dot>
+      {CLINIC_STATUS_LABELS[status]}
+    </Badge>
   );
 }
 

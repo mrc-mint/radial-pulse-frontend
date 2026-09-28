@@ -1,5 +1,5 @@
 import type { Schema } from '@radial-pulse/shared-types';
-import { CLINIC_STAGE_LABELS } from '@radial-pulse/utils';
+import { CLINIC_STATUS_LABELS, CLINIC_STATUS_OF_STAGE } from '@radial-pulse/utils';
 
 type Clinic = Schema<'ClinicListItem'>;
 
@@ -43,7 +43,7 @@ export function clinicActivity(clinics: ReadonlyArray<Clinic>, limit = 5): Activ
             clinicId: c.id,
             kind: 'stage',
             stage: c.stage,
-            text: `${c.name} moved to ${CLINIC_STAGE_LABELS[c.stage]}`,
+            text: `${c.name} moved to ${CLINIC_STATUS_LABELS[CLINIC_STATUS_OF_STAGE[c.stage]]}`,
             at: c.stage_changed_at,
           },
         ]
