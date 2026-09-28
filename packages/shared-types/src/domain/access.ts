@@ -1,18 +1,19 @@
-/**
- * Access vocabulary used by the platform shell.
- *
- * Capabilities come from `GET /me` (decision 5d). The frontend uses them for
- * navigation and UI affordances only; the backend (Cognito + FastAPI + RLS)
- * remains the security boundary.
- *
- * Capability and role values are owned by the backend contract, so they are
- * plain strings here rather than a frontend-invented union.
- */
-export type Capability = string;
+import type { components } from '../contract';
 
-/** Approved product roles (spec §4). Wire values follow the backend enum. */
-export type RoleName =
-  | 'PLATFORM_ADMINISTRATOR'
-  | 'DIGITAL_SUCCESS_MANAGER'
-  | 'CLINIC_ADMINISTRATOR'
-  | 'CLINIC_TEAM_MEMBER';
+/**
+ * Access vocabulary, straight from the API contract (`GET /api/v1/auth/me`).
+ *
+ * Permissions are two-level (backend RBAC): `MeResponse.permissions` holds
+ * platform-level permissions; each `ClinicAccess` carries the permissions for
+ * that clinic. The frontend uses them for navigation and affordances only —
+ * the backend (Cognito + FastAPI + RLS) remains the security boundary.
+ */
+type S = components['schemas'];
+
+export type Permission = S['Permission'];
+/** The shell's name for a permission it can gate UI on. */
+export type Capability = Permission;
+export type PlatformRole = S['PlatformRole'];
+export type ClinicRole = S['ClinicRole'];
+export type MeResponse = S['MeResponse'];
+export type ClinicAccess = S['ClinicAccess'];

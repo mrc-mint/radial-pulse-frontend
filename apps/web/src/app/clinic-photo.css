@@ -1,0 +1,17 @@
+/* Clinic cover photo (and its placeholder). Size is set by the container. */
+.rp-clinic-photo {
+  width: 100%;
+  height: 100%;
+  min-height: 150px;
+  max-height: 180px;
+  border-radius: var(--rp-radius-lg);
+  object-fit: cover;
+  background: var(--rp-color-bg-muted);
+}
+
+.rp-clinic-photo--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rp-color-text-disabled);
+}

@@ -1,9 +1,8 @@
+import type { components } from '../contract';
+
 /**
- * Verification status of a discovered digital-profile value (spec §6).
- * Human-confirmed values take precedence and are never overwritten by
- * automated enrichment — that rule is enforced by the backend.
- *
- * Wire values will follow the backend contract; these are the approved
- * product states.
+ * Verification state of a discovered presence profile (contract
+ * `PresenceVerification`). Human decisions (`confirmed`, `rejected`) are never
+ * overwritten by automated discovery — enforced by the backend.
  */
-export type VerificationStatus = 'UNVERIFIED' | 'HUMAN_CONFIRMED';
+export type VerificationStatus = components['schemas']['PresenceVerification'];

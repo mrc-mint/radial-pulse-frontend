@@ -4,7 +4,9 @@
   "private": true,
   "description": "Presentational components: shared contracts plus separate web and native implementations.",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     "./shared": "./src/shared/index.ts",
     "./web": "./src/web/index.ts",
@@ -23,25 +25,33 @@
   "dependencies": {
     "@radial-pulse/design-tokens": "workspace:*",
     "@radial-pulse/shared-types": "workspace:*",
-    "@radial-pulse/utils": "workspace:*"
+    "@radial-pulse/utils": "workspace:*",
+    "lucide-react": "^1.48.0"
   },
   "peerDependencies": {
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-svg": "*"
   },
   "devDependencies": {
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "@types/node": "^26.6.3",
     "@types/react": "~19.1.10",
     "@types/react-dom": "~19.1.7",
-    "react-native": "0.81.4"
+    "jsdom": "^26.1.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-svg": "15.12.1"
   },
   "peerDependenciesMeta": {
     "react-dom": {
       "optional": true
     },
     "react-native": {
+      "optional": true
+    },
+    "react-native-svg": {
       "optional": true
     }
   }

@@ -1,0 +1,107 @@
+/*
+ * Shared rules for @radial-pulse/ui/web. Requires the token variables from
+ * @radial-pulse/design-tokens/css to be loaded by the app.
+ */
+.rp-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.rp-focusable:focus-visible {
+  outline: none;
+  box-shadow: var(--rp-shadow-focus);
+}
+
+/* Tone utilities: set --_tone-* for any component that renders a status or severity. */
+.rp-tone-neutral {
+  --_tone-bg: var(--rp-color-status-neutral-bg);
+  --_tone-fg: var(--rp-color-status-neutral-fg);
+  --_tone-border: var(--rp-color-status-neutral-border);
+  --_tone-solid: var(--rp-color-status-neutral-solid);
+}
+.rp-tone-brand {
+  --_tone-bg: var(--rp-color-status-brand-bg);
+  --_tone-fg: var(--rp-color-status-brand-fg);
+  --_tone-border: var(--rp-color-status-brand-border);
+  --_tone-solid: var(--rp-color-status-brand-solid);
+}
+.rp-tone-info {
+  --_tone-bg: var(--rp-color-status-info-bg);
+  --_tone-fg: var(--rp-color-status-info-fg);
+  --_tone-border: var(--rp-color-status-info-border);
+  --_tone-solid: var(--rp-color-status-info-solid);
+}
+.rp-tone-success {
+  --_tone-bg: var(--rp-color-status-success-bg);
+  --_tone-fg: var(--rp-color-status-success-fg);
+  --_tone-border: var(--rp-color-status-success-border);
+  --_tone-solid: var(--rp-color-status-success-solid);
+}
+.rp-tone-warning {
+  --_tone-bg: var(--rp-color-status-warning-bg);
+  --_tone-fg: var(--rp-color-status-warning-fg);
+  --_tone-border: var(--rp-color-status-warning-border);
+  --_tone-solid: var(--rp-color-status-warning-solid);
+}
+.rp-tone-danger {
+  --_tone-bg: var(--rp-color-status-danger-bg);
+  --_tone-fg: var(--rp-color-status-danger-fg);
+  --_tone-border: var(--rp-color-status-danger-border);
+  --_tone-solid: var(--rp-color-status-danger-solid);
+}
+.rp-severity-critical {
+  --_tone-bg: var(--rp-color-severity-critical-bg);
+  --_tone-fg: var(--rp-color-severity-critical-fg);
+  --_tone-border: var(--rp-color-severity-critical-border);
+  --_tone-solid: var(--rp-color-severity-critical-solid);
+}
+.rp-severity-high {
+  --_tone-bg: var(--rp-color-severity-high-bg);
+  --_tone-fg: var(--rp-color-severity-high-fg);
+  --_tone-border: var(--rp-color-severity-high-border);
+  --_tone-solid: var(--rp-color-severity-high-solid);
+}
+.rp-severity-medium {
+  --_tone-bg: var(--rp-color-severity-medium-bg);
+  --_tone-fg: var(--rp-color-severity-medium-fg);
+  --_tone-border: var(--rp-color-severity-medium-border);
+  --_tone-solid: var(--rp-color-severity-medium-solid);
+}
+.rp-severity-low {
+  --_tone-bg: var(--rp-color-severity-low-bg);
+  --_tone-fg: var(--rp-color-severity-low-fg);
+  --_tone-border: var(--rp-color-severity-low-border);
+  --_tone-solid: var(--rp-color-severity-low-solid);
+}
+.rp-severity-info {
+  --_tone-bg: var(--rp-color-severity-info-bg);
+  --_tone-fg: var(--rp-color-severity-info-fg);
+  --_tone-border: var(--rp-color-severity-info-border);
+  --_tone-solid: var(--rp-color-severity-info-solid);
+}
+
+@keyframes rp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rp-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rp-spinner,
+  .rp-skeleton {
+    animation-duration: 0s !important;
+  }
+}

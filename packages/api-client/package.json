@@ -21,17 +21,19 @@
     ]
   },
   "dependencies": {
-    "@radial-pulse/shared-types": "workspace:*",
     "@radial-pulse/config": "workspace:*",
-    "@radial-pulse/utils": "workspace:*"
+    "@radial-pulse/shared-types": "workspace:*",
+    "@radial-pulse/utils": "workspace:*",
+    "msw": "^2.15.0",
+    "openapi-fetch": "^0.17.0"
   },
   "peerDependencies": {
-    "react": "19.1.0",
-    "@tanstack/react-query": "^5.85.0"
+    "@tanstack/react-query": "^5.85.0",
+    "react": "19.1.0"
   },
   "devDependencies": {
-    "react": "19.1.0",
+    "@tanstack/react-query": "^5.85.0",
     "@types/react": "~19.1.10",
-    "@tanstack/react-query": "^5.85.0"
+    "react": "19.1.0"
   }
 }

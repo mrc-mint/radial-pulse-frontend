@@ -4,7 +4,9 @@
   "private": true,
   "description": "Central Tech platform shell: session, tenant and clinic context, module manifests, navigation.",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     "./core": "./src/core/index.ts",
     "./web": "./src/web/index.tsx",
@@ -21,30 +23,50 @@
     ]
   },
   "dependencies": {
-    "@radial-pulse/ui": "workspace:*",
     "@radial-pulse/api-client": "workspace:*",
     "@radial-pulse/config": "workspace:*",
+    "@radial-pulse/design-tokens": "workspace:*",
     "@radial-pulse/shared-types": "workspace:*",
+    "@radial-pulse/ui": "workspace:*",
     "@radial-pulse/utils": "workspace:*",
-    "@radial-pulse/design-tokens": "workspace:*"
+    "lucide-react": "^1.48.0"
   },
   "peerDependencies": {
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-native": "*"
+    "react-native": "*",
+    "lucide-react-native": "^1.48.0",
+    "react-native-svg": "*",
+    "react-native-safe-area-context": "*"
   },
   "devDependencies": {
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
     "@types/react": "~19.1.10",
     "@types/react-dom": "~19.1.7",
-    "react-native": "0.81.4"
+    "jsdom": "^26.1.0",
+    "lucide-react-native": "^1.48.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-svg": "15.12.1"
   },
   "peerDependenciesMeta": {
     "react-dom": {
       "optional": true
     },
     "react-native": {
+      "optional": true
+    },
+    "lucide-react-native": {
+      "optional": true
+    },
+    "react-native-svg": {
+      "optional": true
+    },
+    "react-native-safe-area-context": {
       "optional": true
     }
   }

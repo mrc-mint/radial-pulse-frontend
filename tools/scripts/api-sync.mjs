@@ -23,7 +23,18 @@ if (!repo) fail('Set BACKEND_REPO=<owner>/<repo> (the backend repository).');
 const dir = resolve('contracts/api');
 execFileSync(
   'gh',
-  ['release', 'download', `v${version}`, '--repo', repo, '--pattern', 'openapi.json', '--dir', dir, '--clobber'],
+  [
+    'release',
+    'download',
+    `v${version}`,
+    '--repo',
+    repo,
+    '--pattern',
+    'openapi.json',
+    '--dir',
+    dir,
+    '--clobber',
+  ],
   { stdio: 'inherit' },
 );
 writeFileSync(resolve(dir, 'VERSION'), `${version}\n`);

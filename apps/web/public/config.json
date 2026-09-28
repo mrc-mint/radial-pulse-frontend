@@ -6,5 +6,5 @@
     "userPoolClientId": "REPLACE_ME",
     "domain": "REPLACE_ME"
   },
-  "apiMocking": false
+  "apiMocking": true
 }

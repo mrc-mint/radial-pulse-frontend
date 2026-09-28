@@ -11,3 +11,4 @@ apps/web/src/routeTree.gen.ts
 apps/mobile/ios/
 apps/mobile/android/
 .DS_Store
+apps/web/.tanstack/

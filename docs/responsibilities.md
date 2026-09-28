@@ -3,14 +3,14 @@
 Central Tech owns reusable tenancy, security, delivery and cross-team
 contracts. Each domain team owns its domain calculations and workflow logic.
 
-| Central Tech (this repo) | Domain teams (outside the frontend) |
-| --- | --- |
+| Central Tech (this repo)                                                        | Domain teams (outside the frontend)                                       |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
 | Platform shell: auth, session, tenant and clinic context, role-aware navigation | Audit engines: website, SEO, local SEO, GBP, AEO, GEO, social, competitor |
-| Design system and shared UI primitives | Score calculation and weighting |
-| API client, published contracts, shared types | Finding generation, severity, evidence collection |
-| Generic rendering of assessments, sections, findings, evidence, insights | Enrichment logic and source discovery |
-| Work-queue rendering | Deciding which work items exist and when |
-| Chat, CI/CD, environments | Social metric retrieval through official APIs |
+| Design system and shared UI primitives                                          | Score calculation and weighting                                           |
+| API client, published contracts, shared types                                   | Finding generation, severity, evidence collection                         |
+| Generic rendering of assessments, sections, findings, evidence, insights        | Enrichment logic and source discovery                                     |
+| Work-queue rendering                                                            | Deciding which work items exist and when                                  |
+| Chat, CI/CD, environments                                                       | Social metric retrieval through official APIs                             |
 
 ## The rule in code
 

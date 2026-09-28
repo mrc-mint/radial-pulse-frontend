@@ -1,14 +1,13 @@
+import type { components } from '../contract';
+
 /**
- * Assessment component availability (spec §10).
+ * Assessment component status (contract `ComponentStatus`).
  *
- * When no engine is available for a component the platform shows
- * "Not Available". It is NOT a score of zero, a placeholder, or an estimate.
- * Encoding this as a discriminated union makes a fake score a type error:
- * a `not_available` value has no `score` field to fill in.
- *
- * Phase 4: once the contract exists, this is re-pointed to (or checked
- * against) the generated schema so the backend shape stays authoritative.
+ * `not_available` means no engine is deployed for that component: it is
+ * shown as "Not Available", never as a score of 0. A component only has a
+ * meaningful score when its status is `completed`.
  */
-export type ComponentScore =
-  | { availability: 'available'; score: number }
-  | { availability: 'not_available' };
+export type ComponentStatus = components['schemas']['ComponentStatus'];
+
+/** The part of a contract `ComponentDetail` needed to display its score. */
+export type ComponentScore = Pick<components['schemas']['ComponentDetail'], 'status' | 'score'>;

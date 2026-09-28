@@ -1,0 +1,21 @@
+.rp-audit__picker {
+  flex: 0 1 420px;
+  min-width: 240px;
+}
+
+.rp-audit__overview > * {
+  max-width: 720px;
+}
+
+.rp-audit__components {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--rp-space-4);
+}
+
+.rp-audit__group {
+  margin: var(--rp-space-2) 0 0;
+  color: var(--rp-color-text-secondary);
+  font-size: var(--rp-text-label-size);
+  font-weight: var(--rp-font-weight-semibold);
+}

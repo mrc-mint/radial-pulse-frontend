@@ -1,0 +1,186 @@
+.rp-dashboard__header .rp-page-header__text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--rp-space-3);
+}
+
+.rp-dashboard__threads {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rp-dashboard__threads li + li {
+  border-top: 1px solid var(--rp-color-border-subtle);
+}
+
+.rp-dashboard__threads-loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-space-3);
+  padding: var(--rp-space-4) var(--rp-space-5);
+}
+
+.rp-dashboard__thread {
+  display: flex;
+  align-items: center;
+  gap: var(--rp-space-3);
+  padding: var(--rp-space-3) var(--rp-space-5);
+  color: inherit;
+  text-decoration: none;
+}
+
+.rp-dashboard__thread:hover {
+  background: var(--rp-color-bg-hover);
+}
+
+.rp-dashboard__thread:focus-visible {
+  outline: none;
+  box-shadow: inset var(--rp-shadow-focus);
+}
+
+.rp-dashboard__thread-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rp-dashboard__thread-title {
+  color: var(--rp-color-text-primary);
+  font-weight: var(--rp-font-weight-semibold);
+}
+
+.rp-dashboard__thread-preview {
+  overflow: hidden;
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-body-sm-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rp-dashboard__thread-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--rp-space-1);
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-caption-size);
+  white-space: nowrap;
+}
+
+/* ── Platform Administrator dashboard ── */
+.rp-dashboard__tiles {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.rp-dashboard__view-all {
+  font-size: var(--rp-text-label-size);
+  font-weight: var(--rp-font-weight-semibold);
+}
+
+.rp-dashboard__feed {
+  margin: 0;
+  padding: 0 0 var(--rp-space-2);
+  list-style: none;
+}
+
+.rp-dashboard__feed-row {
+  display: flex;
+  align-items: center;
+  gap: var(--rp-space-3);
+  min-height: 48px;
+  padding: var(--rp-space-2) var(--rp-space-5);
+  color: inherit;
+  text-decoration: none;
+}
+
+a.rp-dashboard__feed-row:hover {
+  background: var(--rp-color-bg-hover);
+}
+
+a.rp-dashboard__feed-row:focus-visible {
+  outline: none;
+  box-shadow: inset var(--rp-shadow-focus);
+}
+
+.rp-dashboard__feed-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--rp-radius-md);
+}
+
+.rp-dashboard__feed-icon--brand {
+  background: var(--rp-color-status-brand-bg);
+  color: var(--rp-color-status-brand-fg);
+}
+
+.rp-dashboard__feed-icon--info {
+  background: var(--rp-color-status-info-bg);
+  color: var(--rp-color-status-info-fg);
+}
+
+.rp-dashboard__feed-icon--success {
+  background: var(--rp-color-status-success-bg);
+  color: var(--rp-color-status-success-fg);
+}
+
+.rp-dashboard__feed-icon--warning {
+  background: var(--rp-color-status-warning-bg);
+  color: var(--rp-color-status-warning-fg);
+}
+
+.rp-dashboard__feed-icon--neutral,
+.rp-dashboard__feed-icon--danger {
+  background: var(--rp-color-status-neutral-bg);
+  color: var(--rp-color-status-neutral-fg);
+}
+
+.rp-dashboard__feed-text {
+  flex: 1;
+  min-width: 0;
+  color: var(--rp-color-text-primary);
+}
+
+.rp-dashboard__feed-time {
+  flex-shrink: 0;
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-caption-size);
+  white-space: nowrap;
+}
+
+/* ── Digital Success Manager dashboard ── */
+.rp-dashboard__date {
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-body-sm-size);
+  white-space: nowrap;
+}
+
+.rp-dashboard__feed-title {
+  display: block;
+  color: var(--rp-color-text-primary);
+  font-weight: var(--rp-font-weight-semibold);
+}
+
+.rp-dashboard__feed-sub {
+  display: block;
+  overflow: hidden;
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-body-sm-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rp-dashboard__feed-row .rp-dashboard__thumb {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  border-radius: var(--rp-radius-md);
+}
