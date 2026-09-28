@@ -153,3 +153,34 @@ a.rp-dashboard__feed-row:focus-visible {
   font-size: var(--rp-text-caption-size);
   white-space: nowrap;
 }
+
+/* ── Digital Success Manager dashboard ── */
+.rp-dashboard__date {
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-body-sm-size);
+  white-space: nowrap;
+}
+
+.rp-dashboard__feed-title {
+  display: block;
+  color: var(--rp-color-text-primary);
+  font-weight: var(--rp-font-weight-semibold);
+}
+
+.rp-dashboard__feed-sub {
+  display: block;
+  overflow: hidden;
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-body-sm-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rp-dashboard__feed-row .rp-dashboard__thumb {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  border-radius: var(--rp-radius-md);
+}

@@ -48,13 +48,13 @@ export function activityText(event: AuditEvent, personName: (id: string) => stri
     case 'assignment.end':
       return 'Digital Success Manager removed';
     case 'presence_profile.add':
-      return `${platformLabel(d.platform) ?? 'Online'} profile added`;
+      return `${platformLabel(d.platform) ?? 'Online profile'} added`;
     case 'presence_profile.update': {
       const verification = str(d.verification) as Schema<'PresenceVerification'> | null;
-      const label = platformLabel(d.platform) ?? 'Online';
+      const label = platformLabel(d.platform) ?? 'Online profile';
       return verification && verification in PRESENCE_VERIFICATION_LABELS
-        ? `${label} profile marked ${PRESENCE_VERIFICATION_LABELS[verification].toLowerCase()}`
-        : `${label} profile updated`;
+        ? `${label} marked ${PRESENCE_VERIFICATION_LABELS[verification].toLowerCase()}`
+        : `${label} updated`;
     }
     case 'assessment.requested':
       return 'Assessment requested';

@@ -167,10 +167,20 @@ describe('web app against the contract mocks', () => {
 
   it('shows the dashboard numbers for the caller’s clinics', async () => {
     const router = await renderApp('/', 'digital-success-manager');
-    await screen.findByRole('heading', { name: 'Dashboard', level: 1 });
+    await screen.findByRole('heading', {
+      name: /^Good (morning|afternoon|evening), Priya!$/,
+      level: 1,
+    });
     expect(router.state.location.pathname).toBe('/dashboard');
-    const total = await screen.findByRole('region', { name: 'Total clinics' });
+    const total = await screen.findByRole('region', { name: 'My clinics' });
     expect(await within(total).findByText('4')).toBeTruthy();
+    // Clinics with an assessment submitted for review are listed.
+    const attention = await screen.findByRole('list', { name: 'Clinics needing attention' });
+    expect(
+      (await within(attention).findAllByText(/Audit ready for review/)).length,
+    ).toBeGreaterThan(0);
+    expect(await screen.findByRole('list', { name: 'Recent activity' })).toBeTruthy();
+    expect(screen.getByText('Recent conversations')).toBeTruthy();
   });
 
   it('scopes the clinic workspace to the clinic in the URL', async () => {

@@ -5,7 +5,7 @@ import { Globe, Mail, MapPin, Pencil, Phone } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { ClinicStatusBadge, ExternalLink, mapsUrl, QueryError } from '../../app/page-kit';
 import { ClinicMoreMenu } from './clinic-actions';
-import { ClinicPhoto } from './clinic-photo';
+import { ClinicPhoto } from '../../app/clinic-photo';
 import { EditClinicDrawer } from './edit-clinic-drawer';
 import './clinic.css';
 

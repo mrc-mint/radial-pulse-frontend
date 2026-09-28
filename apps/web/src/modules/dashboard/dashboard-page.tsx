@@ -1,60 +1,93 @@
-import { useChatInbox, useDashboardSummary } from '@radial-pulse/api-client/react';
+import {
+  useChatInbox,
+  useClinics,
+  useClinicsActivity,
+  useClinicsAssessments,
+  useClinicsPresence,
+  useDashboardSummary,
+} from '@radial-pulse/api-client/react';
 import { useCurrentSession } from '@radial-pulse/platform-shell/core';
+import type { Schema } from '@radial-pulse/shared-types';
 import {
   Avatar,
   Badge,
-  BarList,
   Card,
-  ColumnChart,
   EmptyState,
   formatRelativeTime,
   MetricCard,
   PageHeader,
   Skeleton,
 } from '@radial-pulse/ui/web';
-import { CLINIC_STATUS_GROUP_LABELS } from '@radial-pulse/utils';
 import { Link } from '@tanstack/react-router';
 import {
+  Activity,
   Building2,
   ClipboardCheck,
-  Hourglass,
+  Link2,
   ListTodo,
   MessageCircle,
-  Rocket,
-  Sparkles,
+  Search,
+  UserRound,
+  type LucideIcon,
 } from 'lucide-react';
+import { useMemo } from 'react';
+import { activityText } from '../../app/activity-text';
+import { ClinicPhoto } from '../../app/clinic-photo';
 import { QueryError } from '../../app/page-kit';
+import { clinicsNeedingAttention } from './attention';
 import './dashboard.css';
 import { PlatformDashboard } from './platform-dashboard';
 
-const MONTH = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' });
-
 /**
  * Dashboard. A Platform Administrator (`all_clinics`) sees the platform-wide
- * overview; a Digital Success Manager sees their clinics' work. The API scopes
- * every number to the clinics the caller can see.
+ * overview; a Digital Success Manager sees what needs attention in their
+ * clinics. The API scopes every number to the clinics the caller can see.
  */
 export function DashboardPage() {
   const session = useCurrentSession();
   return session.allClinics ? <PlatformDashboard /> : <ClinicWorkDashboard />;
 }
 
+const DAY = new Intl.DateTimeFormat('en-GB', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});
+
+function greeting(now = new Date()) {
+  const hour = now.getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+/** The caller's clinics, for the per-clinic panels (the API's maximum page). */
+const MY_CLINICS = { limit: 200 } as const;
+
 /**
- * Digital Success Manager dashboard. Only contract fields are shown
- * (DashboardSummary, ChatInbox).
+ * Digital Success Manager dashboard: headline counts, clinics that need
+ * attention, recent activity and conversations. Contract data only
+ * (`DashboardSummary`, clinics, assessments, presence profiles, audit events,
+ * chat inbox).
  */
 function ClinicWorkDashboard() {
   const session = useCurrentSession();
   const summary = useDashboardSummary();
   const inbox = useChatInbox();
+  const clinics = useClinics(MY_CLINICS);
   const firstName = session.user.name.split(' ')[0];
   const data = summary.data;
+  const ids = useMemo(() => clinics.data?.items.map((c) => c.id) ?? [], [clinics.data]);
+  const unread = inbox.data?.unread_messages;
 
   return (
     <div className="rp-page">
       <PageHeader
-        title="Dashboard"
-        description={`Welcome back, ${firstName}. Here is how your clinics are doing.`}
+        className="rp-dashboard__header"
+        title={`${greeting()}, ${firstName}!`}
+        description="Here’s what needs your attention today."
+        actions={<span className="rp-dashboard__date">{DAY.format(new Date())}</span>}
       />
 
       {summary.isError ? (
@@ -62,141 +95,260 @@ function ClinicWorkDashboard() {
           <QueryError error={summary.error} onRetry={() => void summary.refetch()} />
         </Card>
       ) : (
-        <>
-          <div className="rp-grid rp-grid--tiles" aria-busy={summary.isLoading || undefined}>
-            <MetricCard
-              label="Total clinics"
-              value={data?.total_clinics}
-              icon={<Building2 size={20} />}
-            />
-            <MetricCard label="Prospects" value={data?.prospects} icon={<Sparkles size={20} />} />
-            <MetricCard
-              label="In progress"
-              value={data?.in_progress}
-              icon={<Hourglass size={20} />}
-            />
-            <MetricCard label="Active clients" value={data?.active} icon={<Rocket size={20} />} />
-          </div>
-
-          <div className="rp-grid rp-grid--tiles">
-            <MetricCard
-              label="Assessments awaiting review"
-              value={data?.assessments_awaiting_review}
-              icon={<ClipboardCheck size={20} />}
-            />
-            <MetricCard
-              label="Open work items"
-              value={data?.open_work_items}
-              icon={<ListTodo size={20} />}
-            />
-            <MetricCard
-              label="Unread chat messages"
-              value={inbox.data?.unread_messages}
-              hint={
-                inbox.data
-                  ? `${inbox.data.unread_threads} conversation${inbox.data.unread_threads === 1 ? '' : 's'}`
-                  : undefined
-              }
-              icon={<MessageCircle size={20} />}
-            />
-          </div>
-
-          <div className="rp-grid rp-grid--2">
-            <Card title="Clinics by status" description="Where each clinic is in the journey">
-              {data ? (
-                <BarList
-                  label="Clinics by status"
-                  unit="clinics"
-                  items={(
-                    [
-                      { id: 'prospect', value: data.prospects },
-                      { id: 'in_progress', value: data.in_progress },
-                      { id: 'active', value: data.active },
-                      { id: 'inactive', value: data.archived },
-                    ] as const
-                  ).map((s) => ({ ...s, label: CLINIC_STATUS_GROUP_LABELS[s.id] }))}
-                />
-              ) : (
-                <ChartSkeleton />
-              )}
-            </Card>
-            <Card title="New clinics" description="Clinics added per month">
-              {data ? (
-                <ColumnChart
-                  label="New clinics per month"
-                  unit="new clinics"
-                  items={data.new_clinics_by_month.map((m) => ({
-                    id: m.month,
-                    label: MONTH.format(new Date(`${m.month}-01T00:00:00Z`)),
-                    value: m.count,
-                  }))}
-                />
-              ) : (
-                <ChartSkeleton />
-              )}
-            </Card>
-          </div>
-        </>
+        <div className="rp-grid rp-grid--tiles" aria-busy={summary.isLoading || undefined}>
+          <MetricCard
+            label="My clinics"
+            value={data?.total_clinics}
+            icon={<Building2 size={20} />}
+            iconTone="brand"
+          />
+          <MetricCard
+            label="Audits ready"
+            value={data?.assessments_awaiting_review}
+            hint="Waiting for your review"
+            icon={<ClipboardCheck size={20} />}
+            iconTone="success"
+          />
+          <MetricCard
+            label="Open work items"
+            value={data?.open_work_items}
+            icon={<ListTodo size={20} />}
+            iconTone="warning"
+          />
+          <MetricCard
+            label="Unread chats"
+            value={unread}
+            hint={
+              inbox.data
+                ? `${inbox.data.unread_threads} ${inbox.data.unread_threads === 1 ? 'conversation' : 'conversations'}`
+                : undefined
+            }
+            icon={<MessageCircle size={20} />}
+            iconTone={unread ? 'danger' : 'info'}
+          />
+        </div>
       )}
 
-      <Card
-        title="Recent conversations"
-        description="Latest messages from your clinics"
-        padding="none"
-      >
-        {inbox.isError ? (
-          <QueryError error={inbox.error} onRetry={() => void inbox.refetch()} />
-        ) : !inbox.data ? (
-          <div className="rp-dashboard__threads-loading">
-            <Skeleton height={40} />
-            <Skeleton height={40} />
-          </div>
-        ) : inbox.data.items.length === 0 ? (
-          <EmptyState
-            title="No conversations yet"
-            description="Chats with your clinics will appear here."
-          />
-        ) : (
-          <ul className="rp-dashboard__threads">
-            {inbox.data.items.slice(0, 5).map((thread) => (
-              <li key={thread.clinic_id}>
-                <Link
-                  to="/clinics/$clinicId/chat"
-                  params={{ clinicId: thread.clinic_id }}
-                  className="rp-dashboard__thread"
-                >
-                  <Avatar name={thread.clinic_name} size="md" decorative />
-                  <span className="rp-dashboard__thread-text">
-                    <span className="rp-dashboard__thread-title">{thread.clinic_name}</span>
-                    <span className="rp-dashboard__thread-preview">
-                      {thread.last_message.sender_name}:{' '}
-                      {thread.last_message.body ?? 'Sent an attachment'}
-                    </span>
-                  </span>
-                  <span className="rp-dashboard__thread-meta">
-                    <span>{formatRelativeTime(thread.last_message.created_at)}</span>
-                    {thread.unread_count > 0 && (
-                      <Badge tone="brand" size="sm">
-                        {thread.unread_count} unread
-                      </Badge>
-                    )}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+      <div className="rp-grid rp-grid--2">
+        <ClinicsNeedingAttention
+          clinics={clinics.data?.items}
+          ids={ids}
+          inbox={inbox.data}
+          error={clinics.error}
+          onRetry={() => void clinics.refetch()}
+        />
+        <RecentActivity clinics={clinics.data?.items} ids={ids} />
+      </div>
+
+      <RecentConversations inbox={inbox} />
     </div>
   );
 }
 
-function ChartSkeleton() {
+function ClinicsNeedingAttention({
+  clinics,
+  ids,
+  inbox,
+  error,
+  onRetry,
+}: {
+  clinics: ReadonlyArray<Schema<'ClinicListItem'>> | undefined;
+  ids: ReadonlyArray<string>;
+  inbox: Schema<'ChatInbox'> | undefined;
+  error: unknown;
+  onRetry: () => void;
+}) {
+  const assessments = useClinicsAssessments(ids);
+  const presence = useClinicsPresence(ids);
+
+  const items = clinics
+    ? clinicsNeedingAttention(
+        clinics.map((clinic, i) => ({
+          clinic,
+          assessments: assessments[i]?.data?.items,
+          profiles: presence[i]?.data?.items,
+          thread: inbox?.items.find((t) => t.clinic_id === clinic.id),
+        })),
+      )
+    : null;
+
   return (
-    <div className="rp-stack-sm" aria-hidden="true">
-      {[80, 60, 70, 40, 55].map((w) => (
-        <Skeleton key={w} width={`${w}%`} height={14} />
-      ))}
+    <Card
+      title="Clinics needing attention"
+      padding="none"
+      actions={
+        <Link to="/clinics" className="rp-link rp-dashboard__view-all">
+          View all
+        </Link>
+      }
+    >
+      {error ? (
+        <QueryError error={error} onRetry={onRetry} />
+      ) : !items ? (
+        <ListSkeleton />
+      ) : items.length === 0 ? (
+        <EmptyState
+          title="All caught up"
+          description="None of your clinics needs anything right now."
+        />
+      ) : (
+        <ul className="rp-dashboard__feed" aria-label="Clinics needing attention">
+          {items.map((item) => (
+            <li key={item.clinic.id}>
+              <Link
+                to="/clinics/$clinicId"
+                params={{ clinicId: item.clinic.id }}
+                className="rp-dashboard__feed-row"
+              >
+                <ClinicPhoto
+                  className="rp-dashboard__thumb"
+                  clinicId={item.clinic.id}
+                  assetId={item.clinic.cover_asset_id}
+                  name={item.clinic.name}
+                />
+                <span className="rp-dashboard__feed-text">
+                  <span className="rp-dashboard__feed-title">{item.clinic.name}</span>
+                  <span className="rp-dashboard__feed-sub">{item.reasons.join(' • ')}</span>
+                </span>
+                <time className="rp-dashboard__feed-time" dateTime={item.at}>
+                  {formatRelativeTime(item.at)}
+                </time>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+const RESOURCE_ICON: Record<string, LucideIcon> = {
+  clinic: Building2,
+  assignment: UserRound,
+  presence_profile: Search,
+  assessment: ClipboardCheck,
+  connection: Link2,
+  chat_message: MessageCircle,
+};
+
+function RecentActivity({
+  clinics,
+  ids,
+}: {
+  clinics: ReadonlyArray<Schema<'ClinicListItem'>> | undefined;
+  ids: ReadonlyArray<string>;
+}) {
+  const session = useCurrentSession();
+  const results = useClinicsActivity(ids);
+  const loading = !clinics || results.some((r) => r.isLoading);
+  const events = results
+    .flatMap((r) => r.data?.items ?? [])
+    .sort((a, b) => b.occurred_at.localeCompare(a.occurred_at))
+    .slice(0, 6);
+  const nameOf = (clinicId: string | null) =>
+    clinics?.find((c) => c.id === clinicId)?.name ?? 'A clinic';
+  const personName = (id: string) => (id === session.user.id ? 'You' : null);
+
+  return (
+    <Card title="Recent activity" padding="none">
+      {loading ? (
+        <ListSkeleton />
+      ) : events.length === 0 ? (
+        <EmptyState title="No activity yet" description="Changes to your clinics appear here." />
+      ) : (
+        <ul className="rp-dashboard__feed" aria-label="Recent activity">
+          {events.map((e) => {
+            const Icon = RESOURCE_ICON[e.resource_type] ?? Activity;
+            const mine = e.actor_user_id === session.user.id;
+            return (
+              <li key={e.id}>
+                <Link
+                  to="/clinics/$clinicId/activity"
+                  params={{ clinicId: e.clinic_id ?? '' }}
+                  className="rp-dashboard__feed-row"
+                >
+                  <span
+                    className="rp-dashboard__feed-icon rp-dashboard__feed-icon--brand"
+                    aria-hidden="true"
+                  >
+                    <Icon size={16} />
+                  </span>
+                  <span className="rp-dashboard__feed-text">
+                    <span className="rp-dashboard__feed-title">{activityText(e, personName)}</span>
+                    <span className="rp-dashboard__feed-sub">
+                      {nameOf(e.clinic_id)}
+                      {mine ? ' · You' : ''}
+                    </span>
+                  </span>
+                  <time className="rp-dashboard__feed-time" dateTime={e.occurred_at}>
+                    {formatRelativeTime(e.occurred_at)}
+                  </time>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+function RecentConversations({ inbox }: { inbox: ReturnType<typeof useChatInbox> }) {
+  return (
+    <Card
+      title="Recent conversations"
+      description="Latest messages from your clinics"
+      padding="none"
+    >
+      {inbox.isError ? (
+        <QueryError error={inbox.error} onRetry={() => void inbox.refetch()} />
+      ) : !inbox.data ? (
+        <ListSkeleton />
+      ) : inbox.data.items.length === 0 ? (
+        <EmptyState
+          title="No conversations yet"
+          description="Chats with your clinics will appear here."
+        />
+      ) : (
+        <ul className="rp-dashboard__threads">
+          {inbox.data.items.slice(0, 5).map((thread) => (
+            <li key={thread.clinic_id}>
+              <Link
+                to="/clinics/$clinicId/chat"
+                params={{ clinicId: thread.clinic_id }}
+                className="rp-dashboard__thread"
+              >
+                <Avatar name={thread.clinic_name} size="md" decorative />
+                <span className="rp-dashboard__thread-text">
+                  <span className="rp-dashboard__thread-title">{thread.clinic_name}</span>
+                  <span className="rp-dashboard__thread-preview">
+                    {thread.last_message.sender_name}:{' '}
+                    {thread.last_message.body ?? 'Sent an attachment'}
+                  </span>
+                </span>
+                <span className="rp-dashboard__thread-meta">
+                  <span>{formatRelativeTime(thread.last_message.created_at)}</span>
+                  {thread.unread_count > 0 && (
+                    <Badge tone="brand" size="sm">
+                      {thread.unread_count} unread
+                    </Badge>
+                  )}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+function ListSkeleton() {
+  return (
+    <div className="rp-dashboard__threads-loading" aria-hidden="true">
+      <Skeleton height={40} />
+      <Skeleton height={40} />
+      <Skeleton height={40} />
     </div>
   );
 }

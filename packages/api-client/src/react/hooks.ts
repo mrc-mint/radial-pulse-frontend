@@ -2,6 +2,7 @@ import type { Schema } from '@radial-pulse/shared-types';
 import {
   keepPreviousData,
   useMutation,
+  useQueries,
   useQuery,
   useQueryClient,
   type QueryClient,
@@ -240,6 +241,42 @@ export function useClinicActivity(
     queryKey: clinicQueryKey(clinicId, 'activity', query),
     queryFn: () => auditEventsService.list(api, clinicId, query),
     placeholderData: keepPreviousData,
+  });
+}
+
+// ── Several clinics at once (dashboards) ────────────────────────────────────
+// One request per clinic, cached under the same keys as the single-clinic
+// hooks, so opening a clinic afterwards reuses the data.
+
+const SUMMARY_PAGE = { limit: 5 } as const;
+
+export function useClinicsAssessments(clinicIds: ReadonlyArray<string>) {
+  const api = useApiClient();
+  return useQueries({
+    queries: clinicIds.map((id) => ({
+      queryKey: clinicQueryKey(id, 'assessments', SUMMARY_PAGE),
+      queryFn: () => assessmentsService.list(api, id, SUMMARY_PAGE),
+    })),
+  });
+}
+
+export function useClinicsPresence(clinicIds: ReadonlyArray<string>) {
+  const api = useApiClient();
+  return useQueries({
+    queries: clinicIds.map((id) => ({
+      queryKey: clinicQueryKey(id, 'presence-profiles'),
+      queryFn: () => presenceService.list(api, id),
+    })),
+  });
+}
+
+export function useClinicsActivity(clinicIds: ReadonlyArray<string>) {
+  const api = useApiClient();
+  return useQueries({
+    queries: clinicIds.map((id) => ({
+      queryKey: clinicQueryKey(id, 'activity', SUMMARY_PAGE),
+      queryFn: () => auditEventsService.list(api, id, SUMMARY_PAGE),
+    })),
   });
 }
 

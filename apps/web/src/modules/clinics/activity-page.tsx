@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { CardSkeleton, QueryError } from '../../app/page-kit';
-import { activityText } from './activity';
+import { activityText } from '../../app/activity-text';
 
 const PAGE_SIZE = 20;
 

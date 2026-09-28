@@ -30,13 +30,23 @@ Requires Node 22+ and pnpm 10 (`corepack enable`).
 
 ```bash
 pnpm install
-pnpm nx graph                      # dependency graph
-pnpm nx run @radial-pulse/web:dev  # web on http://localhost:4200
-pnpm nx run @radial-pulse/mobile:start
-pnpm affected                      # lint, typecheck, test, build for changed projects
+pnpm nx graph        # dependency graph
+pnpm affected        # lint, typecheck, test, build for changed projects
 ```
 
-Mobile uses development builds (not Expo Go) once auth lands in Phase 7.
+The web portal and the mobile app are separate apps and run as separate
+processes; neither needs the other running. Start each in its own terminal:
+
+```bash
+pnpm dev:web         # web portal (staff) on http://localhost:4200
+pnpm dev:mobile      # Clinic Administrator app: Expo dev server (Expo Go / device)
+pnpm dev:mobile:web  # Clinic Administrator app in a browser on http://localhost:8081
+```
+
+With API mocking on (`apps/web/public/config.json`, `apps/mobile/.env` with
+`EXPO_PUBLIC_API_MOCKING=true`), each app serves its own contract mocks: web
+through a service worker, mobile in-process. Mobile uses development builds
+(not Expo Go) once auth lands in Phase 7.
 
 ## Read before contributing
 

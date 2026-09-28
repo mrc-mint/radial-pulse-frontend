@@ -4,7 +4,7 @@ import { Button, Drawer, Input } from '@radial-pulse/ui/web';
 import { ImageUp } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
 import { fieldErrors, mutationErrorMessage } from '../../app/page-kit';
-import { ClinicPhoto } from './clinic-photo';
+import { ClinicPhoto } from '../../app/clinic-photo';
 
 type Editable =
   | 'name'
