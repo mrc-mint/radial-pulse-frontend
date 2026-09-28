@@ -19,9 +19,9 @@ export const assessmentsModule: ModuleManifest = {
   clinicSections: [
     {
       id: 'audit',
-      label: 'Unified Audit',
+      label: 'Audit Report',
       path: 'audit',
-      order: 30,
+      order: 50,
       requiredPermission: 'assessments:read',
     },
   ],

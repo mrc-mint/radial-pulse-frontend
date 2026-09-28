@@ -1,4 +1,5 @@
 import type { components, Schema } from '@radial-pulse/shared-types';
+import { clinicPhotoSvg, mockPractitioners, mockSnapshots } from './extras';
 import { MOCK_PERSONAS } from './personas';
 
 /**
@@ -261,6 +262,9 @@ export interface MockDb {
   /** userId → clinicId → last read message timestamp. */
   chatReads: Map<string, Map<string, string>>;
   assets: Map<string, S<'AssetRead'> & { blob?: Blob }>;
+  practitioners: Array<S<'PractitionerRead'>>;
+  snapshots: Array<S<'MetricSnapshotRead'>>;
+  auditEvents: Array<S<'AuditEventRead'>>;
   settings: S<'PlatformSettingsRead'>;
 }
 
@@ -317,7 +321,12 @@ function finding(
   };
 }
 
-function detailedComponents(site: string | null, clinicName: string): S<'ComponentDetail'>[] {
+function detailedComponents(
+  site: string | null,
+  clinicName: string,
+  /** False keeps Social Presence `not_available` (no engine yet), as in production today. */
+  socialAvailable = true,
+): S<'ComponentDetail'>[] {
   const host = site ?? 'https://www.google.com/maps';
   return [
     component(
@@ -455,7 +464,46 @@ function detailedComponents(site: string | null, clinicName: string): S<'Compone
         ),
       ],
     ),
-    component('social_presence', 'not_available', null, null),
+    socialAvailable
+      ? component(
+          'social_presence',
+          'completed',
+          71,
+          'Active on Instagram; Facebook and YouTube are posted to less often.',
+          [
+            finding(
+              'social.irregular_posting',
+              'medium',
+              'Facebook posts are irregular',
+              'The Facebook page had 9 posts in the last 30 days, with gaps of up to 12 days.',
+              'Post at least twice a week; reuse your Instagram posts on Facebook.',
+              [
+                {
+                  source_url: 'https://www.facebook.com',
+                  excerpt: '9 posts in 30 days · longest gap 12 days',
+                  provider: 'Facebook',
+                  observed_at: ago(1, 6),
+                },
+              ],
+            ),
+            finding(
+              'social.no_reviews_prompt',
+              'low',
+              'Posts never ask patients for reviews',
+              'None of the last 20 Instagram posts link to the Google review page.',
+              'Add a review link to your bio and mention it in one post each month.',
+              [
+                {
+                  source_url: 'https://www.instagram.com',
+                  excerpt: '0 of 20 recent posts mention reviews',
+                  provider: 'Instagram',
+                  observed_at: ago(1, 6),
+                },
+              ],
+            ),
+          ],
+        )
+      : component('social_presence', 'not_available', null, null),
     component(
       'competitor_benchmark',
       'completed',
@@ -499,6 +547,111 @@ function assessment(
       opts.publication === 'published' ? ago(Math.max(0, opts.createdDaysAgo - 3)) : null,
     components: opts.components,
   };
+}
+
+// ── Activity ────────────────────────────────────────────────────────────────
+
+let eventSeq = 0;
+function event(
+  clinicId: string,
+  action: string,
+  resourceType: string,
+  resourceId: string | null,
+  at: string,
+  actor: string | null,
+  details: Record<string, unknown> = {},
+): S<'AuditEventRead'> {
+  eventSeq += 1;
+  return {
+    id: uuid('ev', eventSeq),
+    clinic_id: clinicId,
+    actor_type: actor ? 'user' : 'service',
+    actor_user_id: actor,
+    action,
+    resource_type: resourceType,
+    resource_id: resourceId,
+    details,
+    request_id: null,
+    occurred_at: at,
+  };
+}
+
+/** A believable history per clinic, derived from the other mock records (newest first). */
+function buildAuditEvents(
+  clinics: MockDb['clinics'],
+  assignments: MockDb['assignments'],
+  presence: MockDb['presence'],
+  assessments: MockDb['assessments'],
+  connections: MockDb['connections'],
+): Array<S<'AuditEventRead'>> {
+  eventSeq = 0;
+  const admin = uuid('a1', 1);
+  const clinicAdmin = uuid('a1', 101);
+  const plusHours = (iso: string, hours: number) =>
+    new Date(Date.parse(iso) + hours * 3_600_000).toISOString();
+  const events = clinics.flatMap((c) => {
+    const dsm = assignments.get(c.id)?.user_id ?? null;
+    const rows = [event(c.id, 'clinic.create', 'clinic', c.id, c.created_at, admin)];
+    if (dsm) {
+      rows.push(
+        event(c.id, 'assignment.change', 'assignment', c.id, plusHours(c.created_at, 20), admin, {
+          user_id: dsm,
+        }),
+      );
+    }
+    for (const profile of presence.filter((x) => x.clinic_id === c.id && x.verified_by_user_id)) {
+      rows.push(
+        event(
+          c.id,
+          'presence_profile.update',
+          'presence_profile',
+          profile.id,
+          profile.updated_at,
+          dsm,
+          {
+            platform: profile.platform,
+            verification: profile.verification,
+          },
+        ),
+      );
+    }
+    for (const a of assessments.filter((x) => x.clinic_id === c.id && x.completed_at)) {
+      rows.push(event(c.id, 'assessment.generated', 'assessment', a.id, a.completed_at!, null));
+    }
+    for (const x of connections.get(c.id) ?? []) {
+      if (x.connected_at) {
+        rows.push(
+          event(
+            c.id,
+            'connection.connected',
+            'connection',
+            x.platform,
+            x.connected_at,
+            clinicAdmin,
+            {
+              platform: x.platform,
+            },
+          ),
+        );
+      }
+    }
+    if (Date.parse(c.stage_changed_at) > Date.parse(c.created_at) + 60_000) {
+      rows.push(
+        event(c.id, 'clinic.stage_change', 'clinic', c.id, c.stage_changed_at, dsm ?? admin, {
+          to: c.stage,
+        }),
+      );
+    }
+    if (!c.is_active) {
+      rows.push(
+        event(c.id, 'clinic.archive', 'clinic', c.id, c.updated_at, dsm ?? admin, {
+          reason: c.archived_reason,
+        }),
+      );
+    }
+    return rows;
+  });
+  return events.sort((a, b) => b.occurred_at.localeCompare(a.occurred_at));
 }
 
 // ── Build ───────────────────────────────────────────────────────────────────
@@ -572,7 +725,7 @@ export function createMockDb(): MockDb {
       stage_changed_at: ago(stageDays),
       is_active: !c.archived,
       archived_reason: c.archived ?? null,
-      cover_asset_id: null,
+      cover_asset_id: uuid('ph', i + 1),
       created_at: ago(createdDays),
       updated_at: ago(Math.min(1 + i, stageDays)),
     };
@@ -609,7 +762,7 @@ export function createMockDb(): MockDb {
       approval: 'submitted',
       publication: 'unpublished',
       createdDaysAgo: 2,
-      components: detailedComponents(smile.website_url, smile.name),
+      components: detailedComponents(smile.website_url, smile.name, false),
       overall: 62,
       summary:
         'Strong foundations on the website and Google profile. Fixing the opening-hours mismatch and page speed will have the biggest impact.',
@@ -801,9 +954,9 @@ export function createMockDb(): MockDb {
       c.id,
       PLATFORMS.map(([platform, label], j): S<'ConnectionRead'> => {
         const status: S<'ConnectionStatus'> =
-          i % 4 === 3
+          i % 4 === 2
             ? 'not_connected'
-            : j === 0 || j === 1
+            : j === 0 || j === 1 || (j === 3 && i % 2 === 1)
               ? 'connected'
               : j === 2
                 ? 'needs_reconnect'
@@ -850,6 +1003,43 @@ export function createMockDb(): MockDb {
       },
     ],
   ]);
+  // Sample clinic photos (drawn), one per clinic, served by the mock storage.
+  clinics.forEach((c, i) => {
+    const id = uuid('ph', i + 1);
+    const svg = clinicPhotoSvg(i);
+    assets.set(id, {
+      id,
+      clinic_id: c.id,
+      kind: 'clinic_photo',
+      mime_type: 'image/svg+xml',
+      original_filename: 'reception.svg',
+      size_bytes: svg.length,
+      status: 'uploaded',
+      approval_state: 'approved',
+      owner_user_id: uuid('a1', 1),
+      previous_version_id: null,
+      provenance: {},
+      version: 1,
+      created_at: c.created_at,
+      updated_at: c.created_at,
+      blob: new Blob([svg], { type: 'image/svg+xml' }),
+    });
+  });
+
+  const practitioners = mockPractitioners(clinics, (n) => uuid('b2', n));
+
+  let snapshotSeq = 0;
+  const snapshots = clinics.flatMap((c, i) => {
+    const linked = (connections.get(c.id) ?? [])
+      .filter((x) => x.status === 'connected' || x.status === 'needs_reconnect')
+      .map((x) => x.platform as string);
+    const rows = mockSnapshots(c.id, i, linked, (n) => uuid('d5', n), ago, snapshotSeq);
+    snapshotSeq += rows.length;
+    return rows;
+  });
+
+  const auditEvents = buildAuditEvents(clinics, assignments, presence, assessments, connections);
+
   const chat = (
     n: number,
     clinicId: string,
@@ -942,6 +1132,9 @@ export function createMockDb(): MockDb {
     messages,
     chatReads,
     assets,
+    practitioners,
+    snapshots,
+    auditEvents,
     settings: {
       organization_name: 'Radial Pulse',
       support_email: 'support@radialpulse.example',

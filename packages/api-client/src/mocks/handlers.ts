@@ -180,6 +180,29 @@ export function createMockHandlers(options: MockOptions) {
     { clinicId: string; platform: Schema<'ConnectionPlatform'>; userId: string }
   >();
 
+  /** Appends to the clinic's activity (audit events), newest first. */
+  const record = (
+    clinicId: string,
+    me: Principal,
+    action: string,
+    resourceType: string,
+    resourceId: string | null,
+    details: Record<string, unknown> = {},
+  ) => {
+    db.auditEvents.unshift({
+      id: crypto.randomUUID(),
+      clinic_id: clinicId,
+      actor_type: 'user',
+      actor_user_id: me.user.id,
+      action,
+      resource_type: resourceType,
+      resource_id: resourceId,
+      details,
+      request_id: null,
+      occurred_at: nextTimestamp(),
+    });
+  };
+
   const sideOf = (me: Principal): Schema<'ChatSide'> =>
     me.user.platform_role === 'clinic_user' ? 'clinic' : 'radial_pulse';
 
@@ -359,16 +382,165 @@ export function createMockHandlers(options: MockOptions) {
     http.patch(
       `${api}/clinics/:clinic_id`,
       route<{ clinic_id: string }>(
-        async ({ request, params }) => {
+        async ({ request, params, me }) => {
           const body = (await request.json()) as Schema<'ClinicUpdate'>;
           const clinic = db.clinics.find((c) => c.id === params.clinic_id)!;
           for (const [k, v] of Object.entries(body)) {
             if (v !== undefined && k in clinic) (clinic as Record<string, unknown>)[k] = v;
           }
-          clinic.updated_at = mockNow();
+          clinic.updated_at = nextTimestamp();
+          record(clinic.id, me, 'clinic.update', 'clinic', clinic.id, {
+            fields: Object.keys(body),
+          });
           return HttpResponse.json(toClinicRead(clinic));
         },
         { clinic: true, permission: 'clinics:write' },
+      ),
+    ),
+
+    // Status actions (Radial Pulse staff only: clinics:manage).
+    http.post(
+      `${api}/clinics/:clinic_id/stage`,
+      route<{ clinic_id: string }>(
+        async ({ request, params, me }) => {
+          const body = (await request.json()) as Schema<'StageChange'>;
+          const clinic = db.clinics.find((c) => c.id === params.clinic_id)!;
+          if (!clinic.is_active) {
+            return problem(
+              409,
+              'invalid_state',
+              'Action not allowed in the current state',
+              'This clinic is archived. Restore it first',
+            );
+          }
+          if (clinic.stage === body.stage) {
+            return problem(
+              409,
+              'invalid_state',
+              'Action not allowed in the current state',
+              'The clinic is already at this stage',
+            );
+          }
+          const from = clinic.stage;
+          clinic.stage = body.stage;
+          clinic.stage_changed_at = nextTimestamp();
+          clinic.updated_at = clinic.stage_changed_at;
+          record(clinic.id, me, 'clinic.stage_change', 'clinic', clinic.id, {
+            from,
+            to: body.stage,
+            note: body.note ?? null,
+          });
+          return HttpResponse.json(toClinicRead(clinic));
+        },
+        { clinic: true, permission: 'clinics:manage' },
+      ),
+    ),
+
+    http.post(
+      `${api}/clinics/:clinic_id/archive`,
+      route<{ clinic_id: string }>(
+        async ({ request, params, me }) => {
+          const body = (await request.json()) as Schema<'ArchiveRequest'>;
+          if (!body.reason || body.reason.trim().length < 3) {
+            return problem(422, 'validation_error', 'Invalid input', undefined, [
+              {
+                loc: ['body', 'reason'],
+                msg: 'Give a reason (at least 3 characters)',
+                type: 'too_short',
+              },
+            ]);
+          }
+          const clinic = db.clinics.find((c) => c.id === params.clinic_id)!;
+          if (!clinic.is_active) {
+            return problem(
+              409,
+              'invalid_state',
+              'Action not allowed in the current state',
+              'This clinic is already archived',
+            );
+          }
+          clinic.is_active = false;
+          clinic.archived_reason = body.reason.trim();
+          clinic.updated_at = nextTimestamp();
+          record(clinic.id, me, 'clinic.archive', 'clinic', clinic.id, {
+            reason: clinic.archived_reason,
+          });
+          return HttpResponse.json(toClinicRead(clinic));
+        },
+        { clinic: true, permission: 'clinics:manage' },
+      ),
+    ),
+
+    http.post(
+      `${api}/clinics/:clinic_id/restore`,
+      route<{ clinic_id: string }>(
+        ({ params, me }) => {
+          const clinic = db.clinics.find((c) => c.id === params.clinic_id)!;
+          if (clinic.is_active) {
+            return problem(
+              409,
+              'invalid_state',
+              'Action not allowed in the current state',
+              'This clinic is not archived',
+            );
+          }
+          clinic.is_active = true;
+          clinic.archived_reason = null;
+          clinic.updated_at = nextTimestamp();
+          record(clinic.id, me, 'clinic.restore', 'clinic', clinic.id);
+          return HttpResponse.json(toClinicRead(clinic));
+        },
+        { clinic: true, permission: 'clinics:manage' },
+      ),
+    ),
+
+    http.get(
+      `${api}/clinics/:clinic_id/practitioners`,
+      route<{ clinic_id: string }>(
+        ({ url, params }) => {
+          const rows = db.practitioners
+            .filter((x) => x.clinic_id === params.clinic_id)
+            .sort((a, b) => Number(b.is_primary) - Number(a.is_primary));
+          return HttpResponse.json(page(rows, url) satisfies Schema<'Page_PractitionerRead_'>);
+        },
+        { clinic: true, permission: 'practitioners:read' },
+      ),
+    ),
+
+    http.get(
+      `${api}/clinics/:clinic_id/snapshots`,
+      route<{ clinic_id: string }>(
+        ({ url, params }) => {
+          const metric = url.searchParams.get('metric_key');
+          const source = url.searchParams.get('source');
+          let rows = db.snapshots
+            .filter((x) => x.clinic_id === params.clinic_id)
+            .filter((x) => !metric || x.metric_key === metric)
+            .filter((x) => !source || x.source === source)
+            .sort((a, b) => b.fetched_at.localeCompare(a.fetched_at));
+          if (url.searchParams.get('latest') === 'true') {
+            const seen = new Set<string>();
+            rows = rows.filter((x) => {
+              const key = `${x.source}|${x.metric_key}`;
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            });
+          }
+          return HttpResponse.json(page(rows, url) satisfies Schema<'Page_MetricSnapshotRead_'>);
+        },
+        { clinic: true, permission: 'snapshots:read' },
+      ),
+    ),
+
+    http.get(
+      `${api}/clinics/:clinic_id/audit-events`,
+      route<{ clinic_id: string }>(
+        ({ url, params }) => {
+          const rows = db.auditEvents.filter((x) => x.clinic_id === params.clinic_id);
+          return HttpResponse.json(page(rows, url) satisfies Schema<'Page_AuditEventRead_'>);
+        },
+        { clinic: true, permission: 'audit_log:read' },
       ),
     ),
 
@@ -416,6 +588,9 @@ export function createMockHandlers(options: MockOptions) {
             updated_at: mockNow(),
           };
           db.assignments.set(params.clinic_id, assignment);
+          record(params.clinic_id, me, 'assignment.change', 'assignment', assignment.id, {
+            user_id,
+          });
           for (const u of db.users) {
             if (u.id === user_id) u.assigned_clinic_count += 1;
             if (previous && u.id === previous.user_id) u.assigned_clinic_count -= 1;
@@ -532,7 +707,11 @@ export function createMockHandlers(options: MockOptions) {
             profile.verified_by_user_id = body.verification === 'unverified' ? null : me.user.id;
           }
           if (body.display_name !== undefined) profile.display_name = body.display_name;
-          profile.updated_at = mockNow();
+          profile.updated_at = nextTimestamp();
+          record(profile.clinic_id, me, 'presence_profile.update', 'presence_profile', profile.id, {
+            platform: profile.platform,
+            verification: profile.verification,
+          });
           return HttpResponse.json(profile);
         },
         { clinic: true, permission: 'presence:write' },
@@ -731,6 +910,9 @@ export function createMockHandlers(options: MockOptions) {
             last_error: null,
             scopes: ['read_insights'],
           } satisfies Partial<Schema<'ConnectionRead'>>);
+          record(params.clinic_id, me, 'connection.connected', 'connection', row.platform, {
+            platform: row.platform,
+          });
           return HttpResponse.json(row);
         },
         { clinic: true, permission: 'connections:manage' },

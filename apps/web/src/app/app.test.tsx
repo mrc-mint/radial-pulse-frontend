@@ -176,14 +176,16 @@ describe('web app against the contract mocks', () => {
   it('scopes the clinic workspace to the clinic in the URL', async () => {
     await renderApp(`/clinics/${SMILE}/chat`, 'digital-success-manager');
     expect(
-      await screen.findByRole('heading', { name: 'Smile Dental Care', level: 1 }),
+      await screen.findByRole('heading', { name: 'Smile Dental Care', level: 2 }),
     ).toBeTruthy();
     const sections = within(screen.getByRole('navigation', { name: 'Clinic sections' }));
     expect(sections.getAllByRole('link').map((l) => l.firstChild?.textContent)).toEqual([
       'Overview',
-      'Digital Information',
-      'Unified Audit',
+      'Digital Presence',
       'Social Media',
+      'Listings',
+      'Audit Report',
+      'Activity',
       'Chat',
     ]);
     expect(sections.getByRole('link', { name: /Chat/ }).getAttribute('aria-current')).toBe('page');
@@ -197,12 +199,35 @@ describe('web app against the contract mocks', () => {
   it('switching clinics re-scopes the workspace', async () => {
     const router = await renderApp(`/clinics/${SMILE}`, 'platform-administrator');
     expect(
-      await screen.findByRole('heading', { name: 'Smile Dental Care', level: 1 }),
+      await screen.findByRole('heading', { name: 'Smile Dental Care', level: 2 }),
     ).toBeTruthy();
+    // Platform Administrators have no clinic chat; the clinic's DSM chats.
+    const sections = within(screen.getByRole('navigation', { name: 'Clinic sections' }));
+    expect(sections.queryByRole('link', { name: /Chat/ })).toBeNull();
     await router.navigate({ to: '/clinics/$clinicId', params: { clinicId: BRIGHT } });
     expect(
-      await screen.findByRole('heading', { name: 'Bright Smile Clinic', level: 1 }),
+      await screen.findByRole('heading', { name: 'Bright Smile Clinic', level: 2 }),
     ).toBeTruthy();
+  });
+
+  it('shows clinic details: photo, main doctor, status actions and activity', async () => {
+    const user = userEvent.setup();
+    await renderApp(`/clinics/${SMILE}`, 'platform-administrator');
+    await screen.findByRole('heading', { name: 'Clinic details', level: 1 });
+    expect(await screen.findByRole('img', { name: 'Photo of Smile Dental Care' })).toBeTruthy();
+    expect((await screen.findAllByText('Dr. Rahul Mehta')).length).toBeGreaterThan(0);
+    expect(screen.getByRole('link', { name: /View on Google Maps/ })).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'Change manager' })).toBeTruthy();
+
+    await user.click(screen.getByRole('button', { name: 'More' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Archive clinic' }));
+    await user.type(screen.getByRole('textbox', { name: /Reason/ }), 'Not interested right now');
+    const dialog = within(screen.getByRole('dialog'));
+    await user.click(dialog.getByRole('button', { name: 'Archive clinic' }));
+    expect(await screen.findByText('Archived: Not interested right now')).toBeTruthy();
+
+    await user.click(screen.getByRole('link', { name: 'Activity' }));
+    expect(await screen.findByText('Clinic archived: Not interested right now')).toBeTruthy();
   });
 
   it('shows no sections for a clinic outside the caller’s access', async () => {

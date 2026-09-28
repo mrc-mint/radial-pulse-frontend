@@ -12,12 +12,13 @@ import {
 } from '@radial-pulse/ui/native';
 import { formatComponentScore } from '@radial-pulse/utils';
 import { useRouter } from 'expo-router';
-import { ChartColumn, Link2 } from 'lucide-react-native';
+import { Link2 } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 import { componentCaption } from '../../shell/assessment-kit';
 import { useAssessmentDetail } from '../../shell/clinic-data';
 import { ConnectionRow, offeredConnections } from '../../shell/connection-row';
 import { CardSkeleton, QueryErrorState, SectionHeader, TextLink } from '../../shell/kit';
+import { SocialMetrics } from '../../shell/social-metrics';
 
 /**
  * Social Media (V1): connected accounts and the assessment's Social Presence
@@ -108,13 +109,7 @@ export function SocialMediaScreen() {
       )}
 
       <SectionHeader title="Audience and engagement" />
-      <Card>
-        <EmptyState
-          icon={<ChartColumn size={22} color={t.color.text.tertiary} />}
-          title="Not available yet"
-          description="Follower and engagement numbers from your connected accounts aren’t available in this version of Radial Pulse."
-        />
-      </Card>
+      <SocialMetrics />
     </Screen>
   );
 }

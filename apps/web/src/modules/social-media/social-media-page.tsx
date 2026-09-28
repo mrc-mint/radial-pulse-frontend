@@ -1,15 +1,29 @@
-import { useConnections } from '@radial-pulse/api-client/react';
-import { useClinicId } from '@radial-pulse/platform-shell/core';
-import { Badge, Card, CONNECTION_STATUS_TONES, formatRelativeTime } from '@radial-pulse/ui/web';
-import { CONNECTION_STATUS_LABELS } from '@radial-pulse/utils';
-import { CardSkeleton, ContractGap, QueryError, Section } from '../../app/page-kit';
+import { useConnections, useLatestSnapshots } from '@radial-pulse/api-client/react';
+import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
+import type { Schema } from '@radial-pulse/shared-types';
+import {
+  Badge,
+  Card,
+  CONNECTION_STATUS_TONES,
+  EmptyState,
+  formatRelativeTime,
+  MetricCard,
+} from '@radial-pulse/ui/web';
+import {
+  CONNECTION_STATUS_LABELS,
+  formatMetric,
+  metricLabel,
+  metricRank,
+  PRESENCE_PLATFORM_LABELS,
+} from '@radial-pulse/utils';
+import { CardSkeleton, QueryError, Section } from '../../app/page-kit';
 import './social-media.css';
 
 /**
- * Social Media for one clinic. Connected accounts come from the contract
- * (`ConnectionRead`). Platform metrics are BLOCKED: API 0.1.0 stores them as
- * free-form `metric_key` snapshots without a published catalog, and the UI
- * does not invent metrics.
+ * Social Media for one clinic: connected accounts (`ConnectionRead`) and the
+ * latest value of each platform metric (`MetricSnapshotRead`, `latest=true`).
+ * Metric keys have no published catalogue yet (gap 6): known ones get a label,
+ * others show their key. Values are shown as the API sent them.
  */
 export function SocialMediaPage() {
   const clinicId = useClinicId();
@@ -63,11 +77,77 @@ export function SocialMediaPage() {
       </Section>
 
       <Section title="Performance">
-        <ContractGap
-          title="Social media metrics are coming"
-          description="Followers, reach and engagement will appear here once the API publishes which metrics each platform provides."
-        />
+        <Performance clinicId={clinicId} />
       </Section>
+    </div>
+  );
+}
+
+type Snapshot = Schema<'MetricSnapshotRead'>;
+type Source = Schema<'DataSource'>;
+
+const SOURCE_LABEL = (source: Source) =>
+  source in PRESENCE_PLATFORM_LABELS
+    ? PRESENCE_PLATFORM_LABELS[source as keyof typeof PRESENCE_PLATFORM_LABELS]
+    : source.replace(/_/g, ' ');
+
+const SOCIAL_SOURCES: ReadonlyArray<Source> = ['instagram', 'facebook', 'youtube', 'linkedin'];
+
+function Performance({ clinicId }: { clinicId: string }) {
+  const canRead = useClinicCan(clinicId, 'snapshots:read');
+  const snapshots = useLatestSnapshots(clinicId, { enabled: canRead });
+
+  if (!canRead) return null;
+  if (snapshots.isError) {
+    return (
+      <Card>
+        <QueryError error={snapshots.error} onRetry={() => void snapshots.refetch()} />
+      </Card>
+    );
+  }
+  if (!snapshots.data) return <CardSkeleton lines={3} />;
+
+  const bySource = new Map<Source, Snapshot[]>();
+  for (const s of snapshots.data.items) {
+    if (!SOCIAL_SOURCES.includes(s.source)) continue;
+    bySource.set(s.source, [...(bySource.get(s.source) ?? []), s]);
+  }
+  if (bySource.size === 0) {
+    return (
+      <Card>
+        <EmptyState
+          title="No social metrics yet"
+          description="Metrics appear once the clinic connects an account and it has synced."
+        />
+      </Card>
+    );
+  }
+
+  return (
+    <div className="rp-stack">
+      {[...bySource].map(([source, rows]) => {
+        const newest = rows.reduce((a, b) => (a.fetched_at > b.fetched_at ? a : b));
+        return (
+          <Card
+            key={source}
+            title={SOURCE_LABEL(source)}
+            description={`Updated ${formatRelativeTime(newest.fetched_at)}`}
+          >
+            <div className="rp-social__metrics">
+              {[...rows]
+                .sort((a, b) => metricRank(a.metric_key) - metricRank(b.metric_key))
+                .map((s) => (
+                  <MetricCard
+                    key={s.id}
+                    label={metricLabel(s.metric_key)}
+                    value={s.status === 'error' ? null : formatMetric(s.metric_key, s.value_number)}
+                    hint={s.status === 'stale' ? 'Not refreshed recently' : undefined}
+                  />
+                ))}
+            </div>
+          </Card>
+        );
+      })}
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { useNavLabel } from '../../app/shell';
 /**
  * Cross-clinic Audit Reports list. BLOCKED: API 0.1.0 lists assessments per
  * clinic only (GET /clinics/{clinic_id}/assessments). Tracked as a contract
- * gap; each clinic's reports are available in its Unified Audit section.
+ * gap; each clinic's reports are available in its Audit Report section.
  */
 export function AuditReportsPage() {
   const clinicsLabel = useNavLabel('clinics', 'Clinics');
@@ -23,7 +23,7 @@ export function AuditReportsPage() {
       />
       <ContractGap
         title="A cross-clinic report list isn’t available yet"
-        description="The API currently lists assessments per clinic. Open a clinic and choose Unified Audit to see its reports."
+        description="The API currently lists assessments per clinic. Open a clinic and choose Audit Report to see its reports."
       />
     </div>
   );

@@ -12,7 +12,11 @@ import {
   Tabs,
   textStyle,
 } from '@radial-pulse/ui/native';
-import { ASSESSMENT_COMPONENT_LABELS, formatComponentScore } from '@radial-pulse/utils';
+import {
+  ASSESSMENT_COMPONENT_LABELS,
+  formatComponentScore,
+  showsComponentScore,
+} from '@radial-pulse/utils';
 import { FileSearch } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -26,7 +30,7 @@ import {
   type ComponentKey,
 } from '../../shell/assessment-kit';
 import { useAssessmentDetail } from '../../shell/clinic-data';
-import { CardSkeleton, QueryErrorState, SectionHeader } from '../../shell/kit';
+import { Callout, CardSkeleton, QueryErrorState, SectionHeader } from '../../shell/kit';
 
 type Tab = 'overview' | ComponentKey;
 
@@ -193,13 +197,18 @@ function ComponentSection({ component }: { component: Schema<'ComponentDetail'> 
   const findings = sortByPriority(component.findings);
   return (
     <>
-      <ScoreCard
-        label={label}
-        score={component.status === 'completed' ? component.score : null}
-        emptyLabel={formatComponentScore(component)}
-        tone={COMPONENT_STATUS_TONES[component.status]}
-        caption={componentCaption(component)}
-      />
+      {showsComponentScore(component.key) ? (
+        <ScoreCard
+          label={label}
+          score={component.status === 'completed' ? component.score : null}
+          emptyLabel={formatComponentScore(component)}
+          tone={COMPONENT_STATUS_TONES[component.status]}
+          caption={componentCaption(component)}
+        />
+      ) : componentCaption(component) ? (
+        // Score not shown for this section (product decision); its summary is.
+        <Callout tone="neutral">{componentCaption(component)}</Callout>
+      ) : null}
       <SectionHeader title={`Findings and recommendations (${findings.length})`} />
       {findings.length === 0 ? (
         <Card>

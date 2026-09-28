@@ -13,6 +13,7 @@ import {
   FINDING_PRIORITY_LABELS,
   formatComponentScore,
   overallScoreEmptyLabel,
+  showsComponentScore,
 } from '@radial-pulse/utils';
 import { ChevronRight } from 'lucide-react-native';
 import type { ReactNode } from 'react';
@@ -122,11 +123,13 @@ export function ComponentGrid({
 }) {
   return (
     <View style={styles.grid}>
-      {components.map((c) => (
-        <View key={c.key} style={styles.gridCell}>
-          <ComponentTile component={c} onPress={() => onSelect(c.key)} />
-        </View>
-      ))}
+      {components
+        .filter((c) => showsComponentScore(c.key))
+        .map((c) => (
+          <View key={c.key} style={styles.gridCell}>
+            <ComponentTile component={c} onPress={() => onSelect(c.key)} />
+          </View>
+        ))}
     </View>
   );
 }

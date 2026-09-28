@@ -8,7 +8,7 @@ export const socialMediaModule: ModuleManifest = {
       id: 'social-media',
       label: 'Social Media',
       path: 'social-media',
-      order: 40,
+      order: 30,
       requiredPermission: 'connections:read',
     },
   ],

@@ -7,11 +7,138 @@
 .rp-clinic-header__contacts {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rp-space-2) var(--rp-space-5);
-  margin: 0;
+  gap: var(--rp-space-2) var(--rp-space-6);
+  margin: var(--rp-space-2) 0 0;
   padding: 0;
   list-style: none;
   font-size: var(--rp-text-body-sm-size);
+}
+
+/* ── Clinic card (photo · details · map) ── */
+.rp-clinic-card {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr) minmax(220px, 320px);
+  gap: var(--rp-space-5);
+  align-items: stretch;
+  padding: var(--rp-space-4);
+  border: 1px solid var(--rp-color-border-default);
+  border-radius: var(--rp-radius-xl);
+  background: var(--rp-color-bg-surface);
+  box-shadow: var(--rp-shadow-xs);
+}
+
+@media (max-width: 1023px) {
+  .rp-clinic-card {
+    grid-template-columns: 160px minmax(0, 1fr);
+  }
+
+  .rp-map-card {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 639px) {
+  .rp-clinic-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rp-clinic-photo {
+  width: 100%;
+  height: 100%;
+  min-height: 150px;
+  max-height: 180px;
+  border-radius: var(--rp-radius-lg);
+  object-fit: cover;
+  background: var(--rp-color-bg-muted);
+}
+
+.rp-clinic-photo--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rp-color-text-disabled);
+}
+
+.rp-clinic-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-space-1);
+  min-width: 0;
+  padding: var(--rp-space-2) 0;
+}
+
+.rp-clinic-card__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rp-space-3);
+}
+
+.rp-clinic-card__title h2 {
+  margin: 0;
+  color: var(--rp-color-text-primary);
+  font-size: var(--rp-text-h1-size);
+  line-height: var(--rp-text-h1-line-height);
+  font-weight: var(--rp-text-h1-weight);
+}
+
+.rp-clinic-card__doctor {
+  margin: 0;
+  color: var(--rp-color-bg-inverse);
+  font-size: var(--rp-text-h3-size);
+  font-weight: var(--rp-font-weight-semibold);
+}
+
+.rp-clinic-card__description {
+  margin: 0;
+  color: var(--rp-color-text-secondary);
+}
+
+/* ── Static map card ── */
+.rp-map-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--rp-color-border-default);
+  border-radius: var(--rp-radius-lg);
+  min-height: 150px;
+}
+
+.rp-map-card__art {
+  position: relative;
+  flex: 1;
+  min-height: 96px;
+  background-color: #eef2f5;
+  background-image:
+    linear-gradient(28deg, transparent 46%, #ffffff 46%, #ffffff 54%, transparent 54%),
+    linear-gradient(118deg, transparent 47%, #ffffff 47%, #ffffff 52%, transparent 52%),
+    linear-gradient(90deg, rgba(3, 152, 85, 0.12) 0 18%, transparent 18% 100%),
+    repeating-linear-gradient(0deg, transparent 0 22px, #e1e7ec 22px 24px),
+    repeating-linear-gradient(90deg, transparent 0 30px, #e1e7ec 30px 32px);
+}
+
+.rp-map-card__pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  color: var(--rp-color-status-danger-solid);
+  transform: translate(-50%, -80%);
+  filter: drop-shadow(0 2px 2px rgba(16, 24, 40, 0.25));
+}
+
+.rp-map-card__footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-space-1);
+  padding: var(--rp-space-2) var(--rp-space-3);
+  border-top: 1px solid var(--rp-color-border-default);
+  background: var(--rp-color-bg-surface);
+  font-size: var(--rp-text-body-sm-size);
+}
+
+.rp-map-card__address {
+  color: var(--rp-color-text-secondary);
 }
 
 .rp-clinic-header__contacts li {
@@ -94,4 +221,84 @@
 .rp-presence__actions {
   display: flex;
   gap: var(--rp-space-2);
+}
+
+.rp-photo-field {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: var(--rp-space-4);
+  align-items: center;
+  margin-bottom: var(--rp-space-5);
+}
+
+.rp-photo-field .rp-clinic-photo {
+  min-height: 90px;
+  max-height: 90px;
+}
+
+.rp-photo-field__label {
+  color: var(--rp-color-text-primary);
+  font-weight: var(--rp-font-weight-semibold);
+}
+
+.rp-presence__connected {
+  display: flex;
+  align-items: center;
+  gap: var(--rp-space-1-5);
+  margin: 0;
+  color: var(--rp-color-status-success-fg);
+  font-size: var(--rp-text-body-sm-size);
+}
+
+/* ── Activity ── */
+.rp-activity {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rp-activity__row {
+  display: flex;
+  align-items: center;
+  gap: var(--rp-space-3);
+  padding: var(--rp-space-3) var(--rp-space-5);
+  border-top: 1px solid var(--rp-color-border-subtle);
+}
+
+.rp-activity__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--rp-radius-md);
+  background: var(--rp-color-status-brand-bg);
+  color: var(--rp-color-status-brand-fg);
+}
+
+.rp-activity__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rp-activity__title {
+  color: var(--rp-color-text-primary);
+}
+
+.rp-activity__meta,
+.rp-activity__time {
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-caption-size);
+}
+
+.rp-activity__time {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.rp-activity__footer {
+  padding: 0 var(--rp-space-5);
 }

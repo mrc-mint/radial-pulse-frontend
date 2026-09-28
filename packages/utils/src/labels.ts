@@ -44,12 +44,15 @@ export const COMPONENT_STATUS_LABELS: Labels<'ComponentStatus'> = {
   not_available: 'Not Available',
 };
 
-/** Assessment sections. `search_readiness` covers SEO, AEO and GEO together. */
+/**
+ * Assessment sections as named in the product: the `website` section is
+ * shown as SEO and `search_readiness` as AEO (answer-engine readiness).
+ */
 export const ASSESSMENT_COMPONENT_LABELS: Labels<'AssessmentComponentKey'> = {
-  website: 'Website',
+  website: 'SEO',
   google_business_profile: 'Google Business Profile',
   local_search: 'Local Search',
-  search_readiness: 'Search Readiness',
+  search_readiness: 'AEO',
   social_presence: 'Social Presence',
   competitor_benchmark: 'Competitor Benchmark',
 };

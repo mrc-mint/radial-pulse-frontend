@@ -2,6 +2,7 @@ import {
   ClinicScopeProvider,
   resolveClinicSections,
   useClinicPermissions,
+  useCurrentSession,
 } from '@radial-pulse/platform-shell/core';
 import { ClinicWorkspace } from '@radial-pulse/platform-shell/web';
 import { useChatInbox } from '@radial-pulse/api-client/react';
@@ -25,16 +26,21 @@ export const Route = createFileRoute('/_app/clinics/$clinicId')({
 function ClinicLayout() {
   const { clinicId } = Route.useParams();
   const permissions = useClinicPermissions(clinicId);
+  // Platform Administrators don't chat with clinics; the clinic's DSM does.
+  const chats = !useCurrentSession().allClinics;
   const pathname = usePathname();
   const backLabel = useNavLabel('clinics', 'Clinics');
   // Slow poll for the Chat tab's unread badge; the chat itself polls faster.
   const inbox = useChatInbox({
-    enabled: permissions === 'unrestricted' || permissions.has('chat:read'),
+    enabled: chats && (permissions === 'unrestricted' || permissions.has('chat:read')),
   });
   const unread = inbox.data?.items.find((t) => t.clinic_id === clinicId)?.unread_count ?? 0;
   const sections = useMemo(
-    () => resolveClinicSections(webModules, permissions, clinicId),
-    [permissions, clinicId],
+    () =>
+      resolveClinicSections(webModules, permissions, clinicId).filter(
+        (s) => chats || s.id !== 'chat',
+      ),
+    [permissions, clinicId, chats],
   );
 
   return (
@@ -53,6 +59,7 @@ function ClinicLayout() {
                 to="/clinics"
                 className={buttonClassName({ variant: 'ghost', size: 'sm' })}
                 aria-label={`Back to ${backLabel}`}
+                title={`Back to ${backLabel}`}
               >
                 <ArrowLeft size={16} aria-hidden="true" />
               </Link>

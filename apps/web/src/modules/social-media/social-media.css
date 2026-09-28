@@ -40,3 +40,9 @@
   color: var(--rp-color-text-secondary);
   font-weight: var(--rp-font-weight-medium);
 }
+
+.rp-social__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--rp-space-3);
+}

@@ -23,10 +23,24 @@ export const clinicsModule: ModuleManifest = {
     { id: 'overview', label: 'Overview', path: '', order: 10, requiredPermission: 'clinics:read' },
     {
       id: 'digital-information',
-      label: 'Digital Information',
+      label: 'Digital Presence',
       path: 'digital-information',
       order: 20,
       requiredPermission: 'presence:read',
+    },
+    {
+      id: 'listings',
+      label: 'Listings',
+      path: 'listings',
+      order: 40,
+      requiredPermission: 'presence:read',
+    },
+    {
+      id: 'activity',
+      label: 'Activity',
+      path: 'activity',
+      order: 60,
+      requiredPermission: 'audit_log:read',
     },
   ],
 };

@@ -4,10 +4,13 @@ import { ApiRequestError } from '../errors';
 import { createApiClient } from '../http';
 import {
   assessmentsService,
+  auditEventsService,
   authService,
   chatService,
   clinicsService,
   connectionsService,
+  practitionersService,
+  snapshotsService,
 } from '../services';
 import { createMockDb } from './data';
 import { createMockHandlers } from './handlers';
@@ -123,6 +126,38 @@ describe('contract mocks', () => {
       .start(admin, db.clinics[0]!.id, 'x', { redirect_uri: 'radialpulse-local://cb' })
       .catch((e: unknown) => e)) as ApiRequestError;
     expect(error.kind).toBe('unavailable');
+  });
+
+  it('archives, restores and moves a clinic, recording each in its activity', async () => {
+    const api = as('platform-administrator');
+    const clinic = db.clinics[1]!;
+    await clinicsService.changeStage(api, clinic.id, { stage: 'active_client' });
+    const archived = await clinicsService.archive(api, clinic.id, { reason: 'Said no for now' });
+    expect(archived).toMatchObject({ is_active: false, archived_reason: 'Said no for now' });
+    const stageWhileArchived = (await clinicsService
+      .changeStage(api, clinic.id, { stage: 'prospective_client' })
+      .catch((e: unknown) => e)) as ApiRequestError;
+    expect(stageWhileArchived.kind).toBe('conflict');
+    expect((await clinicsService.restore(api, clinic.id)).is_active).toBe(true);
+
+    const events = await auditEventsService.list(api, clinic.id, { limit: 3 });
+    expect(events.items.map((e) => e.action)).toEqual([
+      'clinic.restore',
+      'clinic.archive',
+      'clinic.stage_change',
+    ]);
+  });
+
+  it('serves the main practitioner and the latest value of each metric', async () => {
+    const admin = as('clinic-administrator');
+    const smile = db.clinics[0]!.id;
+    const doctors = await practitionersService.list(admin, smile);
+    expect(doctors.items[0]).toMatchObject({ full_name: 'Dr. Rahul Mehta', is_primary: true });
+
+    const latest = await snapshotsService.list(admin, smile, { latest: true, limit: 200 });
+    const keys = latest.items.map((s) => `${s.source}|${s.metric_key}`);
+    expect(new Set(keys).size).toBe(keys.length);
+    expect(keys).toContain('instagram|instagram.followers');
   });
 
   it('returns problem+json validation issues', async () => {

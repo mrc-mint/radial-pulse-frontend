@@ -199,16 +199,20 @@ export function ClinicsPage() {
             },
             {
               id: 'audit',
-              label: 'Unified Audit',
+              label: 'Audit Report',
               onSelect: () =>
                 void navigate({ to: '/clinics/$clinicId/audit', params: { clinicId: c.id } }),
             },
-            {
-              id: 'chat',
-              label: 'Chat',
-              onSelect: () =>
-                void navigate({ to: '/clinics/$clinicId/chat', params: { clinicId: c.id } }),
-            },
+            ...(session.allClinics
+              ? []
+              : [
+                  {
+                    id: 'chat',
+                    label: 'Chat',
+                    onSelect: () =>
+                      void navigate({ to: '/clinics/$clinicId/chat', params: { clinicId: c.id } }),
+                  },
+                ]),
           ]}
         />
       ),

@@ -11,12 +11,15 @@ import {
   assessmentsService,
   assetsService,
   assignmentsService,
+  auditEventsService,
   chatService,
   clinicsService,
   connectionsService,
   dashboardService,
+  practitionersService,
   presenceService,
   settingsService,
+  snapshotsService,
   uploadToPresignedUrl,
   usersService,
   workItemsService,
@@ -146,6 +149,100 @@ export function useUpdateClinic(clinicId: string) {
   });
 }
 
+/** Invalidates everything that shows a clinic's status or details. */
+function useInvalidateClinicEverywhere(clinicId: string) {
+  const queryClient = useQueryClient();
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: clinicQueryKey(clinicId, 'detail') }),
+      queryClient.invalidateQueries({ queryKey: clinicQueryKey(clinicId, 'activity') }),
+      invalidatePlatformLists(queryClient),
+    ]);
+}
+
+export function useChangeClinicStage(clinicId: string) {
+  const api = useApiClient();
+  const invalidate = useInvalidateClinicEverywhere(clinicId);
+  return useMutation({
+    mutationFn: (body: BodyOf<'/api/v1/clinics/{clinic_id}/stage', 'post'>) =>
+      clinicsService.changeStage(api, clinicId, body),
+    onSuccess: invalidate,
+  });
+}
+
+export function useArchiveClinic(clinicId: string) {
+  const api = useApiClient();
+  const invalidate = useInvalidateClinicEverywhere(clinicId);
+  return useMutation({
+    mutationFn: (reason: string) => clinicsService.archive(api, clinicId, { reason }),
+    onSuccess: invalidate,
+  });
+}
+
+export function useRestoreClinic(clinicId: string) {
+  const api = useApiClient();
+  const invalidate = useInvalidateClinicEverywhere(clinicId);
+  return useMutation({
+    mutationFn: () => clinicsService.restore(api, clinicId),
+    onSuccess: invalidate,
+  });
+}
+
+/**
+ * Uploads a clinic photo (contract asset flow: request upload, PUT to the
+ * pre-signed URL, confirm) and sets it as the clinic's cover photo.
+ */
+export function useSetClinicPhoto(clinicId: string) {
+  const api = useApiClient();
+  const invalidate = useInvalidateClinicEverywhere(clinicId);
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const upload = await assetsService.requestUpload(api, clinicId, {
+        kind: 'clinic_photo',
+        mime_type: file.type || 'application/octet-stream',
+        size_bytes: file.size,
+        original_filename: file.name,
+      });
+      await uploadToPresignedUrl(upload, file);
+      const asset = await assetsService.confirm(api, clinicId, upload.asset.id);
+      return clinicsService.update(api, clinicId, { cover_asset_id: asset.id });
+    },
+    onSuccess: invalidate,
+  });
+}
+
+/** Practitioners, main one first. */
+export function usePractitioners(clinicId: string, options: { enabled?: boolean } = {}) {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: clinicQueryKey(clinicId, 'practitioners'),
+    queryFn: () => practitionersService.list(api, clinicId, { limit: 50 }),
+    enabled: options.enabled ?? true,
+  });
+}
+
+/** The newest value of each metric (`latest=true`). */
+export function useLatestSnapshots(clinicId: string, options: { enabled?: boolean } = {}) {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: clinicQueryKey(clinicId, 'snapshots', 'latest'),
+    queryFn: () => snapshotsService.list(api, clinicId, { latest: true, limit: 200 }),
+    enabled: options.enabled ?? true,
+  });
+}
+
+export function useClinicActivity(
+  clinicId: string,
+  query: { limit?: number; offset?: number } = {},
+) {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: clinicQueryKey(clinicId, 'activity', query),
+    queryFn: () => auditEventsService.list(api, clinicId, query),
+    placeholderData: keepPreviousData,
+  });
+}
+
 export function useClinicAssignments(clinicId: string) {
   const api = useApiClient();
   return useQuery({
@@ -234,11 +331,12 @@ export function useWorkItems(
   });
 }
 
-export function useConnections(clinicId: string) {
+export function useConnections(clinicId: string, options: { enabled?: boolean } = {}) {
   const api = useApiClient();
   return useQuery({
     queryKey: clinicQueryKey(clinicId, 'connections'),
     queryFn: () => connectionsService.list(api, clinicId),
+    enabled: options.enabled ?? true,
   });
 }
 

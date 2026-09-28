@@ -26,6 +26,7 @@ import {
   ASSESSMENT_STATUS_LABELS,
   formatComponentScore,
   overallScoreEmptyLabel,
+  showsComponentScore,
   PUBLICATION_STATE_LABELS,
 } from '@radial-pulse/utils';
 import { useNavigate } from '@tanstack/react-router';
@@ -194,16 +195,18 @@ function AssessmentReport({
 
       <Section title="Components">
         <div className="rp-audit__components">
-          {a.components.map((c) => (
-            <ScoreCard
-              key={c.key}
-              label={ASSESSMENT_COMPONENT_LABELS[c.key]}
-              score={c.status === 'completed' ? c.score : null}
-              emptyLabel={formatComponentScore(c)}
-              tone={COMPONENT_STATUS_TONES[c.status]}
-              caption={c.summary ?? STATUS_CAPTION[c.status] ?? undefined}
-            />
-          ))}
+          {a.components
+            .filter((c) => showsComponentScore(c.key))
+            .map((c) => (
+              <ScoreCard
+                key={c.key}
+                label={ASSESSMENT_COMPONENT_LABELS[c.key]}
+                score={c.status === 'completed' ? c.score : null}
+                emptyLabel={formatComponentScore(c)}
+                tone={COMPONENT_STATUS_TONES[c.status]}
+                caption={c.summary ?? STATUS_CAPTION[c.status] ?? undefined}
+              />
+            ))}
         </div>
       </Section>
 

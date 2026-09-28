@@ -1,6 +1,7 @@
 import {
   useClinic,
   useClinicAssignments,
+  usePractitioners,
   useSetClinicAssignment,
   useUsers,
   useWorkItems,
@@ -19,7 +20,7 @@ import {
   displayHost,
   EmptyState,
   formatDate,
-  formatRelativeTime,
+  formatDateTime,
   Select,
   WORK_ITEM_PRIORITY_TONES,
   WORK_ITEM_STATUS_TONES,
@@ -29,7 +30,6 @@ import {
   WORK_ITEM_PRIORITY_LABELS,
   WORK_ITEM_STATUS_LABELS,
 } from '@radial-pulse/utils';
-import { Pencil } from 'lucide-react';
 import { useState } from 'react';
 import {
   CardSkeleton,
@@ -39,7 +39,6 @@ import {
   mutationErrorMessage,
   QueryError,
 } from '../../app/page-kit';
-import { EditClinicDrawer } from './edit-clinic-drawer';
 
 export function ClinicOverviewPage() {
   const clinicId = useClinicId();
@@ -51,7 +50,7 @@ export function ClinicOverviewPage() {
       </div>
       <div className="rp-stack">
         <ManagerCard clinicId={clinicId} />
-        <StageCard clinicId={clinicId} />
+        <StatusCard clinicId={clinicId} />
       </div>
     </div>
   );
@@ -59,57 +58,51 @@ export function ClinicOverviewPage() {
 
 function ClinicInformation({ clinicId }: { clinicId: string }) {
   const clinic = useClinic(clinicId);
-  const canEdit = useClinicCan(clinicId, 'clinics:write');
-  const [editing, setEditing] = useState(false);
+  const canPractitioners = useClinicCan(clinicId, 'practitioners:read');
+  const practitioners = usePractitioners(clinicId, { enabled: canPractitioners });
 
   if (clinic.isError) {
     return (
-      <Card title="Clinic information">
+      <Card title="Basic information">
         <QueryError error={clinic.error} onRetry={() => void clinic.refetch()} />
       </Card>
     );
   }
   const c = clinic.data;
   if (!c) return <CardSkeleton lines={6} />;
+  const doctor =
+    practitioners.data?.items.find((p) => p.is_primary && p.is_active) ??
+    practitioners.data?.items[0];
 
   return (
-    <Card
-      title="Clinic information"
-      actions={
-        canEdit && (
-          <Button
-            variant="secondary"
-            size="sm"
-            leadingIcon={<Pencil size={14} />}
-            onClick={() => setEditing(true)}
-          >
-            Edit
-          </Button>
-        )
-      }
-    >
+    <Card title="Basic information">
       <DefinitionList
         items={[
           ['Clinic name', c.name],
+          ['Doctor name', doctor?.full_name ?? null],
           ['Specialty', c.specialty],
           ['Description', c.description],
+          [
+            'Address',
+            [c.address_line, c.city, c.state, c.postal_code].filter(Boolean).join(', ') || null,
+          ],
           ['Phone', c.phone],
-          ['Email', c.email],
+          [
+            'Email',
+            c.email && (
+              <a className="rp-link" href={`mailto:${c.email}`}>
+                {c.email}
+              </a>
+            ),
+          ],
           [
             'Website',
             c.website_url && (
               <ExternalLink href={c.website_url}>{displayHost(c.website_url)}</ExternalLink>
             ),
           ],
-          [
-            'Address',
-            [c.address_line, c.city, c.state, c.postal_code].filter(Boolean).join(', ') || null,
-          ],
-          ['Added', formatDate(c.created_at)],
-          ['Last updated', formatRelativeTime(c.updated_at)],
         ]}
       />
-      <EditClinicDrawer clinic={c} open={editing} onClose={() => setEditing(false)} />
     </Card>
   );
 }
@@ -188,7 +181,7 @@ function ManagerCard({ clinicId }: { clinicId: string }) {
             loading={setAssignment.isPending}
             disabled={!selected || selected === current?.user_id}
           >
-            {current ? 'Update assignment' : 'Assign'}
+            {current ? 'Change manager' : 'Assign manager'}
           </Button>
         </form>
       )}
@@ -196,18 +189,21 @@ function ManagerCard({ clinicId }: { clinicId: string }) {
   );
 }
 
-function StageCard({ clinicId }: { clinicId: string }) {
+function StatusCard({ clinicId }: { clinicId: string }) {
   const clinic = useClinic(clinicId);
   const c = clinic.data;
   return (
     <Card title="Status">
       {c ? (
-        <div className="rp-stack-sm">
-          <ClinicStatusBadge clinic={c} />
-          <span className="rp-muted rp-small">Since {formatDate(c.stage_changed_at)}</span>
-        </div>
+        <DefinitionList
+          items={[
+            ['Status', <ClinicStatusBadge key="status" clinic={c} />],
+            ['In this status since', formatDate(c.stage_changed_at)],
+            ['Last updated', formatDateTime(c.updated_at)],
+          ]}
+        />
       ) : (
-        <CardSkeleton lines={1} />
+        <CardSkeleton lines={2} />
       )}
     </Card>
   );

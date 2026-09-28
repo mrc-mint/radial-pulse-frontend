@@ -26,6 +26,7 @@ import {
   mutationErrorMessage,
   QueryErrorState,
 } from '../../shell/kit';
+import { SocialMetrics } from '../../shell/social-metrics';
 import { useConnectPlatform } from '../../shell/use-connect-platform';
 
 type Platform = Schema<'ConnectionPlatform'>;
@@ -113,6 +114,10 @@ function ConnectionDetail({ platform }: { platform: Platform }) {
               />
             </View>
           </Card>
+
+          {c.platform !== 'google_business_profile' && c.platform !== 'x' && linked ? (
+            <SocialMetrics platform={c.platform} />
+          ) : null}
 
           <Text style={styles.note}>
             Radial Pulse only reads insights from this account. It never posts for you.

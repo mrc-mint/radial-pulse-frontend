@@ -1,8 +1,10 @@
-import { useUpdateClinic } from '@radial-pulse/api-client/react';
+import { useSetClinicPhoto, useUpdateClinic } from '@radial-pulse/api-client/react';
 import type { Schema } from '@radial-pulse/shared-types';
 import { Button, Drawer, Input } from '@radial-pulse/ui/web';
-import { useState, type FormEvent } from 'react';
+import { ImageUp } from 'lucide-react';
+import { useRef, useState, type FormEvent } from 'react';
 import { fieldErrors, mutationErrorMessage } from '../../app/page-kit';
+import { ClinicPhoto } from './clinic-photo';
 
 type Editable =
   | 'name'
@@ -81,6 +83,7 @@ export function EditClinicDrawer({
         </>
       }
     >
+      <PhotoField clinic={clinic} />
       <form id="edit-clinic-form" className="rp-form" onSubmit={submit} noValidate>
         {FIELDS.map(([k, label, type]) => (
           <Input
@@ -100,5 +103,52 @@ export function EditClinicDrawer({
         )}
       </form>
     </Drawer>
+  );
+}
+
+/**
+ * Clinic photo: uploads a `clinic_photo` asset and sets it as the cover
+ * photo straight away (separate from the text fields' Save).
+ */
+function PhotoField({ clinic }: { clinic: Schema<'ClinicRead'> }) {
+  const setPhoto = useSetClinicPhoto(clinic.id);
+  const input = useRef<HTMLInputElement>(null);
+  return (
+    <div className="rp-photo-field">
+      <ClinicPhoto clinicId={clinic.id} assetId={clinic.cover_asset_id} name={clinic.name} />
+      <div className="rp-stack-sm">
+        <span className="rp-photo-field__label">Clinic photo</span>
+        <span className="rp-muted rp-small">Shown on the clinic page. JPG or PNG works best.</span>
+        <input
+          ref={input}
+          type="file"
+          accept="image/*"
+          className="rp-sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) setPhoto.mutate(file);
+            e.target.value = '';
+          }}
+        />
+        <div>
+          <Button
+            variant="secondary"
+            size="sm"
+            leadingIcon={<ImageUp size={14} />}
+            loading={setPhoto.isPending}
+            onClick={() => input.current?.click()}
+          >
+            Change photo
+          </Button>
+        </div>
+        {setPhoto.isError && (
+          <p className="rp-form__error" role="alert">
+            {mutationErrorMessage(setPhoto.error)}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
