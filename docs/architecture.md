@@ -28,8 +28,12 @@ Enforced by `@nx/enforce-module-boundaries` (tags in each `package.json`) and
 
 Also enforced: web never imports native code and vice versa; platform-neutral
 packages import neither DOM nor React Native; packages never import apps;
-modules never import each other; only the app config modules read env.
+modules never import each other; only the app config modules read env;
+pure packages (`utils`, `shared-types`, `config`, `design-tokens`) import no
+React; apps never import the raw HTTP client (`openapi-fetch`,
+`createApiClient`, `useApiClient`) and use resource hooks instead.
 Packages expose only their entry points via `exports`, so deep imports fail.
+Package boundaries in prose: `packages/*/README.md`.
 
 ## §4 Platform shell
 

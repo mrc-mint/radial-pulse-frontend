@@ -57,31 +57,60 @@ const NEUTRAL = {
   message: 'Shared by web and mobile: keep it free of DOM and native imports.',
 };
 const NO_APPS = { group: ['**/apps/**'], message: 'Packages must never import from apps.' };
+const NO_REACT = {
+  group: ['react', 'react/*', 'react-dom', 'react-dom/*', 'react-native', 'react-native/*'],
+  message: 'Pure package: no React. UI belongs in @radial-pulse/ui or platform-shell.',
+};
+
+/**
+ * Apps never talk HTTP themselves: screens use the resource hooks from
+ * @radial-pulse/api-client/react, and only platform-shell's composition root
+ * builds the client.
+ */
+const NO_DIRECT_HTTP = [
+  { name: 'openapi-fetch', message: 'Use the resource hooks from @radial-pulse/api-client/react.' },
+  {
+    name: '@radial-pulse/api-client',
+    importNames: ['createApiClient', 'platformMiddleware'],
+    message: 'The API client is built once by createAppServices (platform-shell).',
+  },
+  {
+    name: '@radial-pulse/api-client/react',
+    importNames: ['useApiClient'],
+    message: 'Use a resource hook instead; add one to @radial-pulse/api-client/react if missing.',
+  },
+];
 const NO_CROSS_MODULE = {
   group: ['**/modules/**'],
   message: 'Modules are independent: navigate via typed routes, share via packages.',
 };
 
-const restrict = (files, patterns, ignores = []) => ({
+const restrict = (files, patterns, ignores = [], paths = []) => ({
   files,
   ignores,
-  rules: { 'no-restricted-imports': ['error', { patterns }] },
+  rules: { 'no-restricted-imports': ['error', { patterns, paths }] },
 });
 
 function importRestrictionBlocks() {
   const ts = '**/*.{ts,tsx}';
   return [
-    restrict([`apps/web/${ts}`], [NATIVE], [`apps/web/src/modules/${ts}`]),
-    restrict([`apps/web/src/modules/${ts}`], [NATIVE, NO_CROSS_MODULE]),
-    restrict([`apps/mobile/${ts}`], [DOM], [`apps/mobile/src/modules/${ts}`]),
-    restrict([`apps/mobile/src/modules/${ts}`], [DOM, NO_CROSS_MODULE]),
+    restrict([`apps/web/${ts}`], [NATIVE], [`apps/web/src/modules/${ts}`], NO_DIRECT_HTTP),
+    restrict([`apps/web/src/modules/${ts}`], [NATIVE, NO_CROSS_MODULE], [], NO_DIRECT_HTTP),
+    restrict([`apps/mobile/${ts}`], [DOM], [`apps/mobile/src/modules/${ts}`], NO_DIRECT_HTTP),
+    restrict([`apps/mobile/src/modules/${ts}`], [DOM, NO_CROSS_MODULE], [], NO_DIRECT_HTTP),
+    // Pure packages: no React at all.
     restrict(
       [
         `packages/shared-types/${ts}`,
         `packages/utils/${ts}`,
         `packages/config/${ts}`,
-        `packages/api-client/${ts}`,
         `packages/design-tokens/${ts}`,
+      ],
+      [NO_REACT, NO_APPS],
+    ),
+    restrict(
+      [
+        `packages/api-client/${ts}`,
         `packages/ui/src/shared/${ts}`,
         `packages/platform-shell/src/core/${ts}`,
       ],
