@@ -36,6 +36,8 @@ export type { ScoreRingProps } from './score-ring';
 export type { MetricCardProps, ScoreCardProps } from './metrics';
 export { FindingCard } from './finding';
 export type { FindingCardProps } from './finding';
+export { ProtectedImage } from './media';
+export type { ProtectedImageProps } from './media';
 export { EmptyState, ErrorState, LoadingState, Skeleton } from './feedback';
 export type {
   EmptyStateProps,

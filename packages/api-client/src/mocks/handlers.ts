@@ -1,6 +1,7 @@
 import type { Permission, Schema } from '@radial-pulse/shared-types';
 import { delay, http, HttpResponse, type HttpResponseResolver } from 'msw';
 import { createMockDb, mockNow, nextTimestamp, type MockDb } from './data';
+import { blobToDataUrl, MOCK_ASSET_RESOURCE_TYPE, MOCK_REVIEWED_KINDS } from './media';
 import {
   CLINIC_ADMIN_CLINIC,
   DSM_CLINIC,
@@ -24,6 +25,42 @@ export interface MockOptions {
   /** Artificial latency so loading states are visible (0 in tests). */
   latencyMs?: number;
   db?: MockDb;
+  /**
+   * Return photos and audio as `data:` URLs from download-url (React Native,
+   * where no service worker can answer the mock storage URL).
+   */
+  inlineMedia?: boolean;
+}
+
+type MockAsset = MockDb['assets'] extends Map<string, infer A> ? A : never;
+
+/** An asset as the API returns it (without the mock's stored file). */
+function assetRead(asset: MockAsset): Schema<'AssetRead'> {
+  const { blob: _blob, ...read } = asset;
+  void _blob;
+  return read;
+}
+
+/** Approval transitions the mocks allow; null means 409 Conflict. */
+function approvalTransition(
+  state: Schema<'ApprovalState'>,
+  action: Schema<'ApprovalAction'>,
+): Schema<'ApprovalState'> | null {
+  switch (action) {
+    case 'submit':
+      return state === 'draft' || state === 'redo_requested' || state === 'rejected'
+        ? 'submitted'
+        : null;
+    case 'approve':
+      return state === 'submitted' ? 'approved' : null;
+    case 'reject':
+      return state === 'submitted' ? 'rejected' : null;
+    case 'redo':
+      return state === 'submitted' ? 'redo_requested' : null;
+    case 'publish':
+    case 'handoff':
+      return null;
+  }
 }
 
 interface Principal {
@@ -1060,6 +1097,12 @@ export function createMockHandlers(options: MockOptions) {
       route<{ clinic_id: string }>(
         async ({ request, params, me }) => {
           const body = (await request.json()) as Schema<'AssetUploadRequest'>;
+          const previous = body.previous_version_id
+            ? db.assets.get(body.previous_version_id)
+            : undefined;
+          if (body.previous_version_id && previous?.clinic_id !== params.clinic_id) {
+            return notFound();
+          }
           const id = crypto.randomUUID();
           const asset: Schema<'AssetRead'> = {
             id,
@@ -1071,9 +1114,9 @@ export function createMockHandlers(options: MockOptions) {
             status: 'pending_upload',
             approval_state: 'draft',
             owner_user_id: me.user.id,
-            previous_version_id: null,
+            previous_version_id: previous?.id ?? null,
             provenance: {},
-            version: 1,
+            version: (previous?.version ?? 0) + 1,
             created_at: mockNow(),
             updated_at: mockNow(),
           };
@@ -1116,31 +1159,139 @@ export function createMockHandlers(options: MockOptions) {
     http.post(
       `${api}/clinics/:clinic_id/assets/:asset_id/confirm`,
       route<{ clinic_id: string; asset_id: string }>(
-        ({ params }) => {
+        ({ params, me }) => {
           const asset = db.assets.get(params.asset_id);
           if (!asset || asset.clinic_id !== params.clinic_id) return notFound();
           asset.status = 'uploaded';
           asset.updated_at = mockNow();
-          const { blob: _b, ...read } = asset;
-          void _b;
-          return HttpResponse.json(read);
+          // Mock behaviour (backend gap 22): a confirmed photo or voice sample
+          // goes straight to review.
+          if (MOCK_REVIEWED_KINDS.has(asset.kind)) {
+            asset.approval_state = 'submitted';
+            db.approvals.unshift({
+              id: crypto.randomUUID(),
+              clinic_id: asset.clinic_id,
+              resource_type: MOCK_ASSET_RESOURCE_TYPE,
+              resource_id: asset.id,
+              state: 'submitted',
+              publication_state: 'unpublished',
+              submitted_by_user_id: me.user.id,
+              decided_by_user_id: null,
+              assignee_user_id: null,
+              last_comment: null,
+              created_at: nextTimestamp(),
+              updated_at: nextTimestamp(),
+            });
+          }
+          return HttpResponse.json(assetRead(asset));
         },
         { clinic: true, permission: 'assets:upload' },
       ),
     ),
 
     http.get(
+      `${api}/clinics/:clinic_id/assets`,
+      route<{ clinic_id: string }>(
+        ({ params, url }) => {
+          const kind = url.searchParams.get('kind');
+          const items = [...db.assets.values()]
+            .filter((a) => a.clinic_id === params.clinic_id && (!kind || a.kind === kind))
+            .sort((a, b) => b.created_at.localeCompare(a.created_at))
+            .map(assetRead);
+          return HttpResponse.json(page(items, url) satisfies Schema<'Page_AssetRead_'>);
+        },
+        { clinic: true, permission: 'assets:read' },
+      ),
+    ),
+
+    http.get(
       `${api}/clinics/:clinic_id/assets/:asset_id/download-url`,
       route<{ clinic_id: string; asset_id: string }>(
-        ({ params }) => {
+        async ({ params }) => {
           const asset = db.assets.get(params.asset_id);
           if (!asset || asset.clinic_id !== params.clinic_id) return notFound();
+          // React Native has no service worker to answer the storage URL, so
+          // the mobile mocks hand photos and audio over inline.
+          const inline =
+            options.inlineMedia && asset.blob && /^(image|audio)\//.test(asset.mime_type);
           return HttpResponse.json({
-            url: `${api}/__mock-storage/${asset.id}`,
+            url: inline ? await blobToDataUrl(asset.blob!) : `${api}/__mock-storage/${asset.id}`,
             expires_in: 300,
           } satisfies Schema<'AssetDownloadResponse'>);
         },
         { clinic: true, permission: 'assets:read' },
+      ),
+    ),
+
+    http.get(
+      `${api}/clinics/:clinic_id/approvals`,
+      route<{ clinic_id: string }>(
+        ({ params, url }) => {
+          const state = url.searchParams.get('state');
+          const items = db.approvals.filter(
+            (a) => a.clinic_id === params.clinic_id && (!state || a.state === state),
+          );
+          return HttpResponse.json(page(items, url) satisfies Schema<'Page_ApprovalRead_'>);
+        },
+        { clinic: true },
+      ),
+    ),
+
+    http.get(
+      `${api}/clinics/:clinic_id/approvals/:approval_id`,
+      route<{ clinic_id: string; approval_id: string }>(
+        ({ params }) => {
+          const approval = db.approvals.find(
+            (a) => a.id === params.approval_id && a.clinic_id === params.clinic_id,
+          );
+          return approval ? HttpResponse.json(approval) : notFound();
+        },
+        { clinic: true },
+      ),
+    ),
+
+    http.post(
+      `${api}/clinics/:clinic_id/approvals/actions`,
+      route<{ clinic_id: string }>(
+        async ({ request, params, me, perms }) => {
+          const body = (await request.json()) as Schema<'ApprovalActionRequest'>;
+          const approval = db.approvals.find(
+            (a) =>
+              a.clinic_id === params.clinic_id &&
+              a.resource_type === body.resource_type &&
+              a.resource_id === body.resource_id,
+          );
+          if (!approval) return notFound();
+          const needed: Record<Schema<'ApprovalAction'>, Permission> = {
+            submit: 'approvals:submit',
+            handoff: 'approvals:submit',
+            approve: 'approvals:decide',
+            reject: 'approvals:decide',
+            redo: 'approvals:decide',
+            publish: 'approvals:publish',
+          };
+          if (!perms.has(needed[body.action])) return forbidden();
+          const next = approvalTransition(approval.state, body.action);
+          if (!next) {
+            return problem(
+              409,
+              'conflict',
+              `Cannot ${body.action} an approval that is ${approval.state}`,
+            );
+          }
+          approval.state = next;
+          approval.last_comment = body.comment ?? approval.last_comment;
+          approval.updated_at = nextTimestamp();
+          if (body.action === 'submit') approval.submitted_by_user_id = me.user.id;
+          else approval.decided_by_user_id = me.user.id;
+          const asset = db.assets.get(approval.resource_id);
+          if (asset && approval.resource_type === MOCK_ASSET_RESOURCE_TYPE) {
+            asset.approval_state = next;
+            asset.updated_at = approval.updated_at;
+          }
+          return HttpResponse.json(approval);
+        },
+        { clinic: true },
       ),
     ),
 

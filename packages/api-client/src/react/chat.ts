@@ -1,8 +1,8 @@
 import type { Schema } from '@radial-pulse/shared-types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
-import { assetsService, chatService, uploadToPresignedUrl } from '../services';
-import { useApiClient } from './provider';
+import { chatService, uploadAsset, type UploadFile } from '../services';
+import { useApiClient, useStorageFetch } from './provider';
 import { clinicQueryKey, platformQueryKey } from './query-keys';
 
 /** Chat (polling today, replaceable by WebSockets without screen changes). */
@@ -107,14 +107,12 @@ export function useChatMessages(
  * A file to attach: a web `File`, or (React Native) a Blob read from the
  * picked document with its name passed alongside.
  */
-export interface ChatAttachment {
-  data: Blob;
-  name: string;
-}
+export type ChatAttachment = UploadFile;
 
 /** Sends text and/or one attachment; attachments are uploaded first (contract flow). */
 export function useSendChatMessage(clinicId: string) {
   const api = useApiClient();
+  const storageFetch = useStorageFetch();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({
@@ -126,15 +124,14 @@ export function useSendChatMessage(clinicId: string) {
     }) => {
       let attachmentId: string | null = null;
       if (file) {
-        const { data, name } = 'data' in file ? file : { data: file, name: file.name };
-        const upload = await assetsService.requestUpload(api, clinicId, {
-          kind: 'chat_attachment',
-          mime_type: data.type || 'application/octet-stream',
-          size_bytes: data.size,
-          original_filename: name,
-        });
-        await uploadToPresignedUrl(upload, data);
-        attachmentId = (await assetsService.confirm(api, clinicId, upload.asset.id)).id;
+        const attachment = 'data' in file ? file : { data: file, name: file.name };
+        const asset = await uploadAsset(
+          api,
+          clinicId,
+          { kind: 'chat_attachment', file: attachment },
+          storageFetch,
+        );
+        attachmentId = asset.id;
       }
       return chatService.send(api, clinicId, { body, attachment_asset_id: attachmentId });
     },

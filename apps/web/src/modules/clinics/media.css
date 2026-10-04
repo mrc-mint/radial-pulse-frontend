@@ -1,0 +1,214 @@
+/* ── Clinic media (staff review) ── */
+.rp-media-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rp-space-3);
+}
+
+.rp-media-toolbar__filter {
+  width: 220px;
+}
+
+.rp-media-summary {
+  margin: 0;
+  color: var(--rp-color-text-secondary);
+  font-size: var(--rp-text-body-sm-size);
+}
+
+.rp-media-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-space-3);
+}
+
+.rp-media-group + .rp-media-group {
+  padding-top: var(--rp-space-4);
+  border-top: 1px solid var(--rp-color-border-subtle);
+}
+
+.rp-media-group__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--rp-space-3);
+}
+
+.rp-media-group__title {
+  margin: 0;
+  color: var(--rp-color-text-primary);
+  font-size: var(--rp-text-body-size);
+  font-weight: 600;
+}
+
+.rp-media-group__hint {
+  margin: var(--rp-space-0-5) 0 0;
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-body-sm-size);
+}
+
+.rp-media-grid {
+  display: grid;
+  gap: var(--rp-space-3);
+}
+
+.rp-media-grid--portrait {
+  grid-template-columns: repeat(auto-fill, minmax(112px, 144px));
+}
+
+.rp-media-grid--portrait .rp-media-tile {
+  aspect-ratio: 3 / 4;
+}
+
+.rp-media-grid--landscape {
+  grid-template-columns: repeat(auto-fill, minmax(168px, 220px));
+}
+
+.rp-media-grid--landscape .rp-media-tile {
+  aspect-ratio: 4 / 3;
+}
+
+.rp-media-tile {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--rp-color-border-default);
+  border-radius: var(--rp-radius-lg);
+  background: var(--rp-color-bg-subtle);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.rp-media-tile:focus-visible {
+  outline: 2px solid var(--rp-color-border-focus);
+  outline-offset: 2px;
+}
+
+.rp-media-tile--empty {
+  border-style: dashed;
+  cursor: default;
+}
+
+.rp-media-tile__status {
+  position: absolute;
+  top: var(--rp-space-2);
+  left: var(--rp-space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--_tone-bg);
+  color: var(--_tone-fg);
+  box-shadow: 0 0 0 2px var(--rp-color-bg-surface);
+}
+
+.rp-media-tile__label {
+  position: absolute;
+  left: var(--rp-space-2);
+  bottom: var(--rp-space-2);
+  padding: 2px var(--rp-space-1-5, 6px);
+  border-radius: var(--rp-radius-sm);
+  background: rgb(15 23 42 / 0.6);
+  color: #fff;
+  font-size: var(--rp-text-caption-size);
+  font-weight: 600;
+}
+
+.rp-media-tile--empty .rp-media-tile__label {
+  background: transparent;
+  color: var(--rp-color-text-tertiary);
+}
+
+.rp-voice-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rp-voice-list li + li {
+  border-top: 1px solid var(--rp-color-border-subtle);
+}
+
+.rp-voice-row {
+  display: flex;
+  align-items: center;
+  gap: var(--rp-space-3);
+  width: 100%;
+  padding: var(--rp-space-3) var(--rp-space-5);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.rp-voice-row:hover {
+  background: var(--rp-color-bg-hover);
+}
+
+.rp-voice-row__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--rp-radius-md);
+  background: var(--rp-color-bg-muted);
+  color: var(--rp-color-text-secondary);
+}
+
+.rp-voice-row__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rp-voice-row__title {
+  color: var(--rp-color-text-primary);
+  font-weight: 600;
+}
+
+.rp-voice-row__meta {
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-body-sm-size);
+}
+
+.rp-media-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-space-4);
+}
+
+.rp-media-review__photo {
+  height: min(60vh, 480px);
+  border-radius: var(--rp-radius-lg);
+  overflow: hidden;
+}
+
+.rp-media-review__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--rp-space-3);
+  margin: 0;
+}
+
+.rp-media-review__facts dt {
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-body-sm-size);
+}
+
+.rp-media-review__facts dd {
+  margin: var(--rp-space-1) 0 0;
+  color: var(--rp-color-text-primary);
+}
+
+.rp-media-review__hint {
+  margin: 0;
+  color: var(--rp-color-text-secondary);
+  font-size: var(--rp-text-body-sm-size);
+}

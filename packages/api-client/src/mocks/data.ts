@@ -1,5 +1,6 @@
 import type { components, Schema } from '@radial-pulse/shared-types';
 import { clinicPhotoSvg, mockPractitioners, mockSnapshots } from './extras';
+import { mockClinicMedia } from './media';
 import { MOCK_PERSONAS } from './personas';
 
 /**
@@ -262,6 +263,7 @@ export interface MockDb {
   /** userId → clinicId → last read message timestamp. */
   chatReads: Map<string, Map<string, string>>;
   assets: Map<string, S<'AssetRead'> & { blob?: Blob }>;
+  approvals: Array<S<'ApprovalRead'>>;
   practitioners: Array<S<'PractitionerRead'>>;
   snapshots: Array<S<'MetricSnapshotRead'>>;
   auditEvents: Array<S<'AuditEventRead'>>;
@@ -1026,6 +1028,20 @@ export function createMockDb(): MockDb {
     });
   });
 
+  // Sample media with approvals for each clinic Dr. Rahul Mehta administers.
+  const approvals: Array<S<'ApprovalRead'>> = [];
+  [clinics[0]!, clinics[7]!].forEach((c, i) => {
+    const media = mockClinicMedia(
+      c.id,
+      doctor.id,
+      priya.id,
+      (n, kind) => uuid(`${kind === 'asset' ? 'md' : 'ap'}${i}`, n),
+      (days) => ago(days),
+    );
+    for (const a of media.assets) assets.set(a.id, a);
+    approvals.push(...media.approvals);
+  });
+
   const practitioners = mockPractitioners(clinics, (n) => uuid('b2', n));
 
   let snapshotSeq = 0;
@@ -1132,6 +1148,7 @@ export function createMockDb(): MockDb {
     messages,
     chatReads,
     assets,
+    approvals,
     practitioners,
     snapshots,
     auditEvents,

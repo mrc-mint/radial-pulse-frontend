@@ -1,4 +1,4 @@
-import type { ApiClient } from '@radial-pulse/api-client';
+import type { ApiClient, StorageFetch } from '@radial-pulse/api-client';
 import { createQueryClient } from '@radial-pulse/api-client/react';
 import type { AppConfig } from '@radial-pulse/config';
 import {
@@ -17,6 +17,8 @@ export interface MobileServices {
   session: SessionController;
   queryClient: QueryClient;
   connectBrowser: ConnectBrowser;
+  /** Object storage fetch for uploads; undefined means the global fetch. */
+  storageFetch?: StorageFetch;
 }
 
 /**
@@ -49,5 +51,6 @@ export function createMobileServices(): MobileServices {
     session,
     queryClient,
     connectBrowser: mocks?.connectBrowser ?? systemConnectBrowser,
+    storageFetch: mocks?.storageFetch,
   };
 }

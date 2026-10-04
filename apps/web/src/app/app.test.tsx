@@ -8,7 +8,7 @@ import {
 } from '@radial-pulse/api-client/mocks';
 import { createConfig } from '@radial-pulse/config';
 import { createAppServices, createMockAuth } from '@radial-pulse/platform-shell/core';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from '@tanstack/react-router';
 import { setupServer } from 'msw/node';
@@ -195,6 +195,7 @@ describe('web app against the contract mocks', () => {
       'Social Media',
       'Listings',
       'Audit Report',
+      'Media',
       'Activity',
       'Chat',
     ]);
@@ -239,6 +240,49 @@ describe('web app against the contract mocks', () => {
     await user.click(screen.getByRole('link', { name: 'Activity' }));
     expect(await screen.findByText('Clinic archived: Not interested right now')).toBeTruthy();
   });
+
+  it.each(['digital-success-manager', 'platform-administrator'] as const)(
+    'lets a %s review clinic media, with no upload or download controls',
+    async (persona) => {
+      const user = userEvent.setup();
+      const container = document.body;
+      await renderApp(`/clinics/${SMILE}/media`, persona);
+      expect(await screen.findByRole('heading', { name: 'Doctor photos' })).toBeTruthy();
+      // Categories from the product reference.
+      expect(screen.getByRole('heading', { name: 'Exterior & signage' })).toBeTruthy();
+      expect(screen.getByRole('heading', { name: 'Logo & cover photo' })).toBeTruthy();
+      expect(screen.getAllByText('90° L').length).toBeGreaterThan(0);
+      expect(screen.getByRole('tab', { name: 'Without apron' })).toBeTruthy();
+
+      // Staff never upload, replace, delete or download here.
+      expect(container.querySelector('input[type="file"]')).toBeNull();
+      expect(container.querySelector('a[download]')).toBeNull();
+      expect(
+        screen.queryByRole('button', { name: /^(upload|replace|delete|remove|download|save) /i }),
+      ).toBeNull();
+
+      const verified = /Verified\. Open to review/;
+      const before = (await screen.findAllByRole('button', { name: verified })).length;
+      const tile = (
+        await screen.findAllByRole('button', { name: /Awaiting review\. Open to review/ })
+      )[0]!;
+      await user.click(tile);
+      const dialog = within(await screen.findByRole('dialog'));
+      // A retake needs a note; approving does not.
+      expect(
+        (dialog.getByRole('button', { name: 'Request retake' }) as HTMLButtonElement).disabled,
+      ).toBe(true);
+      await user.click(dialog.getByRole('button', { name: 'Approve' }));
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+      await waitFor(() =>
+        expect(screen.getAllByRole('button', { name: verified })).toHaveLength(before + 1),
+      );
+      // Protected media never appears as a link.
+      expect([...container.querySelectorAll('a')].some((a) => /mock-storage/.test(a.href))).toBe(
+        false,
+      );
+    },
+  );
 
   it('shows no sections for a clinic outside the caller’s access', async () => {
     await renderApp(`/clinics/${BRIGHT}`, 'digital-success-manager');

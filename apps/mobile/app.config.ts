@@ -29,7 +29,21 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     userInterfaceStyle: 'automatic',
     ios: { bundleIdentifier: `${BASE_ID}${variant.idSuffix}`, supportsTablet: false },
     android: { package: `${BASE_ID}${variant.idSuffix}` },
-    plugins: ['expo-router'],
+    plugins: [
+      'expo-router',
+      // Playback only: voice samples are uploaded as files, never recorded.
+      ['expo-audio', { microphonePermission: false }],
+      // Photos come from the library; no camera capture in V1.
+      [
+        'expo-image-picker',
+        {
+          photosPermission:
+            'Radial Pulse uses your photo library so you can upload clinic and doctor photos.',
+          cameraPermission: false,
+          microphonePermission: false,
+        },
+      ],
+    ],
     experiments: { typedRoutes: true },
     extra: { appEnv: APP_ENV },
   };

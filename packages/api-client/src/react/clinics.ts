@@ -1,16 +1,16 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  assetsService,
   assignmentsService,
   auditEventsService,
   clinicsService,
   practitionersService,
-  uploadToPresignedUrl,
+  uploadAsset,
   type BodyOf,
   type QueryOf,
+  type UploadFile,
 } from '../services';
 import { invalidatePlatformLists } from './invalidation';
-import { useApiClient } from './provider';
+import { useApiClient, useStorageFetch } from './provider';
 import { clinicQueryKey, platformQueryKey } from './query-keys';
 
 /** Clinics: list, details, status actions, photo, practitioners, assignment, activity. */
@@ -99,17 +99,17 @@ export function useRestoreClinic(clinicId: string) {
  */
 export function useSetClinicPhoto(clinicId: string) {
   const api = useApiClient();
+  const storageFetch = useStorageFetch();
   const invalidate = useInvalidateClinicEverywhere(clinicId);
   return useMutation({
-    mutationFn: async (file: File) => {
-      const upload = await assetsService.requestUpload(api, clinicId, {
-        kind: 'clinic_photo',
-        mime_type: file.type || 'application/octet-stream',
-        size_bytes: file.size,
-        original_filename: file.name,
-      });
-      await uploadToPresignedUrl(upload, file);
-      const asset = await assetsService.confirm(api, clinicId, upload.asset.id);
+    mutationFn: async (file: File | UploadFile) => {
+      const photo = 'data' in file ? file : { data: file, name: file.name };
+      const asset = await uploadAsset(
+        api,
+        clinicId,
+        { kind: 'clinic_photo', file: photo },
+        storageFetch,
+      );
       return clinicsService.update(api, clinicId, { cover_asset_id: asset.id });
     },
     onSuccess: invalidate,

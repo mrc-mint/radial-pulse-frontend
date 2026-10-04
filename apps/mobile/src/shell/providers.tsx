@@ -36,7 +36,7 @@ export function AppProviders({
     <SafeAreaProvider>
       <ConfigProvider config={services.config}>
         <SessionProvider controller={services.session}>
-          <ApiClientProvider client={services.api}>
+          <ApiClientProvider client={services.api} storageFetch={services.storageFetch}>
             <QueryClientProvider client={services.queryClient}>
               <ConnectBrowserProvider browser={services.connectBrowser}>
                 <NativeAppShell>{children}</NativeAppShell>

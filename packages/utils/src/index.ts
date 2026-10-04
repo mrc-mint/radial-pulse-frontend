@@ -9,3 +9,4 @@ export * from './labels';
 export * from './clinic-status';
 export { showsComponentScore } from './components';
 export { formatMetric, metricLabel, metricRank } from './metrics';
+export * from './media';

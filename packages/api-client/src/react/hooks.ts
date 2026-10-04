@@ -11,4 +11,5 @@ export * from './assessments';
 export * from './work-items';
 export * from './connections';
 export * from './assets';
+export * from './approvals';
 export * from './chat';

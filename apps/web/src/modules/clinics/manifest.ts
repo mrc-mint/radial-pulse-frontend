@@ -36,6 +36,13 @@ export const clinicsModule: ModuleManifest = {
       requiredPermission: 'presence:read',
     },
     {
+      id: 'media',
+      label: 'Media',
+      path: 'media',
+      order: 55,
+      requiredPermission: 'assets:read',
+    },
+    {
       id: 'activity',
       label: 'Activity',
       path: 'activity',

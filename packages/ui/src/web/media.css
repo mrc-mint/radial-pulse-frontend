@@ -1,0 +1,48 @@
+/* ── Protected media ── */
+.rp-protected-image {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  background: var(--rp-color-bg-subtle);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.rp-protected-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.rp-protected-image--cover img {
+  object-fit: cover;
+}
+
+.rp-protected-image--contain img {
+  object-fit: contain;
+}
+
+.rp-protected-image__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--rp-color-text-tertiary);
+}
+
+.rp-protected-audio {
+  display: block;
+  width: 100%;
+  height: 40px;
+}
+
+.rp-protected-audio--empty {
+  display: flex;
+  align-items: center;
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-body-sm-size);
+}

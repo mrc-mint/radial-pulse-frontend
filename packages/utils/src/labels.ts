@@ -133,3 +133,29 @@ export const USER_STATUS_LABELS: Labels<'UserStatus'> = {
   active: 'Active',
   deactivated: 'Deactivated',
 };
+
+/** Review state of a clinic photo or voice sample, as the Media screens word it. */
+export const MEDIA_REVIEW_LABELS: Labels<'ApprovalState'> = {
+  draft: 'Not submitted',
+  submitted: 'Awaiting review',
+  approved: 'Verified',
+  rejected: 'Rejected',
+  redo_requested: 'Needs retake',
+};
+
+/** Like `MEDIA_REVIEW_LABELS`, but a voice sample is re-recorded, not retaken. */
+export function mediaReviewLabel(
+  state: Schema<'ApprovalState'>,
+  kind: Schema<'AssetKind'>,
+): string {
+  return kind === 'audio' && state === 'redo_requested'
+    ? 'Needs re-record'
+    : MEDIA_REVIEW_LABELS[state];
+}
+
+/** Review actions on a clinic photo or voice sample. */
+export const MEDIA_REVIEW_ACTION_LABELS = {
+  approve: 'Approve',
+  redo: 'Request retake',
+  reject: 'Reject',
+} as const satisfies Partial<Record<Schema<'ApprovalAction'> & string, string>>;

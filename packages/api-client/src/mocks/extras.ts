@@ -21,17 +21,17 @@ export function clinicPhotoSvg(seed: number): string {
   const p = PALETTES[seed % PALETTES.length]!;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
   <defs>
-    <linearGradient id="light" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="light-${seed}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="${p.wall}"/>
     </linearGradient>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="sky-${seed}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#bfdcf5"/><stop offset="1" stop-color="#e9f4fd"/>
     </linearGradient>
   </defs>
-  <rect width="480" height="320" fill="url(#light)"/>
+  <rect width="480" height="320" fill="url(#light-${seed})"/>
   <rect y="236" width="480" height="84" fill="#e4e1dc"/>
   <path d="M0 236 L480 236" stroke="#d3cec6" stroke-width="3"/>
-  <rect x="36" y="44" width="150" height="150" rx="6" fill="url(#sky)" stroke="#ffffff" stroke-width="8"/>
+  <rect x="36" y="44" width="150" height="150" rx="6" fill="url(#sky-${seed})" stroke="#ffffff" stroke-width="8"/>
   <path d="M111 44 V194 M36 119 H186" stroke="#ffffff" stroke-width="6"/>
   <rect x="226" y="58" width="96" height="62" rx="6" fill="${p.accent}" opacity="0.14"/>
   <circle cx="274" cy="89" r="17" fill="none" stroke="${p.accent}" stroke-width="5"/>

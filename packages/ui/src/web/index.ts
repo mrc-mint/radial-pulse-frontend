@@ -41,6 +41,8 @@ export { MetricCard, ScoreCard } from './metrics';
 export type { MetricCardProps, ScoreCardProps } from './metrics';
 export { FindingCard } from './finding';
 export type { FindingCardProps } from './finding';
+export { ProtectedAudio, ProtectedImage } from './media';
+export type { ProtectedAudioProps, ProtectedImageProps } from './media';
 export { EmptyState, ErrorState, LoadingState, Skeleton } from './feedback';
 export type {
   EmptyStateProps,

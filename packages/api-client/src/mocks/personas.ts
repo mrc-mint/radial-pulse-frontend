@@ -58,6 +58,10 @@ export const DSM_CLINIC: Permission[] = [
   'connections:manage',
 ];
 
+/**
+ * V1 rule: Clinic Administrators upload media but never review it, so they
+ * have no `approvals:*` permission (docs/media-backend-request.md).
+ */
 export const CLINIC_ADMIN_CLINIC: Permission[] = [
   'clinics:read',
   'clinics:write',
@@ -72,7 +76,6 @@ export const CLINIC_ADMIN_CLINIC: Permission[] = [
   'assets:upload',
   'assessments:read',
   'reports:read',
-  'approvals:decide',
   'work_items:read',
   'snapshots:read',
   'audit_log:read',

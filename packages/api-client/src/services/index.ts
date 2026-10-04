@@ -14,4 +14,5 @@ export * from './work-items';
 export * from './connections';
 export * from './chat';
 export * from './assets';
+export * from './approvals';
 export * from './settings';
