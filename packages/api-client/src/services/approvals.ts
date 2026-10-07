@@ -1,6 +1,12 @@
 import { unwrap, type ApiClient } from '../http';
 import { clinicPath, type BodyOf, type QueryOf } from './types';
 
+/**
+ * The approvals `resource_type` of a clinic file. The contract documents it as
+ * the example of the `resource_type` filter ("e.g. asset").
+ */
+export const ASSET_RESOURCE_TYPE = 'asset';
+
 /** Approvals: review records and the submit / approve / reject / redo actions. */
 export const approvalsService = {
   list: (

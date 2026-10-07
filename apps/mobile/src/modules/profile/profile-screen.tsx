@@ -23,7 +23,7 @@ type ProfileTab = 'details' | 'media' | 'accounts';
 /**
  * Profile: the clinic's main practitioner, then three tabs. Details: the
  * clinic, its Digital Success Manager, the app version and sign-out. Media:
- * doctor photos, hospital photos and voice samples. Accounts: the signed-in
+ * practitioner photos, hospital photos and voice samples. Accounts: the signed-in
  * account and connected accounts. Clinic-side only: no team management,
  * platform settings or other clinics' data.
  */

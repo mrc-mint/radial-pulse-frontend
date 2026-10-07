@@ -3,6 +3,7 @@ import { can } from '@radial-pulse/utils';
 import { createContext, useContext, useSyncExternalStore, type ReactNode } from 'react';
 import { hasClinicPermission, type ClinicPermissionSet } from './navigation';
 import type { Session, SessionController, SessionState, SignInOption } from './session';
+import type { SignInMethod } from './auth-provider';
 
 const SessionContext = createContext<SessionController | null>(null);
 
@@ -28,6 +29,7 @@ export interface UseSession {
   signOut: () => Promise<void>;
   retry: () => Promise<void>;
   signInOptions: ReadonlyArray<SignInOption>;
+  signInMethod: SignInMethod;
 }
 
 /** Session state and actions. Deliberately exposes no access token. */
@@ -40,6 +42,7 @@ export function useSession(): UseSession {
     signOut: controller.signOut,
     retry: controller.restore,
     signInOptions: controller.signInOptions,
+    signInMethod: controller.signInMethod,
   };
 }
 

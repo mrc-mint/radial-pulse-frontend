@@ -10,11 +10,11 @@ import { usePublishedAssessments } from '../../shell/clinic-data';
 import { CardSkeleton, IconBubble, QueryErrorState } from '../../shell/kit';
 
 /**
- * Reports: the clinic's published Digital Presence Assessments, newest
+ * Assessments: the clinic's published Digital Presence Assessments, newest
  * first (V1 scope). The API returns only published ones to a Clinic
  * Administrator. No downloads: the contract has no assessment export.
  */
-export function ReportsScreen() {
+export function AssessmentsScreen() {
   const router = useRouter();
   const list = usePublishedAssessments();
   const items = list.data?.items ?? [];
@@ -23,7 +23,9 @@ export function ReportsScreen() {
     <Screen
       onRefresh={() => void list.refetch()}
       refreshing={list.isRefetching}
-      header={<PageHeader title="Reports" description="Your published assessments" />}
+      header={
+        <PageHeader title="Assessments" description="Your published Digital Presence Assessments" />
+      }
     >
       {list.isLoading ? (
         <>
@@ -38,7 +40,7 @@ export function ReportsScreen() {
         <Card>
           <EmptyState
             icon={<FileText size={22} color={t.color.text.tertiary} />}
-            title="No reports yet"
+            title="No assessments yet"
             description="Assessments your Digital Success Manager publishes will appear here."
           />
         </Card>

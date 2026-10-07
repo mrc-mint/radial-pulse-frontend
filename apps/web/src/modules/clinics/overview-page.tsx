@@ -70,7 +70,7 @@ function ClinicInformation({ clinicId }: { clinicId: string }) {
   }
   const c = clinic.data;
   if (!c) return <CardSkeleton lines={6} />;
-  const doctor =
+  const practitioner =
     practitioners.data?.items.find((p) => p.is_primary && p.is_active) ??
     practitioners.data?.items[0];
 
@@ -78,8 +78,8 @@ function ClinicInformation({ clinicId }: { clinicId: string }) {
     <Card title="Basic information">
       <DefinitionList
         items={[
-          ['Clinic name', c.name],
-          ['Doctor name', doctor?.full_name ?? null],
+          ['Client organization name', c.name],
+          ['Practitioner name', practitioner?.full_name ?? null],
           ['Specialty', c.specialty],
           ['Description', c.description],
           [
@@ -128,7 +128,7 @@ function ManagerCard({ clinicId }: { clinicId: string }) {
   return (
     <Card
       title="Digital Success Manager"
-      description="Responsible for this clinic’s digital presence"
+      description="Portfolio allocation: responsible for this client organization’s digital presence"
     >
       {assignments.isError ? (
         <QueryError error={assignments.error} onRetry={() => void assignments.refetch()} />
@@ -138,7 +138,7 @@ function ManagerCard({ clinicId }: { clinicId: string }) {
         <span className="rp-person">
           <Avatar name={name ?? 'Digital Success Manager'} size="md" decorative />
           <span className="rp-cell-title">
-            <span>{name ?? 'Assigned'}</span>
+            <span>{name ?? 'Allocated'}</span>
             <span>
               {isMe ? 'You · ' : ''}since {formatDate(current.created_at)}
             </span>
@@ -159,13 +159,17 @@ function ManagerCard({ clinicId }: { clinicId: string }) {
           }}
         >
           <Select
-            label={current ? 'Change Digital Success Manager' : 'Assign a Digital Success Manager'}
+            label={
+              current
+                ? 'Change portfolio allocation'
+                : 'Allocate to a Digital Success Manager’s portfolio'
+            }
             value={selected}
             placeholder="Choose a manager"
             onChange={setChoice}
             options={(managers.data?.items ?? []).map((u) => ({
               value: u.id,
-              label: `${u.full_name ?? u.email} · ${u.assigned_clinic_count} clinics`,
+              label: `${u.full_name ?? u.email} · ${u.assigned_clinic_count} in portfolio`,
             }))}
             disabled={!managers.data}
           />
@@ -181,7 +185,7 @@ function ManagerCard({ clinicId }: { clinicId: string }) {
             loading={setAssignment.isPending}
             disabled={!selected || selected === current?.user_id}
           >
-            {current ? 'Change manager' : 'Assign manager'}
+            {current ? 'Change portfolio allocation' : 'Allocate to portfolio'}
           </Button>
         </form>
       )}
@@ -216,13 +220,19 @@ function OpenWork({ clinicId }: { clinicId: string }) {
   const open = work.data?.items.filter((w) => !DONE.has(w.status)) ?? [];
 
   return (
-    <Card title="Open work" description="Actions for this clinic, from its assessments">
+    <Card
+      title="Improvement work items"
+      description="Open work for this client organization, from its assessments"
+    >
       {work.isError ? (
         <QueryError error={work.error} onRetry={() => void work.refetch()} />
       ) : !work.data ? (
         <CardSkeleton lines={3} />
       ) : open.length === 0 ? (
-        <EmptyState title="Nothing open" description="All actions for this clinic are done." />
+        <EmptyState
+          title="Nothing open"
+          description="All improvement work items for this client organization are done."
+        />
       ) : (
         <ul className="rp-work-list">
           {open.map((w) => (

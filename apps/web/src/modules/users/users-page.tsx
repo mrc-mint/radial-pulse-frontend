@@ -73,7 +73,7 @@ export function UsersPage() {
     },
     {
       id: 'clinics',
-      header: 'Assigned clinics',
+      header: 'Client portfolio',
       align: 'end',
       cell: (u) =>
         u.platform_role === 'digital_success_manager' ? (
@@ -238,7 +238,7 @@ function InviteUserModal({ open, onClose }: { open: boolean; onClose: () => void
       open={open}
       onClose={close}
       title="Invite user"
-      description="They receive an invitation email and sign in with Google using this address."
+      description="They receive an email with a temporary password, sign in with this address and choose their own password."
       footer={
         <>
           <Button variant="secondary" onClick={close}>

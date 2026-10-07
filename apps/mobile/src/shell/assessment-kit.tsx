@@ -23,7 +23,7 @@ import { IconBubble } from './kit';
 
 /**
  * Presentation of the contract's assessment for the mobile screens (Home,
- * Insights, Reports). Everything shown is backend data: scores are never
+ * Insights, Assessments). Everything shown is backend data: scores are never
  * computed, missing scores read their status, never 0.
  */
 

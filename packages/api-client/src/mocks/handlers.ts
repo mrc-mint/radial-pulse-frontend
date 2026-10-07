@@ -1,7 +1,14 @@
 import type { Permission, Schema } from '@radial-pulse/shared-types';
 import { delay, http, HttpResponse, type HttpResponseResolver } from 'msw';
-import { createMockDb, mockNow, nextTimestamp, type MockDb } from './data';
-import { blobToDataUrl, MOCK_ASSET_RESOURCE_TYPE, MOCK_REVIEWED_KINDS } from './media';
+import { createMockDb, mockNow, mockStageGroup, nextTimestamp, type MockDb } from './data';
+import {
+  blobToDataUrl,
+  MOCK_ASSET_RESOURCE_TYPE,
+  MOCK_MEDIA_KINDS,
+  mockAvailableActions,
+  type MockApproval,
+  type MockAsset,
+} from './media';
 import {
   CLINIC_ADMIN_CLINIC,
   DSM_CLINIC,
@@ -30,15 +37,6 @@ export interface MockOptions {
    * where no service worker can answer the mock storage URL).
    */
   inlineMedia?: boolean;
-}
-
-type MockAsset = MockDb['assets'] extends Map<string, infer A> ? A : never;
-
-/** An asset as the API returns it (without the mock's stored file). */
-function assetRead(asset: MockAsset): Schema<'AssetRead'> {
-  const { blob: _blob, ...read } = asset;
-  void _blob;
-  return read;
 }
 
 /** Approval transitions the mocks allow; null means 409 Conflict. */
@@ -163,6 +161,63 @@ export function createMockHandlers(options: MockOptions) {
     };
   }
 
+  /** An approval as the caller sees it: with the actions they may take now. */
+  const approvalRead = (
+    a: MockApproval,
+    perms: ReadonlySet<Permission>,
+  ): Schema<'ApprovalRead'> => ({
+    ...a,
+    available_actions: mockAvailableActions(a, perms),
+  });
+
+  /**
+   * A file as the caller sees it: without the mock's stored bytes, with its
+   * review. Internal notes are for Radial Pulse staff (media:review) only.
+   */
+  const assetRead = (asset: MockAsset, perms: ReadonlySet<Permission>): Schema<'AssetRead'> => {
+    const { blob: _blob, ...read } = asset;
+    void _blob;
+    const approval = db.approvals.find(
+      (a) => a.resource_type === MOCK_ASSET_RESOURCE_TYPE && a.resource_id === asset.id,
+    );
+    return {
+      ...read,
+      review: approval
+        ? {
+            approval_id: approval.id,
+            state: approval.state,
+            clinic_message: approval.clinic_message,
+            internal_note: perms.has('media:review') ? approval.last_comment : null,
+            submitted_by_user_id: approval.submitted_by_user_id,
+            decided_by_user_id: approval.decided_by_user_id,
+            available_actions: mockAvailableActions(approval, perms),
+            updated_at: approval.updated_at,
+          }
+        : null,
+    };
+  };
+
+  /** 422 when an upload names a media label that is not in the taxonomy. */
+  const labelProblem = (body: Schema<'AssetUploadRequest'>) => {
+    const dims = {
+      category: body.kind === 'audio' ? 'voice_sample' : 'clinic_photo_category',
+      apron: 'practitioner_apron',
+      angle: 'practitioner_angle',
+      outfit: 'practitioner_outfit',
+    } as const;
+    for (const [field, dimension] of Object.entries(dims) as Array<
+      [keyof typeof dims, Schema<'MediaTaxonomyDimension'>]
+    >) {
+      const code = body[field];
+      if (code && !db.mediaTaxonomy.some((v) => v.dimension === dimension && v.code === code)) {
+        return problem(422, 'validation_error', 'Invalid input', undefined, [
+          { loc: ['body', field], msg: `Unknown ${dimension} code`, type: 'value_error' },
+        ]);
+      }
+    }
+    return null;
+  };
+
   const personRef = (userId: string | null | undefined): Schema<'PersonRef'> | null => {
     const u = db.users.find((x) => x.id === userId);
     return u ? { id: u.id, email: u.email, full_name: u.full_name } : null;
@@ -183,6 +238,7 @@ export function createMockHandlers(options: MockOptions) {
     }
     return {
       ...c,
+      stage_group: mockStageGroup(c.stage),
       dsm: personRef(db.assignments.get(c.id)?.user_id),
       open_work: [...open].map(([area, open_count]) => ({ area, open_count })),
     };
@@ -191,7 +247,7 @@ export function createMockHandlers(options: MockOptions) {
   const toClinicRead = (c: MockDb['clinics'][number]): Schema<'ClinicRead'> => {
     const { primary_practitioner_name: _doctor, ...read } = c;
     void _doctor;
-    return read;
+    return { ...read, stage_group: mockStageGroup(c.stage) };
   };
 
   const assessmentsFor = (clinicId: string, me: Principal, perms: Set<Permission>) =>
@@ -274,7 +330,7 @@ export function createMockHandlers(options: MockOptions) {
                 permissions: [...me.clinicPermissions(clinic_id)].sort(),
               })),
           avatar_url: null,
-          sign_in_method: 'google',
+          sign_in_method: 'email_password',
           last_login_at: me.user.last_login_at,
         } satisfies Schema<'MeResponse'>),
       ),
@@ -330,6 +386,7 @@ export function createMockHandlers(options: MockOptions) {
         const visible = new Set(me.visibleClinicIds());
         const q = url.searchParams.get('q')?.toLowerCase().trim();
         const stages = url.searchParams.getAll('stage');
+        const group = url.searchParams.get('group');
         const dsm = url.searchParams.get('dsm_user_id');
         const unassigned = url.searchParams.get('unassigned') === 'true';
         const archived = url.searchParams.get('archived') === 'true';
@@ -337,6 +394,7 @@ export function createMockHandlers(options: MockOptions) {
           .filter((c) => visible.has(c.id))
           .filter((c) => c.is_active !== archived)
           .filter((c) => stages.length === 0 || stages.includes(c.stage))
+          .filter((c) => !group || mockStageGroup(c.stage) === group)
           .filter((c) => !dsm || db.assignments.get(c.id)?.user_id === dsm)
           .filter((c) => !unassigned || !db.assignments.has(c.id))
           .filter(
@@ -389,7 +447,7 @@ export function createMockHandlers(options: MockOptions) {
             updated_at: mockNow(),
           };
           db.clinics.push(clinic);
-          // A DSM who onboards a clinic becomes its DSM (outbound sales model).
+          // A DSM who adds a client organization gets it in their portfolio (outbound sales model).
           if (me.user.platform_role === 'digital_success_manager') {
             db.assignments.set(id, {
               id: crypto.randomUUID(),
@@ -1092,11 +1150,22 @@ export function createMockHandlers(options: MockOptions) {
       ),
     ),
 
+    http.get(
+      `${api}/media/taxonomy`,
+      route(() => HttpResponse.json(db.mediaTaxonomy)),
+    ),
+
     http.post(
       `${api}/clinics/:clinic_id/assets/uploads`,
       route<{ clinic_id: string }>(
-        async ({ request, params, me }) => {
+        async ({ request, params, me, perms }) => {
           const body = (await request.json()) as Schema<'AssetUploadRequest'>;
+          // Clinic media needs media:upload; other files (chat attachments) assets:upload.
+          if (!perms.has(MOCK_MEDIA_KINDS.has(body.kind) ? 'media:upload' : 'assets:upload')) {
+            return forbidden();
+          }
+          const unknownLabel = labelProblem(body);
+          if (unknownLabel) return unknownLabel;
           const previous = body.previous_version_id
             ? db.assets.get(body.previous_version_id)
             : undefined;
@@ -1104,7 +1173,7 @@ export function createMockHandlers(options: MockOptions) {
             return notFound();
           }
           const id = crypto.randomUUID();
-          const asset: Schema<'AssetRead'> = {
+          const asset: MockAsset = {
             id,
             clinic_id: params.clinic_id,
             kind: body.kind,
@@ -1117,13 +1186,18 @@ export function createMockHandlers(options: MockOptions) {
             previous_version_id: previous?.id ?? null,
             provenance: {},
             version: (previous?.version ?? 0) + 1,
+            practitioner_id: body.practitioner_id ?? null,
+            category: body.category ?? null,
+            apron: body.apron ?? null,
+            angle: body.angle ?? null,
+            outfit: body.outfit ?? null,
             created_at: mockNow(),
             updated_at: mockNow(),
           };
           db.assets.set(id, asset);
           return HttpResponse.json(
             {
-              asset,
+              asset: assetRead(asset, perms),
               upload_url: `${api}/__mock-storage/${id}`,
               upload_headers: { 'content-type': body.mime_type },
               expires_in: 900,
@@ -1131,7 +1205,7 @@ export function createMockHandlers(options: MockOptions) {
             { status: 201 },
           );
         },
-        { clinic: true, permission: 'assets:upload' },
+        { clinic: true },
       ),
     ),
 
@@ -1152,6 +1226,7 @@ export function createMockHandlers(options: MockOptions) {
         headers: {
           'content-type': asset.blob ? asset.mime_type : 'text/plain',
           'content-disposition': `inline; filename="${asset.original_filename ?? 'file'}"`,
+          'cache-control': 'private, no-store',
         },
       });
     }),
@@ -1159,14 +1234,14 @@ export function createMockHandlers(options: MockOptions) {
     http.post(
       `${api}/clinics/:clinic_id/assets/:asset_id/confirm`,
       route<{ clinic_id: string; asset_id: string }>(
-        ({ params, me }) => {
+        ({ params, me, perms }) => {
           const asset = db.assets.get(params.asset_id);
           if (!asset || asset.clinic_id !== params.clinic_id) return notFound();
+          if (asset.owner_user_id !== me.user.id) return forbidden();
           asset.status = 'uploaded';
           asset.updated_at = mockNow();
-          // Mock behaviour (backend gap 22): a confirmed photo or voice sample
-          // goes straight to review.
-          if (MOCK_REVIEWED_KINDS.has(asset.kind)) {
+          // A confirmed photo or voice sample goes straight to review.
+          if (MOCK_MEDIA_KINDS.has(asset.kind)) {
             asset.approval_state = 'submitted';
             db.approvals.unshift({
               id: crypto.randomUUID(),
@@ -1179,26 +1254,52 @@ export function createMockHandlers(options: MockOptions) {
               decided_by_user_id: null,
               assignee_user_id: null,
               last_comment: null,
+              clinic_message: null,
               created_at: nextTimestamp(),
               updated_at: nextTimestamp(),
             });
           }
-          return HttpResponse.json(assetRead(asset));
+          return HttpResponse.json(assetRead(asset, perms));
         },
-        { clinic: true, permission: 'assets:upload' },
+        { clinic: true },
       ),
     ),
 
     http.get(
       `${api}/clinics/:clinic_id/assets`,
       route<{ clinic_id: string }>(
-        ({ params, url }) => {
-          const kind = url.searchParams.get('kind');
+        ({ params, url, perms }) => {
+          const q = url.searchParams;
+          const match = (field: string, actual: string | null | undefined) =>
+            !q.get(field) || q.get(field) === actual;
           const items = [...db.assets.values()]
-            .filter((a) => a.clinic_id === params.clinic_id && (!kind || a.kind === kind))
+            .filter((a) => a.clinic_id === params.clinic_id)
+            .filter(
+              (a) =>
+                match('kind', a.kind) &&
+                match('status', a.status) &&
+                match('approval_state', a.approval_state) &&
+                match('practitioner_id', a.practitioner_id) &&
+                match('category', a.category) &&
+                match('apron', a.apron) &&
+                match('angle', a.angle) &&
+                match('outfit', a.outfit),
+            )
             .sort((a, b) => b.created_at.localeCompare(a.created_at))
-            .map(assetRead);
+            .map((a) => assetRead(a, perms));
           return HttpResponse.json(page(items, url) satisfies Schema<'Page_AssetRead_'>);
+        },
+        { clinic: true, permission: 'assets:read' },
+      ),
+    ),
+
+    http.get(
+      `${api}/clinics/:clinic_id/assets/:asset_id`,
+      route<{ clinic_id: string; asset_id: string }>(
+        ({ params, perms }) => {
+          const asset = db.assets.get(params.asset_id);
+          if (!asset || asset.clinic_id !== params.clinic_id) return notFound();
+          return HttpResponse.json(assetRead(asset, perms));
         },
         { clinic: true, permission: 'assets:read' },
       ),
@@ -1226,11 +1327,17 @@ export function createMockHandlers(options: MockOptions) {
     http.get(
       `${api}/clinics/:clinic_id/approvals`,
       route<{ clinic_id: string }>(
-        ({ params, url }) => {
+        ({ params, url, perms }) => {
           const state = url.searchParams.get('state');
-          const items = db.approvals.filter(
-            (a) => a.clinic_id === params.clinic_id && (!state || a.state === state),
-          );
+          const type = url.searchParams.get('resource_type');
+          const items = db.approvals
+            .filter(
+              (a) =>
+                a.clinic_id === params.clinic_id &&
+                (!state || a.state === state) &&
+                (!type || a.resource_type === type),
+            )
+            .map((a) => approvalRead(a, perms));
           return HttpResponse.json(page(items, url) satisfies Schema<'Page_ApprovalRead_'>);
         },
         { clinic: true },
@@ -1240,11 +1347,11 @@ export function createMockHandlers(options: MockOptions) {
     http.get(
       `${api}/clinics/:clinic_id/approvals/:approval_id`,
       route<{ clinic_id: string; approval_id: string }>(
-        ({ params }) => {
+        ({ params, perms }) => {
           const approval = db.approvals.find(
             (a) => a.id === params.approval_id && a.clinic_id === params.clinic_id,
           );
-          return approval ? HttpResponse.json(approval) : notFound();
+          return approval ? HttpResponse.json(approvalRead(approval, perms)) : notFound();
         },
         { clinic: true },
       ),
@@ -1262,15 +1369,16 @@ export function createMockHandlers(options: MockOptions) {
               a.resource_id === body.resource_id,
           );
           if (!approval) return notFound();
-          const needed: Record<Schema<'ApprovalAction'>, Permission> = {
-            submit: 'approvals:submit',
-            handoff: 'approvals:submit',
-            approve: 'approvals:decide',
-            reject: 'approvals:decide',
-            redo: 'approvals:decide',
-            publish: 'approvals:publish',
-          };
-          if (!perms.has(needed[body.action])) return forbidden();
+          if (!mockAvailableActions(approval, perms).includes(body.action)) {
+            const allowedAtAll = mockAvailableActions({ ...approval, state: 'submitted' }, perms);
+            return allowedAtAll.includes(body.action) || body.action === 'submit'
+              ? problem(
+                  409,
+                  'conflict',
+                  `Cannot ${body.action} an approval that is ${approval.state}`,
+                )
+              : forbidden();
+          }
           const next = approvalTransition(approval.state, body.action);
           if (!next) {
             return problem(
@@ -1281,6 +1389,7 @@ export function createMockHandlers(options: MockOptions) {
           }
           approval.state = next;
           approval.last_comment = body.comment ?? approval.last_comment;
+          approval.clinic_message = body.clinic_message ?? approval.clinic_message;
           approval.updated_at = nextTimestamp();
           if (body.action === 'submit') approval.submitted_by_user_id = me.user.id;
           else approval.decided_by_user_id = me.user.id;
@@ -1289,7 +1398,7 @@ export function createMockHandlers(options: MockOptions) {
             asset.approval_state = next;
             asset.updated_at = approval.updated_at;
           }
-          return HttpResponse.json(approval);
+          return HttpResponse.json(approvalRead(approval, perms));
         },
         { clinic: true },
       ),

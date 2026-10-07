@@ -1,6 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { AuditReportsPage } from '../../modules/assessments/audit-reports-page';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
+/** Old URL: Digital Presence Assessments moved to /assessments. */
 export const Route = createFileRoute('/_app/audit-reports')({
-  component: AuditReportsPage,
+  beforeLoad: () => {
+    throw redirect({ to: '/assessments', replace: true });
+  },
 });

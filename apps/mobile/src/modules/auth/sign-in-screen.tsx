@@ -12,15 +12,16 @@ import { Callout } from '../../shell/kit';
 const CLINIC_ADMINISTRATOR_OPTION = 'clinic-administrator';
 
 /**
- * Branded sign-in. Authentication itself happens on Cognito managed login
- * (Phase 7, Amplify Auth); there is no password form in the app. With API
- * mocking, development personas sign in instead.
+ * Branded sign-in. Authentication itself happens on Cognito Managed Login
+ * (email and password, Authorization Code + PKCE) in the system browser;
+ * there is no password form in the app. With API mocking, development
+ * personas sign in instead.
  */
 export function SignInScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const config = useConfig();
-  const { state, signIn, signInOptions } = useSession();
+  const { state, signIn, signInOptions, signInMethod } = useSession();
   const [showOthers, setShowOthers] = useState(false);
   const busy = state.status === 'loading';
 
@@ -60,7 +61,16 @@ export function SignInScreen() {
         <Callout tone="danger">Sign-in didn’t complete. Please try again.</Callout>
       ) : null}
 
-      {signInOptions.length === 0 ? (
+      {signInMethod === 'cognito' ? (
+        <View style={styles.options}>
+          <Button size="lg" fullWidth loading={busy} onPress={() => void signIn()}>
+            Sign in
+          </Button>
+          <Text style={styles.note}>
+            You’ll continue on Radial Pulse’s secure sign-in page, then come back here.
+          </Text>
+        </View>
+      ) : signInOptions.length === 0 ? (
         <>
           <Button size="lg" fullWidth disabled>
             Sign in

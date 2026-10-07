@@ -30,7 +30,7 @@ export interface NavEntry {
   label: string;
   /**
    * Label for users who see only their own clinics (`all_clinics` is false),
-   * e.g. "My Clinics" for a Digital Success Manager.
+   * e.g. "My Client Portfolio" for a Digital Success Manager.
    */
   scopedLabel?: string;
   to: string;

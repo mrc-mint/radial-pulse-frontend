@@ -1,7 +1,6 @@
 import type { Schema } from '@radial-pulse/shared-types';
 import {
-  CLINIC_STATUS_LABELS,
-  CLINIC_STATUS_OF_STAGE,
+  CLINIC_STAGE_LABELS,
   PRESENCE_PLATFORM_LABELS,
   PRESENCE_VERIFICATION_LABELS,
 } from '@radial-pulse/utils';
@@ -26,27 +25,27 @@ export function activityText(event: AuditEvent, personName: (id: string) => stri
   const d = event.details;
   switch (event.action) {
     case 'clinic.create':
-      return 'Clinic added';
+      return 'Client organization added';
     case 'clinic.update':
-      return 'Clinic details updated';
+      return 'Client organization details updated';
     case 'clinic.stage_change': {
       const to = str(d.to) as Stage | null;
-      return to && to in CLINIC_STATUS_OF_STAGE
-        ? `Status changed to ${CLINIC_STATUS_LABELS[CLINIC_STATUS_OF_STAGE[to]]}`
+      return to && to in CLINIC_STAGE_LABELS
+        ? `Status changed to ${CLINIC_STAGE_LABELS[to]}`
         : 'Status changed';
     }
     case 'clinic.archive':
-      return str(d.reason) ? `Clinic archived: ${str(d.reason)}` : 'Clinic archived';
+      return str(d.reason)
+        ? `Client organization archived: ${str(d.reason)}`
+        : 'Client organization archived';
     case 'clinic.restore':
-      return 'Clinic restored';
+      return 'Client organization restored';
     case 'assignment.change': {
       const name = str(d.user_id) ? personName(str(d.user_id)!) : null;
-      return name
-        ? `${name} assigned as Digital Success Manager`
-        : 'Digital Success Manager assigned';
+      return name ? `Allocated to ${name}’s portfolio` : 'Portfolio allocation changed';
     }
     case 'assignment.end':
-      return 'Digital Success Manager removed';
+      return 'Removed from the portfolio';
     case 'presence_profile.add':
       return `${platformLabel(d.platform) ?? 'Online profile'} added`;
     case 'presence_profile.update': {
@@ -75,7 +74,7 @@ export function activityText(event: AuditEvent, personName: (id: string) => stri
     case 'report.create':
       return 'Report added';
     case 'team.add':
-      return 'Clinic team member added';
+      return 'Clinic Team Member added';
     default: {
       const [resource, verb] = event.action.split('.');
       const words = `${(resource ?? event.resource_type).replace(/_/g, ' ')} ${(verb ?? 'updated').replace(/_/g, ' ')}`;

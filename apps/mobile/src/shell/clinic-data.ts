@@ -12,7 +12,7 @@ export function useAccessibleClinics() {
   return useClinics(CLINICS_QUERY);
 }
 
-/** The selected clinic's list row (`ClinicListItem`: name, city, doctor, DSM). */
+/** The selected clinic's list row (`ClinicListItem`: name, city, practitioner, DSM). */
 export function useSelectedClinicRow() {
   const clinicId = useClinicId();
   const clinics = useAccessibleClinics();

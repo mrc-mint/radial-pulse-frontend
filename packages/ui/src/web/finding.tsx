@@ -75,7 +75,7 @@ export function FindingCard({
       {description && <p className="rp-finding__description">{description}</p>}
       {recommendation && (
         <div className="rp-finding__recommendation">
-          <p className="rp-finding__recommendation-label">Recommendation</p>
+          <p className="rp-finding__recommendation-label">Improvement opportunity</p>
           <p>{recommendation}</p>
         </div>
       )}

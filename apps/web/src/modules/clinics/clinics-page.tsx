@@ -20,7 +20,7 @@ import {
 } from '@radial-pulse/ui/web';
 import {
   CLINIC_STATUS_GROUP_LABELS,
-  CLINIC_STATUS_STAGES,
+  CLINIC_STATUS_GROUP,
   CLINIC_STATUSES,
   type ClinicStatus,
 } from '@radial-pulse/utils';
@@ -49,7 +49,7 @@ const COUNT_FIELD = {
 function statusQuery(status: StatusFilter) {
   if (status === 'all') return {};
   if (status === 'inactive') return { archived: true };
-  return { stage: CLINIC_STATUS_STAGES[status] };
+  return { group: CLINIC_STATUS_GROUP[status] };
 }
 
 const STATUS_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
@@ -58,13 +58,14 @@ const STATUS_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
 ];
 
 /**
- * Clinics (Platform Administrator) / My Clinics (Digital Success Manager).
+ * Client Organizations (Platform Administrator) / My Client Portfolio (Digital
+ * Success Manager). Contract: `GET /clinics`.
  * One screen: the API scopes the list to the clinics the caller can see.
  * Clinics show a status (the backend's stage groups, or Inactive when
  * archived); the tabs and the Status filter select the same thing.
  */
 export function ClinicsPage() {
-  const title = useNavLabel('clinics', 'Clinics');
+  const title = useNavLabel('clinics', 'Client Organizations');
   const session = useCurrentSession();
   const canCreate = useCan('clinics:create');
   const canSeeUsers = useCan('users:read');
@@ -116,7 +117,7 @@ export function ClinicsPage() {
     },
     {
       id: 'name',
-      header: 'Clinic name',
+      header: 'Client organization',
       cell: (c) => (
         <Link to="/clinics/$clinicId" params={{ clinicId: c.id }} className="rp-link rp-nowrap">
           {c.name}
@@ -124,8 +125,8 @@ export function ClinicsPage() {
       ),
     },
     {
-      id: 'doctor',
-      header: 'Doctor name',
+      id: 'practitioner',
+      header: 'Practitioner name',
       cell: (c) =>
         c.primary_practitioner_name ? (
           <span className="rp-nowrap">{c.primary_practitioner_name}</span>
@@ -162,7 +163,7 @@ export function ClinicsPage() {
       ? [
           {
             id: 'dsm',
-            header: 'Assigned user',
+            header: 'Portfolio allocation',
             cell: (c: ClinicRow) =>
               c.dsm ? (
                 <span className="rp-person">
@@ -193,22 +194,22 @@ export function ClinicsPage() {
           items={[
             {
               id: 'open',
-              label: 'Open clinic',
+              label: 'Open client organization',
               onSelect: () =>
                 void navigate({ to: '/clinics/$clinicId', params: { clinicId: c.id } }),
             },
             {
               id: 'audit',
-              label: 'Audit Report',
+              label: 'Digital Presence Assessment',
               onSelect: () =>
-                void navigate({ to: '/clinics/$clinicId/audit', params: { clinicId: c.id } }),
+                void navigate({ to: '/clinics/$clinicId/assessment', params: { clinicId: c.id } }),
             },
             ...(session.allClinics
               ? []
               : [
                   {
                     id: 'chat',
-                    label: 'Chat',
+                    label: 'Client Collaboration',
                     onSelect: () =>
                       void navigate({ to: '/clinics/$clinicId/chat', params: { clinicId: c.id } }),
                   },
@@ -225,13 +226,13 @@ export function ClinicsPage() {
         title={title}
         description={
           session.allClinics
-            ? 'Manage all clinics and prospects'
-            : 'The clinics you are responsible for'
+            ? 'Manage all client organizations and prospective clients'
+            : 'The client organizations in your portfolio'
         }
         actions={
           canCreate && (
             <Button leadingIcon={<Plus size={16} />} onClick={() => setAdding(true)}>
-              Add clinic
+              Add client organization
             </Button>
           )
         }
@@ -246,7 +247,7 @@ export function ClinicsPage() {
             items={[
               {
                 value: 'all',
-                label: session.allClinics ? 'All clinics' : 'All',
+                label: session.allClinics ? 'All client organizations' : 'All',
                 count: summary.data?.total_clinics,
               },
               ...CLINIC_STATUSES.map((s) => ({
@@ -260,8 +261,8 @@ export function ClinicsPage() {
         <div className="rp-toolbar">
           <div className="rp-grow">
             <SearchInput
-              label="Search clinics"
-              placeholder="Search by clinic name, doctor name or website"
+              label="Search client organizations"
+              placeholder="Search by name, practitioner or website"
               value={search}
               onValueChange={resetPage(setSearch)}
             />
@@ -277,12 +278,12 @@ export function ClinicsPage() {
           {canSeeUsers && (
             <div className="rp-fixed">
               <Select
-                label="Assigned user"
+                label="Portfolio allocation"
                 value={dsm ?? 'all'}
                 onChange={(v) => resetPage(setDsm)(v === 'all' ? null : v)}
                 options={[
                   { value: 'all', label: 'All' },
-                  { value: UNASSIGNED, label: 'Unassigned' },
+                  { value: UNASSIGNED, label: 'Not allocated' },
                   ...(managers.data?.items ?? []).map((u) => ({
                     value: u.id,
                     label: u.full_name ?? u.email,
@@ -309,7 +310,7 @@ export function ClinicsPage() {
           empty={
             filtered ? (
               <EmptyState
-                title="No clinics match these filters"
+                title="No client organizations match these filters"
                 description="Try a different search or status."
                 action={
                   <button
@@ -323,11 +324,15 @@ export function ClinicsPage() {
               />
             ) : (
               <EmptyState
-                title={session.allClinics ? 'No clinics yet' : 'No clinics assigned to you yet'}
+                title={
+                  session.allClinics
+                    ? 'No client organizations yet'
+                    : 'Your client portfolio is empty'
+                }
                 description={
                   canCreate
-                    ? 'Add a clinic to start its digital presence assessment.'
-                    : 'Clinics assigned to you will appear here.'
+                    ? 'Add a client organization to start its Digital Presence Assessment.'
+                    : 'Client organizations allocated to your portfolio appear here.'
                 }
               />
             )
@@ -338,7 +343,7 @@ export function ClinicsPage() {
                 page={page}
                 pageSize={PAGE_SIZE}
                 totalItems={clinics.data.total}
-                itemLabel="clinics"
+                itemLabel="client organizations"
                 onPageChange={setPage}
               />
             ) : undefined

@@ -17,7 +17,7 @@ export interface ClinicWorkspaceProps {
 
 /**
  * Frame for every clinic-scoped page: clinic header, section navigation
- * (Overview, Unified Audit, Social Media, Chat, …) and the section content.
+ * (Overview, Digital Presence Assessment, Social Presence Insights, Client Collaboration, …) and the section content.
  * Sections are links — each one is a URL — so they use navigation semantics
  * rather than ARIA tabs.
  */
@@ -32,7 +32,7 @@ export function ClinicWorkspace({
   return (
     <div className="rp-clinic">
       {header}
-      <nav aria-label="Clinic sections" className="rp-clinic__nav">
+      <nav aria-label="Client organization sections" className="rp-clinic__nav">
         <ul className="rp-clinic__list">
           {sections.map((section) => {
             const active = isRouteActive(section.to, pathname, section.exact);

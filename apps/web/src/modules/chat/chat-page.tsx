@@ -79,7 +79,7 @@ export function ChatPage() {
             icon={<MessageCircle size={22} />}
             title="No messages yet"
             description={
-              canWrite ? 'Start the conversation with this clinic.' : 'Messages will appear here.'
+              canWrite ? 'Start the conversation with this client.' : 'Messages will appear here.'
             }
           />
         ) : (

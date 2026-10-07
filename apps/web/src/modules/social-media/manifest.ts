@@ -6,7 +6,7 @@ export const socialMediaModule: ModuleManifest = {
   clinicSections: [
     {
       id: 'social-media',
-      label: 'Social Media',
+      label: 'Social Presence Insights',
       path: 'social-media',
       order: 30,
       requiredPermission: 'connections:read',

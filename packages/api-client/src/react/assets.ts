@@ -1,8 +1,8 @@
 import type { Schema } from '@radial-pulse/shared-types';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { assetsService, uploadAsset, type UploadFile } from '../services';
+import { assetsService, uploadAsset, type UploadFile, type UploadLabels } from '../services';
 import { useApiClient, useStorageFetch } from './provider';
-import { clinicQueryKey } from './query-keys';
+import { clinicQueryKey, platformQueryKey } from './query-keys';
 
 /** Clinic files. */
 
@@ -22,6 +22,20 @@ export function useAssetDownloadUrl(clinicId: string, assetId: string | null) {
     // Refresh well before the URL expires.
     staleTime: (query) => Math.max(0, ((query.state.data?.expires_in ?? 60) - 30) * 1000),
     gcTime: 30_000,
+  });
+}
+
+/**
+ * Media labels to build upload screens from (photo categories, practitioner-photo
+ * apron / angle / outfit, voice samples), in display order. The list can grow,
+ * so screens never hard-code the values.
+ */
+export function useMediaTaxonomy() {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: platformQueryKey('media-taxonomy'),
+    queryFn: () => assetsService.mediaTaxonomy(api),
+    staleTime: 60 * 60 * 1000,
   });
 }
 
@@ -63,12 +77,18 @@ export function useUploadAsset(clinicId: string) {
     mutationFn: (input: {
       kind: Schema<'AssetKind'>;
       file: UploadFile;
+      labels?: UploadLabels;
       replaces?: string | null;
     }) =>
       uploadAsset(
         api,
         clinicId,
-        { kind: input.kind, file: input.file, previousVersionId: input.replaces },
+        {
+          kind: input.kind,
+          file: input.file,
+          labels: input.labels,
+          previousVersionId: input.replaces,
+        },
         storageFetch,
       ),
     onSuccess: () =>

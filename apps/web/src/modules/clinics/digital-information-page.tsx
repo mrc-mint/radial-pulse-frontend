@@ -181,7 +181,7 @@ function ProfileCard({
         <p className="rp-presence__connected">
           <Link2 size={14} aria-hidden="true" />
           <span>
-            Connected by the clinic
+            Connected by the client
             {connection.external_account_name ? ` · ${connection.external_account_name}` : ''}
             {connection.last_synced_at
               ? ` · synced ${formatRelativeTime(connection.last_synced_at)}`
@@ -191,7 +191,7 @@ function ProfileCard({
       )}
       {reviewAgain && (
         <p className="rp-callout" role="note">
-          The clinic has connected this platform. Check whether this is the same account and confirm
+          The client has connected this platform. Check whether this is the same account and confirm
           it if so.
         </p>
       )}
@@ -216,7 +216,7 @@ function ProfileCard({
               disabled={update.isPending}
               onClick={() => decide('rejected')}
             >
-              Not this clinic
+              Not this client
             </Button>
           )}
         </div>

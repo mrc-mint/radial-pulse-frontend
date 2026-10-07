@@ -151,8 +151,11 @@ describe('contract mocks', () => {
   it('serves the main practitioner and the latest value of each metric', async () => {
     const admin = as('clinic-administrator');
     const smile = db.clinics[0]!.id;
-    const doctors = await practitionersService.list(admin, smile);
-    expect(doctors.items[0]).toMatchObject({ full_name: 'Dr. Rahul Mehta', is_primary: true });
+    const practitioners = await practitionersService.list(admin, smile);
+    expect(practitioners.items[0]).toMatchObject({
+      full_name: 'Dr. Rahul Mehta',
+      is_primary: true,
+    });
 
     const latest = await snapshotsService.list(admin, smile, { latest: true, limit: 200 });
     const keys = latest.items.map((s) => `${s.source}|${s.metric_key}`);

@@ -1,8 +1,8 @@
 import type { Permission, Schema } from '@radial-pulse/shared-types';
 
 /**
- * DEV/TEST ONLY. Mock sign-in personas for building the UI against MSW before
- * Cognito (Phase 7). A persona's token is `dev-persona:<id>`; the mock
+ * DEV/TEST ONLY. Mock sign-in personas for building the UI against MSW
+ * (only with API mocking; real sign-in is Cognito Managed Login). A persona's token is `dev-persona:<id>`; the mock
  * `/auth/me` returns the matching contract `MeResponse`.
  *
  * Permission sets mirror the backend's RBAC table (radial-pulse-backend
@@ -56,11 +56,12 @@ export const DSM_CLINIC: Permission[] = [
   'chat:write',
   'connections:read',
   'connections:manage',
+  'media:review',
 ];
 
 /**
- * V1 rule: Clinic Administrators upload media but never review it, so they
- * have no `approvals:*` permission (docs/media-backend-request.md).
+ * V1 rule: Clinic Administrators upload clinic media (`media:upload`) but
+ * never review it: no `media:review` and no `approvals:*` permission.
  */
 export const CLINIC_ADMIN_CLINIC: Permission[] = [
   'clinics:read',
@@ -83,6 +84,7 @@ export const CLINIC_ADMIN_CLINIC: Permission[] = [
   'chat:write',
   'connections:read',
   'connections:manage',
+  'media:upload',
 ];
 
 export interface MockPersona {
@@ -96,13 +98,13 @@ export const MOCK_PERSONAS: ReadonlyArray<MockPersona> = [
   {
     id: 'platform-administrator',
     label: 'Platform Administrator',
-    description: 'Rohan Agarwal — all clinics, users and settings.',
+    description: 'Rohan Agarwal — all client organizations, users and settings.',
     userId: 'a1000000-0000-4000-8000-000000000001',
   },
   {
     id: 'digital-success-manager',
     label: 'Digital Success Manager',
-    description: 'Priya Shah — assigned clinics, their reviews and chats.',
+    description: 'Priya Shah — her client portfolio, its reviews and client collaboration.',
     userId: 'a1000000-0000-4000-8000-000000000002',
   },
   {

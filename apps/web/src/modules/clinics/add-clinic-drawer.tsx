@@ -31,7 +31,7 @@ const EMPTY: Draft = {
   postal_code: '',
 };
 
-/** "Add a clinic (a lead)" — contract `ClinicCreate`; blank optional fields are omitted. */
+/** "Add a client organization" (a prospective client) — contract `ClinicCreate`; blank optional fields are omitted. */
 export function AddClinicDrawer({
   open,
   onClose,
@@ -92,22 +92,22 @@ export function AddClinicDrawer({
     <Drawer
       open={open}
       onClose={close}
-      title="Add clinic"
-      description="Add a clinic as a new lead. You can enrich its profile afterwards."
+      title="Add client organization"
+      description="Add a client organization as a new prospective client."
       footer={
         <>
           <Button variant="secondary" onClick={close}>
             Cancel
           </Button>
           <Button type="submit" form="add-clinic-form" loading={create.isPending}>
-            Add clinic
+            Add client organization
           </Button>
         </>
       }
     >
       <form id="add-clinic-form" className="rp-form" onSubmit={submit} noValidate>
-        {field('name', 'Clinic name', { required: true })}
-        {field('primary_practitioner_name', 'Primary doctor', {
+        {field('name', 'Client organization name', { required: true })}
+        {field('primary_practitioner_name', 'Main practitioner', {
           hint: 'For example, Dr. Rahul Mehta',
         })}
         {field('specialty', 'Specialty')}

@@ -2,15 +2,39 @@ import type { Schema } from '@radial-pulse/shared-types';
 import { describe, expect, it } from 'vitest';
 import { MEDIA_REVIEW_LABELS, mediaReviewLabel } from './labels';
 import {
-  approvalForResource,
   buildMediaBoard,
-  CLINIC_PHOTO_CATEGORIES,
   currentAssets,
-  DOCTOR_PHOTO_ANGLES,
-  DOCTOR_PHOTO_OUTFITS,
-  mediaReviewDecisions,
-  mediaSlotOf,
+  mediaActions,
+  mediaLabels,
+  type MediaLabel,
 } from './media';
+
+const label = (
+  dimension: MediaLabel['dimension'],
+  code: string,
+  sort_order: number,
+): MediaLabel => ({
+  dimension,
+  code,
+  label: code.replace(/_/g, ' '),
+  sort_order,
+});
+
+// Deliberately out of order: the board follows sort_order.
+const TAXONOMY: MediaLabel[] = [
+  label('practitioner_angle', 'front', 30),
+  label('practitioner_angle', 'left_90', 10),
+  label('practitioner_angle', 'left_45', 20),
+  label('practitioner_apron', 'without_apron', 20),
+  label('practitioner_apron', 'with_apron', 10),
+  label('practitioner_outfit', 'outfit_1', 10),
+  label('practitioner_outfit', 'outfit_2', 20),
+  label('clinic_photo_category', 'reception_waiting', 20),
+  label('clinic_photo_category', 'exterior_signage', 10),
+  label('voice_sample', 'reading_sample', 20),
+  label('voice_sample', 'clinic_greeting', 10),
+];
+const LABELS = mediaLabels(TAXONOMY);
 
 let n = 0;
 function asset(overrides: Partial<Schema<'AssetRead'>> = {}): Schema<'AssetRead'> {
@@ -28,84 +52,96 @@ function asset(overrides: Partial<Schema<'AssetRead'>> = {}): Schema<'AssetRead'
     provenance: {},
     status: 'uploaded',
     approval_state: 'submitted',
-    created_at: '2026-09-01T00:00:00Z',
+    created_at: `2026-09-${String(n).padStart(2, '0')}T00:00:00Z`,
     updated_at: '2026-09-01T00:00:00Z',
     ...overrides,
   };
 }
 
-describe('media board layout (product reference)', () => {
-  it('has five doctor angles in shooting order and two outfit options', () => {
-    expect(DOCTOR_PHOTO_ANGLES.map((a) => a.label)).toEqual([
-      '90° L',
-      '45° L',
-      '0°',
-      '45° R',
-      '90° R',
-    ]);
-    expect(DOCTOR_PHOTO_OUTFITS.map((o) => o.label)).toEqual(['With apron', 'Without apron']);
-  });
-
-  it('has the six hospital photo categories in order with their targets', () => {
-    expect(CLINIC_PHOTO_CATEGORIES.map((c) => [c.title, c.target])).toEqual([
-      ['Exterior & signage', 3],
-      ['Reception & waiting', 3],
-      ['Consult & procedure rooms', 3],
-      ['Equipment & facilities', 3],
-      ['Team at work', 3],
-      ['Logo & cover photo', 2],
-    ]);
+describe('mediaLabels', () => {
+  it('groups the taxonomy by dimension in display order', () => {
+    expect(LABELS.angles.map((a) => a.code)).toEqual(['left_90', 'left_45', 'front']);
+    expect(LABELS.aprons.map((a) => a.code)).toEqual(['with_apron', 'without_apron']);
+    expect(LABELS.categories.map((c) => c.code)).toEqual(['exterior_signage', 'reception_waiting']);
+    expect(LABELS.voiceSamples.map((v) => v.code)).toEqual(['clinic_greeting', 'reading_sample']);
   });
 });
 
 describe('buildMediaBoard', () => {
-  it('places only what the contract can place: the logo and the cover photo', () => {
-    const cover = asset({ kind: 'clinic_photo' });
-    const logo = asset({ kind: 'logo' });
-    const room = asset({ kind: 'clinic_photo' });
-    const doctor = asset({ kind: 'practitioner_photo' });
-    const voice = asset({ kind: 'audio', mime_type: 'audio/wav' });
-    const board = buildMediaBoard([cover, logo, room, doctor, voice], { coverAssetId: cover.id });
-
-    expect(mediaSlotOf(doctor, { coverAssetId: cover.id })).toBeNull();
-    expect(board.logo).toBe(logo);
-    expect(board.cover).toBe(cover);
-    expect(board.clinic.find((c) => c.id === 'logo_cover')!.assets).toEqual([logo, cover]);
-    expect(board.clinicUnplaced).toEqual([room]);
-    expect(board.doctorUnplaced).toEqual([doctor]);
-    expect(board.voice).toEqual([voice]);
+  it('places practitioner photos by apron, outfit and angle', () => {
+    const front = asset({
+      kind: 'practitioner_photo',
+      apron: 'with_apron',
+      outfit: 'outfit_2',
+      angle: 'front',
+    });
+    const board = buildMediaBoard([front], LABELS, { coverAssetId: null });
+    const withApron = board.practitioner[0]!;
+    expect(withApron.apron.code).toBe('with_apron');
+    // Outfit 2 holds a photo, so both outfits are laid out.
+    expect(withApron.outfits.map((o) => o.outfit.code)).toEqual(['outfit_1', 'outfit_2']);
+    expect(withApron.outfits[1]!.slots.map((s) => s.asset)).toEqual([null, null, front]);
+    expect(withApron.hasMoreOutfits).toBe(false);
+    expect(board.practitioner[1]!.outfits).toHaveLength(1);
   });
 
-  it('lays out one empty outfit of five angles per apron option, more on request', () => {
-    const board = buildMediaBoard([], { coverAssetId: null }, { with_apron: 2 });
-    expect(board.doctor.with_apron).toHaveLength(2);
-    expect(board.doctor.without_apron).toHaveLength(1);
-    expect(board.doctor.with_apron[0]!.slots.map((s) => s.asset)).toEqual([
-      null,
-      null,
-      null,
-      null,
-      null,
+  it('lays out more outfits on request, up to the taxonomy', () => {
+    const board = buildMediaBoard([], LABELS, { coverAssetId: null }, { without_apron: 5 });
+    expect(board.practitioner[1]!.outfits).toHaveLength(2);
+  });
+
+  it('keeps photos with missing or unknown labels visible as unplaced', () => {
+    const noLabels = asset({ kind: 'practitioner_photo' });
+    const unknown = asset({ kind: 'clinic_photo', category: 'rooftop' });
+    const board = buildMediaBoard([noLabels, unknown], LABELS, { coverAssetId: null });
+    expect(board.practitionerUnplaced).toEqual([noLabels]);
+    expect(board.clinicUnplaced).toEqual([unknown]);
+  });
+
+  it('puts clinic photos in their category, the logo and the cover photo in their row', () => {
+    const entrance = asset({ category: 'exterior_signage' });
+    const cover = asset({ category: 'reception_waiting' });
+    const logo = asset({ kind: 'logo' });
+    const board = buildMediaBoard([entrance, cover, logo], LABELS, { coverAssetId: cover.id });
+    expect(board.clinic.map((c) => c.assets)).toEqual([[entrance], []]);
+    expect(board.cover).toBe(cover);
+    expect(board.logo).toBe(logo);
+  });
+
+  it('names voice samples by type, numbering repeats, newest first', () => {
+    const greeting = asset({ kind: 'audio', category: 'clinic_greeting' });
+    const first = asset({ kind: 'audio', category: 'reading_sample' });
+    const second = asset({ kind: 'audio', category: 'reading_sample' });
+    const board = buildMediaBoard([greeting, first, second], LABELS, { coverAssetId: null });
+    expect(board.voice.map((v) => v.title)).toEqual([
+      'reading sample 2',
+      'reading sample 1',
+      'clinic greeting',
     ]);
-    expect(board.doctor.with_apron[0]!.uploaded).toBe(0);
   });
 
   it('shows only the newest uploaded version of each file', () => {
     const v1 = asset({ kind: 'audio' });
     const v2 = asset({ kind: 'audio', previous_version_id: v1.id, version: 2 });
     const pending = asset({ kind: 'audio', status: 'pending_upload' });
-    const deleted = asset({ kind: 'audio', status: 'deleted' });
-    expect(currentAssets([v1, v2, pending, deleted])).toEqual([v2]);
+    expect(currentAssets([v1, v2, pending])).toEqual([v2]);
   });
 });
 
 describe('review', () => {
-  it('offers decisions only for a file awaiting review, to someone who may decide', () => {
-    expect(mediaReviewDecisions('submitted', true)).toEqual(['approve', 'redo', 'reject']);
-    expect(mediaReviewDecisions('submitted', false)).toEqual([]);
-    for (const state of ['draft', 'approved', 'rejected', 'redo_requested'] as const) {
-      expect(mediaReviewDecisions(state, true)).toEqual([]);
-    }
+  it('offers exactly the actions the API allows', () => {
+    const review: Schema<'AssetReview'> = {
+      approval_id: 'ap-1',
+      state: 'submitted',
+      clinic_message: null,
+      internal_note: null,
+      submitted_by_user_id: null,
+      decided_by_user_id: null,
+      available_actions: ['approve', 'redo'],
+      updated_at: '2026-09-01T00:00:00Z',
+    };
+    expect(mediaActions(asset({ review }))).toEqual(['approve', 'redo']);
+    expect(mediaActions(asset({ review: null }))).toEqual([]);
   });
 
   it('labels every review state, and asks for a re-record for voice samples', () => {
@@ -118,42 +154,5 @@ describe('review', () => {
     ]);
     expect(mediaReviewLabel('redo_requested', 'practitioner_photo')).toBe('Needs retake');
     expect(mediaReviewLabel('redo_requested', 'audio')).toBe('Needs re-record');
-    expect(mediaReviewLabel('approved', 'audio')).toBe('Verified');
-  });
-
-  it('finds the newest approval for a file by its id', () => {
-    const base = {
-      clinic_id: 'clinic-1',
-      resource_type: 'asset',
-      publication_state: 'unpublished' as const,
-      submitted_by_user_id: null,
-      decided_by_user_id: null,
-      assignee_user_id: null,
-      last_comment: null,
-      created_at: '2026-09-01T00:00:00Z',
-    };
-    const old = {
-      ...base,
-      id: 'a1',
-      resource_id: 'x',
-      state: 'rejected' as const,
-      updated_at: '2026-09-01T00:00:00Z',
-    };
-    const latest = {
-      ...base,
-      id: 'a2',
-      resource_id: 'x',
-      state: 'submitted' as const,
-      updated_at: '2026-09-02T00:00:00Z',
-    };
-    const other = {
-      ...base,
-      id: 'a3',
-      resource_id: 'y',
-      state: 'approved' as const,
-      updated_at: '2026-09-03T00:00:00Z',
-    };
-    expect(approvalForResource([old, latest, other], 'x')).toBe(latest);
-    expect(approvalForResource([other], 'x')).toBeNull();
   });
 });

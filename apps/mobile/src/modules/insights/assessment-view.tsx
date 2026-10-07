@@ -209,7 +209,7 @@ function ComponentSection({ component }: { component: Schema<'ComponentDetail'> 
         // Score not shown for this section (product decision); its summary is.
         <Callout tone="neutral">{componentCaption(component)}</Callout>
       ) : null}
-      <SectionHeader title={`Findings and recommendations (${findings.length})`} />
+      <SectionHeader title={`Findings and improvement opportunities (${findings.length})`} />
       {findings.length === 0 ? (
         <Card>
           <EmptyState

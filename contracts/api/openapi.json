@@ -31,10 +31,24 @@
             ],
             "title": "Assignee User Id"
           },
+          "clinic_message": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clinic Message"
+          },
           "comment": {
             "anyOf": [
               {
                 "maxLength": 2000,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -78,10 +92,28 @@
             ],
             "title": "Assignee User Id"
           },
+          "available_actions": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalAction"
+            },
+            "title": "Available Actions",
+            "type": "array"
+          },
           "clinic_id": {
             "format": "uuid",
             "title": "Clinic Id",
             "type": "string"
+          },
+          "clinic_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clinic Message"
           },
           "created_at": {
             "format": "date-time",
@@ -160,6 +192,8 @@
           "decided_by_user_id",
           "assignee_user_id",
           "last_comment",
+          "clinic_message",
+          "available_actions",
           "created_at",
           "updated_at"
         ],
@@ -358,6 +392,149 @@
         "title": "AssessmentDetail",
         "type": "object"
       },
+      "AssessmentListItem": {
+        "additionalProperties": false,
+        "description": "A row of the cross-clinic Audit Reports list (``GET /assessments``).",
+        "properties": {
+          "approval_state": {
+            "$ref": "#/components/schemas/ApprovalState"
+          },
+          "clinic_id": {
+            "format": "uuid",
+            "title": "Clinic Id",
+            "type": "string"
+          },
+          "clinic_name": {
+            "title": "Clinic Name",
+            "type": "string"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "methodology_version": {
+            "title": "Methodology Version",
+            "type": "string"
+          },
+          "overall_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Score"
+          },
+          "primary_practitioner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Practitioner Name"
+          },
+          "publication_state": {
+            "$ref": "#/components/schemas/PublicationState"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "requested_by_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By User Id"
+          },
+          "sequence": {
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AssessmentStatus"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          }
+        },
+        "required": [
+          "id",
+          "clinic_id",
+          "sequence",
+          "status",
+          "methodology_version",
+          "overall_score",
+          "summary",
+          "requested_by_user_id",
+          "started_at",
+          "completed_at",
+          "approval_state",
+          "publication_state",
+          "published_at",
+          "created_at",
+          "clinic_name",
+          "primary_practitioner_name"
+        ],
+        "title": "AssessmentListItem",
+        "type": "object"
+      },
       "AssessmentRead": {
         "additionalProperties": false,
         "properties": {
@@ -552,8 +729,41 @@
       "AssetRead": {
         "additionalProperties": false,
         "properties": {
+          "angle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Angle"
+          },
           "approval_state": {
             "$ref": "#/components/schemas/ApprovalState"
+          },
+          "apron": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Apron"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
           },
           "clinic_id": {
             "format": "uuid",
@@ -588,6 +798,17 @@
             ],
             "title": "Original Filename"
           },
+          "outfit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outfit"
+          },
           "owner_user_id": {
             "anyOf": [
               {
@@ -599,6 +820,18 @@
               }
             ],
             "title": "Owner User Id"
+          },
+          "practitioner_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practitioner Id"
           },
           "previous_version_id": {
             "anyOf": [
@@ -616,6 +849,16 @@
             "additionalProperties": true,
             "title": "Provenance",
             "type": "object"
+          },
+          "review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AssetReview"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "size_bytes": {
             "title": "Size Bytes",
@@ -653,6 +896,90 @@
         "title": "AssetRead",
         "type": "object"
       },
+      "AssetReview": {
+        "additionalProperties": false,
+        "description": "The review of a file (clinic media): its approval, as the CALLER may see it.",
+        "properties": {
+          "approval_id": {
+            "format": "uuid",
+            "title": "Approval Id",
+            "type": "string"
+          },
+          "available_actions": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalAction"
+            },
+            "title": "Available Actions",
+            "type": "array"
+          },
+          "clinic_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clinic Message"
+          },
+          "decided_by_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By User Id"
+          },
+          "internal_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Note"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ApprovalState"
+          },
+          "submitted_by_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted By User Id"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "approval_id",
+          "state",
+          "clinic_message",
+          "internal_note",
+          "submitted_by_user_id",
+          "decided_by_user_id",
+          "available_actions",
+          "updated_at"
+        ],
+        "title": "AssetReview",
+        "type": "object"
+      },
       "AssetStatus": {
         "enum": [
           "pending_upload",
@@ -666,6 +993,48 @@
       "AssetUploadRequest": {
         "additionalProperties": false,
         "properties": {
+          "angle": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "pattern": "^[a-z0-9_]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Angle"
+          },
+          "apron": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "pattern": "^[a-z0-9_]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Apron"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "pattern": "^[a-z0-9_]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
           "checksum_sha256": {
             "anyOf": [
               {
@@ -698,6 +1067,32 @@
               }
             ],
             "title": "Original Filename"
+          },
+          "outfit": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "pattern": "^[a-z0-9_]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outfit"
+          },
+          "practitioner_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practitioner Id"
           },
           "previous_version_id": {
             "anyOf": [
@@ -1746,6 +2141,9 @@
             "title": "Stage Changed At",
             "type": "string"
           },
+          "stage_group": {
+            "$ref": "#/components/schemas/ClinicStageGroup"
+          },
           "state": {
             "anyOf": [
               {
@@ -1792,6 +2190,7 @@
           "longitude",
           "cover_asset_id",
           "stage",
+          "stage_group",
           "stage_changed_at",
           "is_active",
           "archived_reason",
@@ -2094,6 +2493,9 @@
             "title": "Stage Changed At",
             "type": "string"
           },
+          "stage_group": {
+            "$ref": "#/components/schemas/ClinicStageGroup"
+          },
           "state": {
             "anyOf": [
               {
@@ -2140,6 +2542,7 @@
           "longitude",
           "cover_asset_id",
           "stage",
+          "stage_group",
           "stage_changed_at",
           "is_active",
           "archived_reason",
@@ -2168,6 +2571,16 @@
           "active_client"
         ],
         "title": "ClinicStage",
+        "type": "string"
+      },
+      "ClinicStageGroup": {
+        "description": "The Admin tabs (decision D5): Prospects = stages 1-2, In Progress = 3-4, Active = 5.\n\nThe API applies this grouping itself (``GET /clinics?group=\u2026``, ``stage_group`` on every\nclinic, the dashboard tiles) so no screen has to repeat it.",
+        "enum": [
+          "prospects",
+          "in_progress",
+          "active"
+        ],
+        "title": "ClinicStageGroup",
         "type": "string"
       },
       "ClinicUpdate": {
@@ -3041,8 +3454,8 @@
             "$ref": "#/components/schemas/PlatformRole"
           },
           "sign_in_method": {
-            "const": "google",
-            "default": "google",
+            "const": "email_password",
+            "default": "email_password",
             "title": "Sign In Method",
             "type": "string"
           }
@@ -3089,6 +3502,46 @@
           }
         },
         "title": "MeUpdate",
+        "type": "object"
+      },
+      "MediaTaxonomyDimension": {
+        "description": "WHICH list a media label belongs to. The VALUES live in the ``media_taxonomy`` table,\nso a new outfit or voice sample is a new row, not a code change.",
+        "enum": [
+          "clinic_photo_category",
+          "voice_sample",
+          "practitioner_apron",
+          "practitioner_angle",
+          "practitioner_outfit"
+        ],
+        "title": "MediaTaxonomyDimension",
+        "type": "string"
+      },
+      "MediaTaxonomyValueRead": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "dimension": {
+            "$ref": "#/components/schemas/MediaTaxonomyDimension"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "sort_order": {
+            "title": "Sort Order",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dimension",
+          "code",
+          "label",
+          "sort_order"
+        ],
+        "title": "MediaTaxonomyValueRead",
         "type": "object"
       },
       "MetricSnapshotBatch": {
@@ -3535,6 +3988,38 @@
         "title": "Page[ApprovalRead]",
         "type": "object"
       },
+      "Page_AssessmentListItem_": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AssessmentListItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "Page[AssessmentListItem]",
+        "type": "object"
+      },
       "Page_AssessmentRead_": {
         "additionalProperties": false,
         "properties": {
@@ -3855,6 +4340,38 @@
         "title": "Page[UserListItem]",
         "type": "object"
       },
+      "Page_WorkItemListItem_": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WorkItemListItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "Page[WorkItemListItem]",
+        "type": "object"
+      },
       "Page_WorkItemRead_": {
         "additionalProperties": false,
         "properties": {
@@ -3922,7 +4439,9 @@
           "chat:read",
           "chat:write",
           "connections:read",
-          "connections:manage"
+          "connections:manage",
+          "media:upload",
+          "media:review"
         ],
         "title": "Permission",
         "type": "string"
@@ -4956,6 +5475,42 @@
         "title": "ServiceItem",
         "type": "object"
       },
+      "ServiceReportCreate": {
+        "additionalProperties": false,
+        "description": "A report registered by a backend service (/api/v1/internal). Services have no file upload\nroute, so no ``asset_id``: they cannot point a report at a clinic's files.",
+        "properties": {
+          "provenance": {
+            "additionalProperties": true,
+            "title": "Provenance",
+            "type": "object"
+          },
+          "report_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Report Key",
+            "type": "string"
+          },
+          "report_type": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Report Type",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "report_type",
+          "report_key",
+          "title"
+        ],
+        "title": "ServiceReportCreate",
+        "type": "object"
+      },
       "ServicesSection": {
         "additionalProperties": false,
         "properties": {
@@ -5093,7 +5648,7 @@
       },
       "TeamMemberCreate": {
         "additionalProperties": false,
-        "description": "Add a clinic-side person. Creates the (clinic_user) account if the email is new, and sends\nan invite email. Role `clinic_administrator` (default) or `clinic_team_member` (clinic staff: view-only\nplus uploading photos/files).",
+        "description": "Add a clinic-side person. Creates the (clinic_user) account if the email is new, and sends\nan invite (Cognito emails a temporary password). Role `clinic_administrator` (default) or\n`clinic_team_member` (clinic staff: view-only plus uploading photos/files).",
         "properties": {
           "email": {
             "title": "Email",
@@ -5196,7 +5751,7 @@
       },
       "UserCreate": {
         "additionalProperties": false,
-        "description": "Pre-provision a staff user. They get an invite email and sign in with Google using this email.",
+        "description": "Pre-provision a staff user. Cognito emails them a temporary password; they sign in with this email.",
         "properties": {
           "email": {
             "title": "Email",
@@ -5647,6 +6202,181 @@
         "title": "WorkItemCreate",
         "type": "object"
       },
+      "WorkItemListItem": {
+        "additionalProperties": false,
+        "description": "A row of the cross-clinic work queue (``GET /work-items``).",
+        "properties": {
+          "approval_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Id"
+          },
+          "area": {
+            "$ref": "#/components/schemas/WorkArea"
+          },
+          "clinic_id": {
+            "format": "uuid",
+            "title": "Clinic Id",
+            "type": "string"
+          },
+          "clinic_name": {
+            "title": "Clinic Name",
+            "type": "string"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By User Id"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "finding_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finding Code"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "owner_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner User Id"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/WorkItemPriority"
+          },
+          "source_finding_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Finding Id"
+          },
+          "source_team": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Team"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkItemStatus"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "clinic_id",
+          "kind",
+          "title",
+          "description",
+          "area",
+          "finding_code",
+          "source_finding_id",
+          "status",
+          "priority",
+          "owner_user_id",
+          "created_by_user_id",
+          "due_at",
+          "completed_at",
+          "approval_id",
+          "source_team",
+          "created_at",
+          "updated_at",
+          "clinic_name"
+        ],
+        "title": "WorkItemListItem",
+        "type": "object"
+      },
       "WorkItemPriority": {
         "enum": [
           "low",
@@ -5930,19 +6660,170 @@
         "description": "Cognito access token (Authorization Code + PKCE)",
         "scheme": "bearer",
         "type": "http"
+      },
+      "ServiceBearer": {
+        "description": "Cognito access token from the OAuth 2.0 client-credentials grant (backend services only)",
+        "scheme": "bearer",
+        "type": "http"
       }
     }
   },
   "info": {
     "description": "Platform API for Radial Pulse (clinics & practitioners). Every clinic-scoped route is authorized server-side; see docs/architecture/multi-tenancy.md.",
     "title": "Radial Pulse API",
-    "version": "0.1.0"
+    "version": "0.3.0"
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/assessments": {
+      "get": {
+        "operationId": "list_all_assessments_api_v1_assessments_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AssessmentStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "publication_state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PublicationState"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Publication State"
+            }
+          },
+          {
+            "description": "Only this clinic",
+            "in": "query",
+            "name": "clinic_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only this clinic",
+              "title": "Clinic Id"
+            }
+          },
+          {
+            "description": "Page size",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items to skip",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "Items to skip",
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_AssessmentListItem_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Authenticated but not allowed"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not found, or no access to this clinic"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Audit Reports: assessments of every clinic the caller may see (clinic users: PUBLISHED only)",
+        "tags": [
+          "assessments"
+        ]
+      }
+    },
     "/api/v1/auth/me": {
       "get": {
-        "description": "Sign-in happens in Cognito (Hosted UI, Google, PKCE). This returns the platform view of the caller.",
+        "description": "Sign-in happens in Cognito (Managed Login: email + password, PKCE).\n\nThis returns the platform view of the caller.",
         "operationId": "me_api_v1_auth_me_get",
         "responses": {
           "200": {
@@ -6524,7 +7405,7 @@
         "operationId": "list_clinics_api_v1_clinics_get",
         "parameters": [
           {
-            "description": "One or more stages. Prospects tab = prospective_client + profile_enriched",
+            "description": "One or more stages",
             "in": "query",
             "name": "stage",
             "required": false,
@@ -6540,8 +7421,26 @@
                   "type": "null"
                 }
               ],
-              "description": "One or more stages. Prospects tab = prospective_client + profile_enriched",
+              "description": "One or more stages",
               "title": "Stage"
+            }
+          },
+          {
+            "description": "An Admin tab: prospects (stages 1-2), in_progress (3-4) or active (5)",
+            "in": "query",
+            "name": "group",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ClinicStageGroup"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "An Admin tab: prospects (stages 1-2), in_progress (3-4) or active (5)",
+              "title": "Group"
             }
           },
           {
@@ -6972,6 +7871,25 @@
             }
           },
           {
+            "description": "e.g. asset",
+            "in": "query",
+            "name": "resource_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "e.g. asset",
+              "title": "Resource Type"
+            }
+          },
+          {
             "description": "Page size",
             "in": "query",
             "name": "limit",
@@ -7064,7 +7982,7 @@
     },
     "/api/v1/clinics/{clinic_id}/approvals/actions": {
       "post": {
-        "description": "The per-action permission (e.g. approvals:decide) is checked by the service.",
+        "description": "The per-action permission (e.g. approvals:decide, media:review) is checked by the service.\n\n``comment`` is an internal note (Radial Pulse staff only); ``clinic_message`` is what the\nclinic reads (e.g. why a photo must be retaken).",
         "operationId": "apply_action_api_v1_clinics__clinic_id__approvals_actions_post",
         "parameters": [
           {
@@ -7681,6 +8599,133 @@
             }
           },
           {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AssetStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "description": "e.g. submitted = awaiting review",
+            "in": "query",
+            "name": "approval_state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ApprovalState"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "e.g. submitted = awaiting review",
+              "title": "Approval State"
+            }
+          },
+          {
+            "in": "query",
+            "name": "practitioner_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Practitioner Id"
+            }
+          },
+          {
+            "description": "Photo category, or voice sample type with kind=audio",
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Photo category, or voice sample type with kind=audio",
+              "title": "Category"
+            }
+          },
+          {
+            "description": "Doctor photos: apron code",
+            "in": "query",
+            "name": "apron",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Doctor photos: apron code",
+              "title": "Apron"
+            }
+          },
+          {
+            "description": "Doctor photos: angle code",
+            "in": "query",
+            "name": "angle",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Doctor photos: angle code",
+              "title": "Angle"
+            }
+          },
+          {
+            "description": "Doctor photos: outfit code",
+            "in": "query",
+            "name": "outfit",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Doctor photos: outfit code",
+              "title": "Outfit"
+            }
+          },
+          {
             "description": "Page size",
             "in": "query",
             "name": "limit",
@@ -7765,7 +8810,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Assets",
+        "summary": "Clinic users never see unpublished report files",
         "tags": [
           "assets"
         ]
@@ -7861,8 +8906,99 @@
         ]
       }
     },
+    "/api/v1/clinics/{clinic_id}/assets/{asset_id}": {
+      "get": {
+        "operationId": "get_asset_api_v1_clinics__clinic_id__assets__asset_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "asset_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Clinic (tenant) id",
+            "in": "path",
+            "name": "clinic_id",
+            "required": true,
+            "schema": {
+              "description": "Clinic (tenant) id",
+              "format": "uuid",
+              "title": "Clinic Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Authenticated but not allowed"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not found, or no access to this clinic"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "One file with its labels and review",
+        "tags": [
+          "assets"
+        ]
+      }
+    },
     "/api/v1/clinics/{clinic_id}/assets/{asset_id}/confirm": {
       "post": {
+        "description": "Clinic media (clinic_photo, practitioner_photo, audio) is submitted for review here.",
         "operationId": "confirm_upload_api_v1_clinics__clinic_id__assets__asset_id__confirm_post",
         "parameters": [
           {
@@ -10951,7 +12087,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Add a Clinic Administrator (sends an invite email)",
+        "summary": "Add a Clinic Administrator (creates their sign-in; Cognito emails the invite)",
         "tags": [
           "clinics"
         ]
@@ -11658,6 +12794,448 @@
         ]
       }
     },
+    "/api/v1/internal/clinics/{clinic_id}/presence-profiles": {
+      "get": {
+        "operationId": "list_presence_profiles_api_v1_internal_clinics__clinic_id__presence_profiles_get",
+        "parameters": [
+          {
+            "description": "Clinic (tenant) id",
+            "in": "path",
+            "name": "clinic_id",
+            "required": true,
+            "schema": {
+              "description": "Clinic (tenant) id",
+              "format": "uuid",
+              "title": "Clinic Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "description": "Page size",
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items to skip",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "Items to skip",
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_PresenceProfileRead_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Authenticated but not allowed"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not found, or no access to this clinic"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error"
+          }
+        },
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "summary": "Service: where the clinic is online (scope presence.read)",
+        "tags": [
+          "internal (services)"
+        ]
+      }
+    },
+    "/api/v1/internal/clinics/{clinic_id}/profile": {
+      "get": {
+        "operationId": "get_profile_api_v1_internal_clinics__clinic_id__profile_get",
+        "parameters": [
+          {
+            "description": "Clinic (tenant) id",
+            "in": "path",
+            "name": "clinic_id",
+            "required": true,
+            "schema": {
+              "description": "Clinic (tenant) id",
+              "format": "uuid",
+              "title": "Clinic Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicProfileRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Authenticated but not allowed"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not found, or no access to this clinic"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error"
+          }
+        },
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "summary": "Service: the client context (scope profile.read). `team` is always empty for services",
+        "tags": [
+          "internal (services)"
+        ]
+      }
+    },
+    "/api/v1/internal/clinics/{clinic_id}/reports": {
+      "post": {
+        "operationId": "create_report_api_v1_internal_clinics__clinic_id__reports_post",
+        "parameters": [
+          {
+            "description": "Clinic (tenant) id",
+            "in": "path",
+            "name": "clinic_id",
+            "required": true,
+            "schema": {
+              "description": "Clinic (tenant) id",
+              "format": "uuid",
+              "title": "Clinic Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceReportCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportArtifactRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Authenticated but not allowed"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not found, or no access to this clinic"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error"
+          }
+        },
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "summary": "Service: register a report version (scope reports.write)",
+        "tags": [
+          "internal (services)"
+        ]
+      }
+    },
+    "/api/v1/internal/clinics/{clinic_id}/snapshots": {
+      "post": {
+        "operationId": "ingest_snapshots_api_v1_internal_clinics__clinic_id__snapshots_post",
+        "parameters": [
+          {
+            "description": "Clinic (tenant) id",
+            "in": "path",
+            "name": "clinic_id",
+            "required": true,
+            "schema": {
+              "description": "Clinic (tenant) id",
+              "format": "uuid",
+              "title": "Clinic Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetricSnapshotBatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MetricSnapshotRead"
+                  },
+                  "title": "Response Ingest Snapshots Api V1 Internal Clinics  Clinic Id  Snapshots Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Authenticated but not allowed"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not found, or no access to this clinic"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error"
+          }
+        },
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "summary": "Service: ingest metric snapshots (scope snapshots.write)",
+        "tags": [
+          "internal (services)"
+        ]
+      }
+    },
+    "/api/v1/media/taxonomy": {
+      "get": {
+        "description": "The values to offer when uploading clinic media, grouped by ``dimension`` and in display\norder (``sort_order``). Use the ``code`` in ``POST /clinics/{id}/assets/uploads``. The list\ncan grow (e.g. new outfits): build screens from it instead of hard-coding the values.",
+        "operationId": "list_taxonomy_api_v1_media_taxonomy_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MediaTaxonomyValueRead"
+                  },
+                  "title": "Response List Taxonomy Api V1 Media Taxonomy Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Authenticated but not allowed"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not found, or no access to this clinic"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Media labels: photo categories, doctor-photo apron / angle / outfit, voice samples",
+        "tags": [
+          "assets"
+        ]
+      }
+    },
     "/api/v1/notifications": {
       "get": {
         "operationId": "list_notifications_api_v1_notifications_get",
@@ -12193,7 +13771,7 @@
         ]
       },
       "post": {
-        "description": "Pre-provision a Radial Pulse staff user (Platform Administrator or Digital Success Manager).\n\nAn invite email is sent; they then sign in with Google using this email.",
+        "description": "Pre-provision a Radial Pulse staff user (Platform Administrator or Digital Success Manager).\n\nTheir Cognito sign-in is created and Cognito emails them a temporary password; they sign in\nwith this email address through Managed Login and choose their own password.",
         "operationId": "create_user_api_v1_users_post",
         "requestBody": {
           "content": {
@@ -12270,6 +13848,7 @@
     },
     "/api/v1/users/{user_id}": {
       "patch": {
+        "description": "Deactivating also disables the person's Cognito sign-in and signs them out everywhere.",
         "operationId": "update_user_api_v1_users__user_id__patch",
         "parameters": [
           {
@@ -12444,6 +14023,171 @@
         "summary": "Resend Invite",
         "tags": [
           "users"
+        ]
+      }
+    },
+    "/api/v1/work-items": {
+      "get": {
+        "operationId": "list_all_work_items_api_v1_work_items_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/WorkItemStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "description": "Only items owned by this person",
+            "in": "query",
+            "name": "owner_user_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only items owned by this person",
+              "title": "Owner User Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "area",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/WorkArea"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Area"
+            }
+          },
+          {
+            "description": "Only this clinic",
+            "in": "query",
+            "name": "clinic_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only this clinic",
+              "title": "Clinic Id"
+            }
+          },
+          {
+            "description": "Page size",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items to skip",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "Items to skip",
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_WorkItemListItem_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Authenticated but not allowed"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not found, or no access to this clinic"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Work queue: work items of every clinic the caller may see",
+        "tags": [
+          "work-items"
         ]
       }
     },

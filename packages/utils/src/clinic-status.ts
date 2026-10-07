@@ -1,38 +1,35 @@
 import type { Schema } from '@radial-pulse/shared-types';
 
-type ClinicStage = Schema<'ClinicStage'>;
+type ClinicStageGroup = Schema<'ClinicStageGroup'>;
 
 /**
- * The status a clinic is shown with: the backend's own stage groups
- * (`DashboardSummary.prospects / in_progress / active`, and the clinics list
- * `stage` filter "Prospects tab = prospective_client + profile_enriched"),
- * plus archived clinics as "inactive". A display grouping of contract values,
- * not a new domain value: the API still stores and filters by `ClinicStage`.
+ * The status a clinic is shown with: the API's own stage group
+ * (`ClinicRead.stage_group`, the `group` list filter, the dashboard tiles),
+ * plus archived clinics as "inactive". The API owns the grouping; the
+ * frontend only words it.
  */
 export type ClinicStatus = 'prospect' | 'in_progress' | 'active' | 'inactive';
 
-/** Every contract stage in exactly one group (a new stage is a compile error). */
-export const CLINIC_STATUS_OF_STAGE: Readonly<
-  Record<ClinicStage, Exclude<ClinicStatus, 'inactive'>>
+/** Every contract stage group as a status (a new group is a compile error). */
+export const CLINIC_STATUS_OF_GROUP: Readonly<
+  Record<ClinicStageGroup, Exclude<ClinicStatus, 'inactive'>>
 > = {
-  prospective_client: 'prospect',
-  profile_enriched: 'prospect',
-  assessment_completed: 'in_progress',
-  client_discussion: 'in_progress',
-  active_client: 'active',
+  prospects: 'prospect',
+  in_progress: 'in_progress',
+  active: 'active',
 };
 
-/** Stages to send as the list `stage` filter for a status (inactive = `archived=true`). */
-export const CLINIC_STATUS_STAGES: Readonly<
-  Record<Exclude<ClinicStatus, 'inactive'>, ClinicStage[]>
+/** The list `group` filter for a status (inactive = `archived=true`). */
+export const CLINIC_STATUS_GROUP: Readonly<
+  Record<Exclude<ClinicStatus, 'inactive'>, ClinicStageGroup>
 > = {
-  prospect: ['prospective_client', 'profile_enriched'],
-  in_progress: ['assessment_completed', 'client_discussion'],
-  active: ['active_client'],
+  prospect: 'prospects',
+  in_progress: 'in_progress',
+  active: 'active',
 };
 
 export const CLINIC_STATUS_LABELS: Readonly<Record<ClinicStatus, string>> = {
-  prospect: 'Prospect',
+  prospect: 'Prospective client',
   in_progress: 'In progress',
   active: 'Active',
   inactive: 'Inactive',
@@ -40,7 +37,7 @@ export const CLINIC_STATUS_LABELS: Readonly<Record<ClinicStatus, string>> = {
 
 /** Plural labels for tabs and filters. */
 export const CLINIC_STATUS_GROUP_LABELS: Readonly<Record<ClinicStatus, string>> = {
-  prospect: 'Prospects',
+  prospect: 'Prospective clients',
   in_progress: 'In progress',
   active: 'Active',
   inactive: 'Inactive',
@@ -55,6 +52,9 @@ export const CLINIC_STATUSES: ReadonlyArray<ClinicStatus> = [
 ];
 
 /** A clinic's status from its contract fields: archived first, else its stage group. */
-export function clinicStatus(clinic: { stage: ClinicStage; is_active: boolean }): ClinicStatus {
-  return clinic.is_active ? CLINIC_STATUS_OF_STAGE[clinic.stage] : 'inactive';
+export function clinicStatus(clinic: {
+  stage_group: ClinicStageGroup;
+  is_active: boolean;
+}): ClinicStatus {
+  return clinic.is_active ? CLINIC_STATUS_OF_GROUP[clinic.stage_group] : 'inactive';
 }

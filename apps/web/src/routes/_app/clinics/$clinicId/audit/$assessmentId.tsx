@@ -1,12 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { AuditPage } from '../../../../../modules/assessments/audit-page';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
-/** Canonical report URL (architecture §6). */
+/** Old URL: assessments moved to …/assessment/$assessmentId. */
 export const Route = createFileRoute('/_app/clinics/$clinicId/audit/$assessmentId')({
-  component: AssessmentRoute,
+  beforeLoad: ({ params }) => {
+    throw redirect({ to: '/clinics/$clinicId/assessment/$assessmentId', params, replace: true });
+  },
 });
-
-function AssessmentRoute() {
-  const { assessmentId } = Route.useParams();
-  return <AuditPage assessmentId={assessmentId} />;
-}

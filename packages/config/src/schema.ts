@@ -25,6 +25,8 @@ const rawSchema = z
       userPoolClientId: z.string().min(1),
       /** Managed-login domain, e.g. auth.dev.example.com */
       domain: z.string().min(1),
+      /** OAuth scopes the public app client allows (Authorization Code + PKCE). */
+      scopes: z.array(z.string().min(1)).min(1).default(['openid', 'email']),
     }),
     apiMocking: z.boolean().default(false),
   })
@@ -57,4 +59,16 @@ export function createConfig(raw: unknown): AppConfig {
     );
   }
   return Object.freeze(result.data);
+}
+
+/** Placeholder value in committed example configuration. */
+const PLACEHOLDER = 'REPLACE_ME';
+
+/**
+ * True when the Cognito values are real (not the committed placeholders), so
+ * Managed Login can be offered. Otherwise the app runs without sign-in.
+ */
+export function isCognitoConfigured(config: Pick<AppConfig, 'cognito'>): boolean {
+  const { userPoolId, userPoolClientId, domain } = config.cognito;
+  return [userPoolId, userPoolClientId, domain].every((v) => v && v !== PLACEHOLDER);
 }

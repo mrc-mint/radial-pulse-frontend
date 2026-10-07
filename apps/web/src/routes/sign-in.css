@@ -79,3 +79,9 @@
   color: var(--rp-color-status-warning-fg);
   font-size: var(--rp-text-body-sm-size);
 }
+
+.rp-sign-in__note {
+  margin: 0;
+  color: var(--rp-color-text-tertiary);
+  font-size: var(--rp-text-body-sm-size);
+}

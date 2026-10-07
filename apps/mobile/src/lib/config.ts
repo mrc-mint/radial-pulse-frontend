@@ -13,6 +13,8 @@ export function readRawEnv() {
       userPoolId: process.env.EXPO_PUBLIC_COGNITO_USER_POOL_ID,
       userPoolClientId: process.env.EXPO_PUBLIC_COGNITO_USER_POOL_CLIENT_ID,
       domain: process.env.EXPO_PUBLIC_COGNITO_DOMAIN,
+      // Space-separated; the schema defaults to "openid email".
+      scopes: process.env.EXPO_PUBLIC_COGNITO_SCOPES?.split(/\s+/).filter(Boolean) || undefined,
     },
     apiMocking: process.env.EXPO_PUBLIC_API_MOCKING === 'true',
   };

@@ -58,7 +58,7 @@ function ProfileCard() {
       <DefinitionList
         items={[
           ['Email', user.email],
-          ['Sign-in', 'Google account'],
+          ['Sign-in', 'Email and password'],
         ]}
       />
     </Card>

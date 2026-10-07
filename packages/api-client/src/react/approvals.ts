@@ -1,6 +1,6 @@
 import type { Schema } from '@radial-pulse/shared-types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { approvalsService } from '../services';
+import { approvalsService, ASSET_RESOURCE_TYPE } from '../services';
 import { useApiClient } from './provider';
 import { clinicQueryKey } from './query-keys';
 
@@ -32,4 +32,35 @@ export function useApplyApprovalAction(clinicId: string) {
         queryClient.invalidateQueries({ queryKey: clinicQueryKey(clinicId, 'assets') }),
       ]),
   });
+}
+
+/**
+ * Reviews a clinic file (photo, logo or voice sample). Offer only the actions
+ * in `AssetRead.review.available_actions`; `clinicMessage` is what the clinic
+ * reads, `internalNote` stays with Radial Pulse staff.
+ */
+export function useReviewAsset(clinicId: string) {
+  const apply = useApplyApprovalAction(clinicId);
+  return {
+    ...apply,
+    mutate: (
+      input: {
+        assetId: string;
+        action: Schema<'ApprovalAction'>;
+        clinicMessage?: string | null;
+        internalNote?: string | null;
+      },
+      options?: Parameters<typeof apply.mutate>[1],
+    ) =>
+      apply.mutate(
+        {
+          resource_type: ASSET_RESOURCE_TYPE,
+          resource_id: input.assetId,
+          action: input.action,
+          clinic_message: input.clinicMessage || null,
+          comment: input.internalNote || null,
+        },
+        options,
+      ),
+  };
 }

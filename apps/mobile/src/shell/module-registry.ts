@@ -5,7 +5,7 @@ import { connectAccountsModule } from '../modules/connect-accounts/manifest';
 import { homeModule } from '../modules/home/manifest';
 import { insightsModule } from '../modules/insights/manifest';
 import { profileModule } from '../modules/profile/manifest';
-import { reportsModule } from '../modules/reports/manifest';
+import { assessmentsModule } from '../modules/assessments/manifest';
 import { socialMediaModule } from '../modules/social-media/manifest';
 
 /**
@@ -16,7 +16,7 @@ export const mobileModules: ReadonlyArray<ModuleManifest> = [
   homeModule,
   insightsModule,
   socialMediaModule,
-  reportsModule,
+  assessmentsModule,
   profileModule,
   chatModule,
   connectAccountsModule,

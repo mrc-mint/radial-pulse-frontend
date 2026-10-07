@@ -1,5 +1,5 @@
 import type { Schema } from '@radial-pulse/shared-types';
-import { CLINIC_STATUS_LABELS, CLINIC_STATUS_OF_STAGE } from '@radial-pulse/utils';
+import { CLINIC_STATUS_LABELS, CLINIC_STATUS_OF_GROUP } from '@radial-pulse/utils';
 
 type Clinic = Schema<'ClinicListItem'>;
 
@@ -7,7 +7,7 @@ type Clinic = Schema<'ClinicListItem'>;
  * Dashboard feed and highlights, built only from `ClinicListItem` fields
  * (`created_at`, `stage`, `stage_changed_at`, `website_url`) and page totals.
  * Counts and dates only: nothing is scored. Other events and figures in the
- * design (enrichment, assignment, reports, profile coverage) are not in the
+ * design (Digital Presence Intelligence Agent results, portfolio allocation, reports, profile coverage) are not in the
  * contract and are not shown (docs/phase-4-contract-dependency.md, gap 18).
  */
 
@@ -43,7 +43,7 @@ export function clinicActivity(clinics: ReadonlyArray<Clinic>, limit = 5): Activ
             clinicId: c.id,
             kind: 'stage',
             stage: c.stage,
-            text: `${c.name} moved to ${CLINIC_STATUS_LABELS[CLINIC_STATUS_OF_STAGE[c.stage]]}`,
+            text: `${c.name} moved to ${CLINIC_STATUS_LABELS[CLINIC_STATUS_OF_GROUP[c.stage_group]]}`,
             at: c.stage_changed_at,
           },
         ]

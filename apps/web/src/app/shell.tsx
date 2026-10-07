@@ -42,7 +42,7 @@ export function useAppNavigation() {
   );
 }
 
-/** The label the current user sees for a nav entry (e.g. "My Clinics"). */
+/** The label the current user sees for a nav entry (e.g. "My Client Portfolio"). */
 export function useNavLabel(id: string, fallback: string): string {
   return useAppNavigation().find((e) => e.id === id)?.label ?? fallback;
 }

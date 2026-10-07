@@ -48,19 +48,22 @@ compile-time; no micro-frontends.
 
 ## §5 Work queue
 
-Generic `WorkItem` from the backend. V1 surfaces: DSM dashboard widgets and
-the clinic Overview Actions panel. No dedicated route.
+Generic `WorkItem` from the backend, shown as Improvement Work Items. V1
+surfaces: DSM dashboard widgets and the client organization Overview. No
+dedicated route.
 
 ## §6 Web routing
 
-TanStack Router, file-based. Canonical report URL
-`/clinics/$clinicId/audit/$assessmentId`. Built in Phase 5.
+TanStack Router, file-based. Canonical Digital Presence Assessment URL
+`/clinics/$clinicId/assessment/$assessmentId`; the cross-client list is
+`/assessments`. The old `/audit-reports` and `/clinics/$clinicId/audit/…`
+URLs redirect. (Route segments keep the API's `clinics` name.)
 
 ## §7 Mobile navigation / API Gateway
 
 Expo Router groups `(public)` (Welcome, Sign in), `(app)` guarded by the
 Clinic Administrator gate with `(setup)/connect-accounts`, `(tabs)` (Home,
-Insights, Social Media, Reports, Profile — from the modules' manifests,
+Insights, Social Presence, Assessments, Profile — from the modules' manifests,
 filtered by the selected clinic's permissions), `chat` as a modal from the
 floating button, and detail screens. `ClinicSelectionProvider` scopes the whole
 signed-in tree to one clinic. App composition lives in `src/shell` (not
@@ -79,9 +82,12 @@ Mobile: EAS profiles `development`, `dev`, `prod` set `APP_ENV`.
 `shared-types/src/contract/generated.ts` → domain aliases. The frontend
 defines no enum values of its own for assessment status or severity.
 
-## Auth (Phase 7)
+## Auth
 
-Cognito managed login via Amplify Auth (`signInWithRedirect`) on both
-platforms. Web tokens in sessionStorage plus a strict CSP on CloudFront.
-Mobile tokens in expo-secure-store via a chunking adapter. The API client only
-sees an injected `AuthBridge`.
+Cognito Managed Login, email and password, Authorization Code + PKCE, with a
+public app client per app (ADR 0006, docs/phase-7-auth.md). One shared
+provider, `createCognitoAuth` in `platform-shell/core`; no Amplify. Web tokens
+in sessionStorage plus a strict CSP on CloudFront. Mobile tokens in
+expo-secure-store via a chunking adapter. The API client only sees an injected
+`AuthBridge`; the session comes from `GET /api/v1/auth/me`. Service-to-service
+(client-credentials) auth is backend-only.

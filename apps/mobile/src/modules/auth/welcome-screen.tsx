@@ -15,13 +15,13 @@ const FEATURES: Array<{ icon: LucideIcon; title: string; body: string }> = [
   },
   {
     icon: FileText,
-    title: 'Reports',
+    title: 'Assessments',
     body: 'Every assessment your Digital Success Manager publishes, in one place.',
   },
   {
     icon: MessageCircle,
-    title: 'Chat',
-    body: 'Talk to your Digital Success Manager and share files.',
+    title: 'Client Collaboration',
+    body: 'Chat with your Digital Success Manager and share files.',
   },
 ];
 

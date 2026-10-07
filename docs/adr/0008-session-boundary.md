@@ -1,7 +1,7 @@
 # 0008 — Session boundary and mock sign-in
 
-Status: accepted (platform shell phase; revised when API contract 0.1.0 was
-imported; Cognito arrives in Phase 7, ADR 0006)
+Status: accepted (platform shell phase; revised for API contract 0.1.0 and
+again in Phase 7 when Cognito Managed Login landed, ADR 0006)
 
 `platform-shell/core` defines a `SessionAdapter` and a framework-free
 `SessionController`. The session content always comes from the contract's
@@ -15,7 +15,8 @@ client.
 Token providers (`platform-shell/core/auth-provider.ts`, shared by web and
 mobile):
 
-- **Cognito** — Phase 7.
+- **Cognito** — `createCognitoAuth`: Managed Login, email and password,
+  Authorization Code + PKCE, public app clients (ADR 0006).
 - **Mock sign-in** — only when `apiMocking` is on (which `createConfig()` refuses
   in prod): a persona becomes a `dev-persona:<id>` token that only the MSW
   contract mocks accept. No passwords, no real tokens.

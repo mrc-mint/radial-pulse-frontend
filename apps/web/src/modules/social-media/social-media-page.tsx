@@ -61,7 +61,7 @@ export function SocialMediaPage() {
                     {synced
                       ? `Last synced ${synced}`
                       : c.available
-                        ? 'The clinic connects this account from the mobile app.'
+                        ? 'The client connects this account from the mobile app.'
                         : 'This platform isn’t supported yet.'}
                   </p>
                   {c.last_error && (
@@ -117,7 +117,7 @@ function Performance({ clinicId }: { clinicId: string }) {
       <Card>
         <EmptyState
           title="No social metrics yet"
-          description="Metrics appear once the clinic connects an account and it has synced."
+          description="Metrics appear once the client connects an account and it has synced."
         />
       </Card>
     );
