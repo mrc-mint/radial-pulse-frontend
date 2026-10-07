@@ -40,7 +40,7 @@ export function SocialMediaScreen() {
       refreshing={connections.isRefetching}
       header={
         <PageHeader
-          title="Social Media"
+          title="Social Presence"
           description="Your connected accounts and social presence"
         />
       }

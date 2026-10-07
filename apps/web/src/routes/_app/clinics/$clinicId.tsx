@@ -17,7 +17,7 @@ import { ClinicHeader } from '../../../modules/clinics/clinic-header';
 /**
  * Clinic workspace: every route below /clinics/$clinicId runs inside this
  * clinic's scope (useClinicId()). Digital Success Managers reach it from
- * My Clinics; access to the clinic itself is enforced by the API.
+ * My Client Portfolio; access to the clinic itself is enforced by the API.
  */
 export const Route = createFileRoute('/_app/clinics/$clinicId')({
   component: ClinicLayout,
@@ -29,7 +29,7 @@ function ClinicLayout() {
   // Platform Administrators don't chat with clinics; the clinic's DSM does.
   const chats = !useCurrentSession().allClinics;
   const pathname = usePathname();
-  const backLabel = useNavLabel('clinics', 'Clinics');
+  const backLabel = useNavLabel('clinics', 'Client Organizations');
   // Slow poll for the Chat tab's unread badge; the chat itself polls faster.
   const inbox = useChatInbox({
     enabled: chats && (permissions === 'unrestricted' || permissions.has('chat:read')),

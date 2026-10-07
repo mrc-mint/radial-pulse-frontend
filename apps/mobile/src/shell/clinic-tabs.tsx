@@ -33,7 +33,7 @@ export function ClinicTabsLayout() {
           headerShown: false,
           tabBarActiveTintColor: t.color.text.link,
           tabBarInactiveTintColor: t.color.text.tertiary,
-          // 10pt keeps five labels ("Social Media") unclipped on 320–375pt phones.
+          // 10pt keeps five labels ("Social Presence") unclipped on 320–375pt phones.
           tabBarLabelStyle: { ...fontStyle(500), fontSize: 10, letterSpacing: -0.1 },
           tabBarStyle: {
             height: TAB_BAR_HEIGHT + insets.bottom,

@@ -24,6 +24,15 @@ export const assetsService = {
         body,
       }),
     ),
+  /** One file with its labels and its review as the caller may see it. */
+  get: (api: ApiClient, clinicId: string, assetId: string) =>
+    unwrap(
+      api.GET('/api/v1/clinics/{clinic_id}/assets/{asset_id}', {
+        params: { path: { clinic_id: clinicId, asset_id: assetId } },
+      }),
+    ),
+  /** Media labels (photo categories, apron / angle / outfit, voice samples). */
+  mediaTaxonomy: (api: ApiClient) => unwrap(api.GET('/api/v1/media/taxonomy')),
   confirm: (api: ApiClient, clinicId: string, assetId: string) =>
     unwrap(
       api.POST('/api/v1/clinics/{clinic_id}/assets/{asset_id}/confirm', {
@@ -64,6 +73,12 @@ export interface UploadFile {
   name: string;
 }
 
+/** Media labels and practitioner of an upload (codes from `GET /media/taxonomy`). */
+export type UploadLabels = Pick<
+  BodyOf<'/api/v1/clinics/{clinic_id}/assets/uploads', 'post'>,
+  'category' | 'apron' | 'angle' | 'outfit' | 'practitioner_id'
+>;
+
 /**
  * The contract's three-step upload: request a pre-signed URL, PUT the file to
  * storage, then confirm (the API verifies the object). `previousVersionId`
@@ -75,6 +90,7 @@ export async function uploadAsset(
   input: {
     kind: BodyOf<'/api/v1/clinics/{clinic_id}/assets/uploads', 'post'>['kind'];
     file: UploadFile;
+    labels?: UploadLabels;
     previousVersionId?: string | null;
   },
   storageFetch?: StorageFetch,
@@ -85,6 +101,7 @@ export async function uploadAsset(
     mime_type: data.type || 'application/octet-stream',
     size_bytes: data.size,
     original_filename: name,
+    ...input.labels,
     ...(input.previousVersionId ? { previous_version_id: input.previousVersionId } : {}),
   });
   await uploadToPresignedUrl(upload, data, storageFetch);

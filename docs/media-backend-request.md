@@ -1,7 +1,7 @@
 # Clinic media: backend and DevOps request
 
 Feature: Clinic Media & Voice Samples (V1). Clinic Administrators upload
-doctor photos, hospital photos and voice samples in the mobile app. Platform
+practitioner photos (doctor photos), hospital photos and voice samples in the mobile app. Platform
 Administrators and Digital Success Managers review them on the web (approve,
 request a retake / re-record, reject). Staff never upload, replace or delete
 clinic media. Practitioner logins and a Clinic Team Member portal are future
@@ -32,7 +32,7 @@ until each item ships, the screens fall back as described.
 
 The product reference has fixed slots:
 
-- **Doctor photos:** outfits, each **with apron** or **without apron**, and
+- **Practitioner photos:** outfits, each **with apron** or **without apron**, and
   five angles per outfit: **90° L, 45° L, 0°, 45° R, 90° R**.
 - **Hospital photos:** **Exterior & signage**, **Reception & waiting**,
   **Consult & procedure rooms**, **Equipment & facilities**, **Team at work**
@@ -56,7 +56,7 @@ published. Until then uploads are stored with their kind only and appear under
 ### 2. Practitioner link (gap 21)
 
 `practitioner_id` (nullable uuid) on `AssetUploadRequest`, `AssetRead` and as
-a list filter, for doctor photos and voice samples. V1 always uses the main
+a list filter, for practitioner photos and voice samples. V1 always uses the main
 practitioner (`is_primary`); the field keeps multiple practitioners possible
 later without changing the media model.
 

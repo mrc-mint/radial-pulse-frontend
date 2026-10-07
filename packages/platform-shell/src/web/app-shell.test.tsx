@@ -33,8 +33,8 @@ const modules: ModuleManifest[] = [
     navEntries: [
       {
         id: 'clinics',
-        label: 'Clinics',
-        scopedLabel: 'My Clinics',
+        label: 'Client Organizations',
+        scopedLabel: 'My Client Portfolio',
         to: '/clinics',
         icon: 'clinics',
         placement: 'primary',
@@ -62,16 +62,21 @@ const modules: ModuleManifest[] = [
     navEntries: [
       {
         id: 'audit-reports',
-        label: 'Audit Reports',
+        label: 'Digital Presence Assessments',
         to: '/audit-reports',
         icon: 'reports',
         placement: 'primary',
         order: 40,
       },
     ],
-    clinicSections: [{ id: 'audit', label: 'Unified Audit', path: 'audit', order: 30 }],
+    clinicSections: [
+      { id: 'audit', label: 'Digital Presence Assessment', path: 'audit', order: 30 },
+    ],
   },
-  { id: 'chat', clinicSections: [{ id: 'chat', label: 'Chat', path: 'chat', order: 50 }] },
+  {
+    id: 'chat',
+    clinicSections: [{ id: 'chat', label: 'Client Collaboration', path: 'chat', order: 50 }],
+  },
   {
     id: 'settings',
     navEntries: [
@@ -151,12 +156,23 @@ describe('WebAppShell', () => {
 
   it('shows the Platform Administrator navigation', () => {
     renderShell({ capabilities: ['users:read'], allClinics: true });
-    expect(mainNavLabels()).toEqual(['Dashboard', 'Clinics', 'Users', 'Audit Reports', 'Settings']);
+    expect(mainNavLabels()).toEqual([
+      'Dashboard',
+      'Client Organizations',
+      'Users',
+      'Digital Presence Assessments',
+      'Settings',
+    ]);
   });
 
   it('shows the Digital Success Manager navigation', () => {
     renderShell({ capabilities: ['clinics:create'], allClinics: false });
-    expect(mainNavLabels()).toEqual(['Dashboard', 'My Clinics', 'Audit Reports', 'Settings']);
+    expect(mainNavLabels()).toEqual([
+      'Dashboard',
+      'My Client Portfolio',
+      'Digital Presence Assessments',
+      'Settings',
+    ]);
   });
 
   it('marks the current page, and its section inside clinic routes', () => {
@@ -164,10 +180,14 @@ describe('WebAppShell', () => {
     expect(screen.getByRole('link', { name: 'Dashboard' }).getAttribute('aria-current')).toBe(
       'page',
     );
-    expect(screen.getByRole('link', { name: 'Clinics' }).getAttribute('aria-current')).toBeNull();
+    expect(
+      screen.getByRole('link', { name: 'Client Organizations' }).getAttribute('aria-current'),
+    ).toBeNull();
 
     navigate('/clinics/c_smile/chat');
-    expect(screen.getByRole('link', { name: 'Clinics' }).getAttribute('aria-current')).toBe('true');
+    expect(
+      screen.getByRole('link', { name: 'Client Organizations' }).getAttribute('aria-current'),
+    ).toBe('true');
     expect(screen.getByRole('link', { name: 'Dashboard' }).getAttribute('aria-current')).toBeNull();
   });
 
@@ -212,7 +232,7 @@ describe('WebAppShell', () => {
       const user = userEvent.setup();
       const { navigate } = renderShell();
       await user.click(screen.getByRole('button', { name: 'Open menu' }));
-      await user.click(screen.getByRole('link', { name: 'Audit Reports' }));
+      await user.click(screen.getByRole('link', { name: 'Digital Presence Assessments' }));
       expect(screen.queryByRole('dialog')).toBeNull();
 
       await user.click(screen.getByRole('button', { name: 'Open menu' }));
@@ -243,24 +263,24 @@ describe('ClinicWorkspace', () => {
         <p>Section content</p>
       </ClinicWorkspace>,
     );
-    return within(screen.getByRole('navigation', { name: 'Clinic sections' }));
+    return within(screen.getByRole('navigation', { name: 'Client organization sections' }));
   }
 
   it('lists clinic sections as clinic-scoped links', () => {
     const nav = renderWorkspace('/clinics/c_smile');
     expect(nav.getAllByRole('link').map((a) => [a.textContent, a.getAttribute('href')])).toEqual([
       ['Overview', '/clinics/c_smile'],
-      ['Unified Audit', '/clinics/c_smile/audit'],
-      ['Chat', '/clinics/c_smile/chat'],
+      ['Digital Presence Assessment', '/clinics/c_smile/audit'],
+      ['Client Collaboration', '/clinics/c_smile/chat'],
     ]);
   });
 
   it('activates the overview only on the clinic root', () => {
     const nav = renderWorkspace('/clinics/c_smile/audit/a_9');
     expect(nav.getByRole('link', { name: 'Overview' }).getAttribute('aria-current')).toBeNull();
-    expect(nav.getByRole('link', { name: 'Unified Audit' }).getAttribute('aria-current')).toBe(
-      'page',
-    );
+    expect(
+      nav.getByRole('link', { name: 'Digital Presence Assessment' }).getAttribute('aria-current'),
+    ).toBe('page');
   });
 });
 
@@ -276,7 +296,7 @@ describe('RequireCapability', () => {
           platform_role: 'digital_success_manager',
           permissions: ['clinics:create'],
           all_clinics: false,
-          sign_in_method: 'google',
+          sign_in_method: 'email_password',
           clinics: [],
         }),
       signIn: async () => null,

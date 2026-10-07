@@ -97,7 +97,7 @@ function ClinicWorkDashboard() {
       ) : (
         <div className="rp-grid rp-grid--tiles" aria-busy={summary.isLoading || undefined}>
           <MetricCard
-            label="My clinics"
+            label="My Client Portfolio"
             value={data?.total_clinics}
             icon={<Building2 size={20} />}
             iconTone="brand"
@@ -110,13 +110,13 @@ function ClinicWorkDashboard() {
             iconTone="success"
           />
           <MetricCard
-            label="Open work items"
+            label="Open improvement work items"
             value={data?.open_work_items}
             icon={<ListTodo size={20} />}
             iconTone="warning"
           />
           <MetricCard
-            label="Unread chats"
+            label="Unread messages"
             value={unread}
             hint={
               inbox.data
@@ -174,7 +174,7 @@ function ClinicsNeedingAttention({
 
   return (
     <Card
-      title="Clinics needing attention"
+      title="Client organizations needing attention"
       padding="none"
       actions={
         <Link to="/clinics" className="rp-link rp-dashboard__view-all">
@@ -189,10 +189,10 @@ function ClinicsNeedingAttention({
       ) : items.length === 0 ? (
         <EmptyState
           title="All caught up"
-          description="None of your clinics needs anything right now."
+          description="Nothing in your portfolio needs attention right now."
         />
       ) : (
-        <ul className="rp-dashboard__feed" aria-label="Clinics needing attention">
+        <ul className="rp-dashboard__feed" aria-label="Client organizations needing attention">
           {items.map((item) => (
             <li key={item.clinic.id}>
               <Link
@@ -254,7 +254,10 @@ function RecentActivity({
       {loading ? (
         <ListSkeleton />
       ) : events.length === 0 ? (
-        <EmptyState title="No activity yet" description="Changes to your clinics appear here." />
+        <EmptyState
+          title="No activity yet"
+          description="Changes to your client organizations appear here."
+        />
       ) : (
         <ul className="rp-dashboard__feed" aria-label="Recent activity">
           {events.map((e) => {
@@ -297,7 +300,7 @@ function RecentConversations({ inbox }: { inbox: ReturnType<typeof useChatInbox>
   return (
     <Card
       title="Recent conversations"
-      description="Latest messages from your clinics"
+      description="Client Collaboration: latest messages from your clients"
       padding="none"
     >
       {inbox.isError ? (
@@ -307,7 +310,7 @@ function RecentConversations({ inbox }: { inbox: ReturnType<typeof useChatInbox>
       ) : inbox.data.items.length === 0 ? (
         <EmptyState
           title="No conversations yet"
-          description="Chats with your clinics will appear here."
+          description="Messages with your clients will appear here."
         />
       ) : (
         <ul className="rp-dashboard__threads">

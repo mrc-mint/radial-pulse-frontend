@@ -124,7 +124,7 @@ export const WORK_ITEM_PRIORITY_LABELS: Labels<'WorkItemPriority'> = {
 
 export const WORK_AREA_LABELS: Labels<'WorkArea'> = {
   ...ASSESSMENT_COMPONENT_LABELS,
-  clinic_profile: 'Clinic profile',
+  clinic_profile: 'Client profile',
   other: 'Other',
 };
 
@@ -153,9 +153,12 @@ export function mediaReviewLabel(
     : MEDIA_REVIEW_LABELS[state];
 }
 
-/** Review actions on a clinic photo or voice sample. */
-export const MEDIA_REVIEW_ACTION_LABELS = {
+/** Approval actions, as buttons on a clinic photo or voice sample. */
+export const MEDIA_REVIEW_ACTION_LABELS: Labels<'ApprovalAction'> = {
   approve: 'Approve',
   redo: 'Request retake',
   reject: 'Reject',
-} as const satisfies Partial<Record<Schema<'ApprovalAction'> & string, string>>;
+  submit: 'Submit for review',
+  publish: 'Publish',
+  handoff: 'Hand off',
+};

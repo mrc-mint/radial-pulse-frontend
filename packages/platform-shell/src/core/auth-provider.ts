@@ -2,14 +2,19 @@ import type { AppConfig } from '@radial-pulse/config';
 import type { SignInOption } from './session';
 
 /**
- * How an app obtains an access token (web and mobile). Phase 7 provides the
- * Cognito implementation (managed login via Amplify Auth). Until then:
+ * How an app obtains an access token (web and mobile):
+ *   - `createCognitoAuth` — Cognito Managed Login, Authorization Code + PKCE
+ *                         (./cognito-auth.ts).
  *   - `createMockAuth`  — only with API mocking: persona tokens the MSW
  *                         `/auth/me` understands. Never real credentials.
  *   - `unconfiguredAuth` — no sign-in available, matching the backend's
  *                         "auth not configured" mode.
  */
+/** How users sign in: Cognito Managed Login, mock personas (API mocking only), or not at all. */
+export type SignInMethod = 'cognito' | 'mock' | 'none';
+
 export interface AuthProvider {
+  readonly method: SignInMethod;
   readonly signInOptions: ReadonlyArray<SignInOption>;
   getAccessToken(): Promise<string | null>;
   signIn(optionId?: string): Promise<void>;
@@ -24,6 +29,7 @@ export class SignInUnavailableError extends Error {
 }
 
 export const unconfiguredAuth: AuthProvider = {
+  method: 'none',
   signInOptions: [],
   getAccessToken: async () => null,
   signIn: async () => {
@@ -81,6 +87,7 @@ export function createMockAuth(
     }
   };
   return {
+    method: 'mock',
     signInOptions: personas.map(({ id, label, description }) => ({ id, label, description })),
     getAccessToken: async () => read(),
     signIn: async (optionId) => {

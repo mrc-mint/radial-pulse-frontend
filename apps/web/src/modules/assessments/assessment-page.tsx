@@ -32,17 +32,17 @@ import {
 import { useNavigate } from '@tanstack/react-router';
 import { FileSearch, Info, RefreshCw } from 'lucide-react';
 import { CardSkeleton, mutationErrorMessage, QueryError, Section } from '../../app/page-kit';
-import './audit.css';
+import './assessment.css';
 
 type Assessment = Schema<'AssessmentDetail'>;
 type Component = Schema<'ComponentDetail'>;
 
 /**
- * Unified Audit — the one combined Digital Presence Assessment for a clinic.
+ * The one combined Digital Presence Assessment for a client organization.
  * Sections render generically from the contract's components; unavailable
  * components read "Not Available", never 0.
  */
-export function AuditPage({ assessmentId }: { assessmentId?: string }) {
+export function AssessmentPage({ assessmentId }: { assessmentId?: string }) {
   const clinicId = useClinicId();
   const navigate = useNavigate();
   const list = useAssessments(clinicId, { limit: 20 });
@@ -53,7 +53,7 @@ export function AuditPage({ assessmentId }: { assessmentId?: string }) {
 
   const open = (id: string) =>
     void navigate({
-      to: '/clinics/$clinicId/audit/$assessmentId',
+      to: '/clinics/$clinicId/assessment/$assessmentId',
       params: { clinicId, assessmentId: id },
     });
 
@@ -86,8 +86,8 @@ export function AuditPage({ assessmentId }: { assessmentId?: string }) {
           title="No assessments yet"
           description={
             canRequest
-              ? 'Request the first Digital Presence Assessment for this clinic.'
-              : 'Published assessments for this clinic will appear here.'
+              ? 'Request the first Digital Presence Assessment for this client organization.'
+              : 'Published assessments for this client organization will appear here.'
           }
           action={requestButton}
         />
@@ -98,7 +98,7 @@ export function AuditPage({ assessmentId }: { assessmentId?: string }) {
   return (
     <div className="rp-stack">
       <div className="rp-row rp-row--between">
-        <div className="rp-audit__picker">
+        <div className="rp-assessment__picker">
           <Select
             label="Assessment"
             value={selectedId}
@@ -169,13 +169,13 @@ function AssessmentReport({
         <p className="rp-callout" role="note">
           <Info size={16} aria-hidden="true" />
           <span>
-            Review and publishing actions will appear here once the API reports which actions are
-            allowed for an assessment. Clinics only see an assessment after it is published.
+            Review and publishing actions for assessments aren’t available here yet. Clients only
+            see an assessment after it is published.
           </span>
         </p>
       )}
 
-      <div className="rp-audit__overview">
+      <div className="rp-assessment__overview">
         <ScoreCard
           label="Overall score"
           score={a.overall_score}
@@ -194,7 +194,7 @@ function AssessmentReport({
       </div>
 
       <Section title="Components">
-        <div className="rp-audit__components">
+        <div className="rp-assessment__components">
           {a.components
             .filter((c) => showsComponentScore(c.key))
             .map((c) => (
@@ -210,7 +210,7 @@ function AssessmentReport({
         </div>
       </Section>
 
-      <Section title="Findings and recommendations">
+      <Section title="Findings and improvement opportunities">
         {withFindings.length === 0 ? (
           <Card>
             <EmptyState
@@ -225,7 +225,7 @@ function AssessmentReport({
               className="rp-stack-sm"
               aria-label={ASSESSMENT_COMPONENT_LABELS[c.key]}
             >
-              <h3 className="rp-audit__group">
+              <h3 className="rp-assessment__group">
                 {ASSESSMENT_COMPONENT_LABELS[c.key]}
                 <span className="rp-muted"> · {c.findings.length}</span>
               </h3>

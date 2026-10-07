@@ -25,10 +25,10 @@ export function ClinicHeader({ clinicId, back }: { clinicId: string; back: React
   if (clinic.isError) {
     return (
       <div className="rp-stack">
-        <PageHeader back={back} title="Clinic details" />
+        <PageHeader back={back} title="Client organization details" />
         <QueryError
           error={clinic.error}
-          title="This clinic isn’t available"
+          title="This client organization isn’t available"
           onRetry={() => void clinic.refetch()}
         />
       </div>
@@ -36,7 +36,7 @@ export function ClinicHeader({ clinicId, back }: { clinicId: string; back: React
   }
 
   const c = clinic.data;
-  const doctor =
+  const practitioner =
     practitioners.data?.items.find((p) => p.is_primary && p.is_active) ??
     practitioners.data?.items[0];
 
@@ -44,7 +44,7 @@ export function ClinicHeader({ clinicId, back }: { clinicId: string; back: React
     <div className="rp-clinic-header">
       <PageHeader
         back={back}
-        title="Clinic details"
+        title="Client organization details"
         actions={
           c && (
             <>
@@ -80,12 +80,15 @@ export function ClinicHeader({ clinicId, back }: { clinicId: string; back: React
               <h2>{c.name}</h2>
               <ClinicStatusBadge clinic={c} />
             </div>
-            {doctor && <p className="rp-clinic-card__doctor">{doctor.full_name}</p>}
+            {practitioner && <p className="rp-clinic-card__doctor">{practitioner.full_name}</p>}
             {c.description && <p className="rp-clinic-card__description">{c.description}</p>}
             {!c.is_active && c.archived_reason && (
               <p className="rp-muted rp-small">Archived: {c.archived_reason}</p>
             )}
-            <ul className="rp-clinic-header__contacts" aria-label="Clinic contact details">
+            <ul
+              className="rp-clinic-header__contacts"
+              aria-label="Client organization contact details"
+            >
               {c.website_url && (
                 <li>
                   <Globe size={16} aria-hidden="true" />

@@ -2,7 +2,7 @@ import { Screen } from '@radial-pulse/platform-shell/native';
 import { useLocalSearchParams } from 'expo-router';
 import { AssessmentView, parseComponent } from './assessment-view';
 
-/** One published assessment, opened from Reports (`/assessment/[assessmentId]`). */
+/** One published assessment, opened from Assessments (`/assessment/[assessmentId]`). */
 export function AssessmentScreen() {
   const params = useLocalSearchParams<{ assessmentId: string; component?: string }>();
   return (

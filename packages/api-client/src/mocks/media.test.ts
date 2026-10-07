@@ -1,6 +1,7 @@
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { createApiClient } from '../http';
+import { ApiRequestError } from '../errors';
 import { approvalsService, assetsService, uploadAsset } from '../services';
 import { createMockDb } from './data';
 import { createMockHandlers } from './handlers';
@@ -32,7 +33,7 @@ function as(persona: PersonaId) {
 const smile = () => db.clinics[0]!.id;
 const photo = () => ({
   data: new Blob(['jpeg bytes'], { type: 'image/jpeg' }),
-  name: 'doctor-front.jpg',
+  name: 'practitioner-front.jpg',
 });
 
 async function awaitingReview(persona: PersonaId) {
@@ -41,7 +42,7 @@ async function awaitingReview(persona: PersonaId) {
 }
 
 describe('clinic media against the contract mocks', () => {
-  it('lets a Clinic Administrator upload a doctor photo, which goes to review', async () => {
+  it('lets a Clinic Administrator upload a practitioner photo, which goes to review', async () => {
     reset();
     const admin = as('clinic-administrator');
     const asset = await uploadAsset(admin, smile(), { kind: 'practitioner_photo', file: photo() });
@@ -51,6 +52,64 @@ describe('clinic media against the contract mocks', () => {
     expect(listed.items.map((a) => a.id)).toContain(asset.id);
     const approvals = await approvalsService.list(as('digital-success-manager'), smile());
     expect(approvals.items.find((a) => a.resource_id === asset.id)?.state).toBe('submitted');
+  });
+
+  it('serves the media taxonomy and stores an upload with its labels', async () => {
+    reset();
+    const admin = as('clinic-administrator');
+    const taxonomy = await assetsService.mediaTaxonomy(admin);
+    expect(new Set(taxonomy.map((v) => v.dimension))).toEqual(
+      new Set([
+        'clinic_photo_category',
+        'voice_sample',
+        'practitioner_apron',
+        'practitioner_angle',
+        'practitioner_outfit',
+      ]),
+    );
+    const asset = await uploadAsset(admin, smile(), {
+      kind: 'practitioner_photo',
+      file: photo(),
+      labels: { apron: 'with_apron', angle: 'front', outfit: 'outfit_2' },
+    });
+    const listed = await assetsService.list(admin, smile(), { outfit: 'outfit_2' });
+    expect(listed.items.map((a) => a.id)).toEqual([asset.id]);
+    expect(listed.items[0]).toMatchObject({ apron: 'with_apron', angle: 'front' });
+  });
+
+  it('rejects a label that is not in the taxonomy', async () => {
+    reset();
+    const error = await uploadAsset(as('clinic-administrator'), smile(), {
+      kind: 'clinic_photo',
+      file: photo(),
+      labels: { category: 'rooftop' },
+    }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiRequestError);
+    expect((error as ApiRequestError).kind).toBe('validation');
+  });
+
+  it('never lets staff upload clinic media', async () => {
+    reset();
+    const error = await uploadAsset(as('digital-success-manager'), smile(), {
+      kind: 'practitioner_photo',
+      file: photo(),
+    }).catch((e: unknown) => e);
+    expect(error).toMatchObject({ kind: 'forbidden' });
+  });
+
+  it('shows each caller only their review actions and notes', async () => {
+    reset();
+    const sample = await awaitingReview('digital-success-manager');
+    expect(sample.review?.available_actions).toEqual(['approve', 'redo', 'reject']);
+    const decided = (
+      await assetsService.list(as('clinic-administrator'), smile(), {
+        approval_state: 'approved',
+      })
+    ).items[0]!;
+    expect(decided.review?.available_actions).toEqual([]);
+    expect(decided.review?.internal_note).toBeNull();
+    const asStaff = await assetsService.get(as('digital-success-manager'), smile(), decided.id);
+    expect(asStaff.review?.internal_note).toBeTruthy();
   });
 
   it('replaces a file as its next version', async () => {
@@ -89,8 +148,14 @@ describe('clinic media against the contract mocks', () => {
         resource_id: sample.id,
         action: 'approve',
         comment: 'Clear and quiet.',
+        clinic_message: 'Thank you, ready to use.',
       });
-      expect(approval).toMatchObject({ state: 'approved', last_comment: 'Clear and quiet.' });
+      expect(approval).toMatchObject({
+        state: 'approved',
+        last_comment: 'Clear and quiet.',
+        clinic_message: 'Thank you, ready to use.',
+        available_actions: [],
+      });
       const after = await assetsService.list(reviewer, smile(), { kind: 'audio' });
       expect(after.items.find((a) => a.id === sample.id)?.approval_state).toBe('approved');
 

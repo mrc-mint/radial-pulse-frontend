@@ -15,7 +15,7 @@ export function MobileAppRequired({ onSignOut }: { onSignOut: () => void }) {
           variant="page"
           icon={<Smartphone size={22} />}
           title="Use the Radial Pulse mobile app"
-          description="Clinic Administrators use the Radial Pulse mobile app to see their clinic’s insights, reports and chat with their Digital Success Manager. This web portal is for the Radial Pulse team."
+          description="Clinic Administrators use the Radial Pulse mobile app to see their clinic’s insights and assessments and chat with their Digital Success Manager. This web portal is for the Radial Pulse team."
           action={
             <Button variant="secondary" onClick={onSignOut}>
               Sign out

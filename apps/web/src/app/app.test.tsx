@@ -70,7 +70,9 @@ describe('web app against the contract mocks', () => {
     await userEvent.click(
       screen.getByRole('button', { name: /Continue as Digital Success Manager/ }),
     );
-    expect(await screen.findByRole('heading', { name: 'My Clinics', level: 1 })).toBeTruthy();
+    expect(
+      await screen.findByRole('heading', { name: 'My Client Portfolio', level: 1 }),
+    ).toBeTruthy();
     expect(router.state.location.pathname).toBe('/clinics');
     // The API scopes the list: Priya Shah's four assigned clinics.
     expect(await screen.findByRole('link', { name: 'Smile Dental Care' })).toBeTruthy();
@@ -81,13 +83,15 @@ describe('web app against the contract mocks', () => {
     await renderApp('/clinics', 'platform-administrator');
     expect(await navLabels()).toEqual([
       'Dashboard',
-      'Clinics',
+      'Client Organizations',
       'Users',
-      'Audit Reports',
+      'Digital Presence Assessments',
       'Settings',
     ]);
-    expect(await screen.findByRole('heading', { name: 'Clinics', level: 1 })).toBeTruthy();
-    expect(await screen.findByText('Showing 1–10 of 12 clinics')).toBeTruthy();
+    expect(
+      await screen.findByRole('heading', { name: 'Client Organizations', level: 1 }),
+    ).toBeTruthy();
+    expect(await screen.findByText('Showing 1–10 of 12 client organizations')).toBeTruthy();
     expect(screen.getByText('Rohan Agarwal')).toBeTruthy();
   });
 
@@ -96,43 +100,43 @@ describe('web app against the contract mocks', () => {
     await renderApp('/clinics', 'platform-administrator');
     const tabs = within(await screen.findByRole('tablist', { name: 'Filter by status' }));
     expect(tabs.getAllByRole('tab').map((t) => t.firstChild?.textContent)).toEqual([
-      'All clinics',
+      'All client organizations',
       'Active',
-      'Prospects',
+      'Prospective clients',
       'In progress',
       'Inactive',
     ]);
     expect(screen.queryByRole('columnheader', { name: 'Open work' })).toBeNull();
     // Contract stages are shown as their group, never as the raw stage.
-    await screen.findByText('Showing 1–10 of 12 clinics');
+    await screen.findByText('Showing 1–10 of 12 client organizations');
     expect(screen.queryByText('Profile enriched')).toBeNull();
     expect(screen.queryByText('Client discussion')).toBeNull();
 
     await user.click(tabs.getByRole('tab', { name: /Inactive/ }));
     expect(await screen.findByRole('link', { name: 'Lotus Dental Studio' })).toBeTruthy();
-    expect(screen.getByText('Showing 1–2 of 2 clinics')).toBeTruthy();
+    expect(screen.getByText('Showing 1–2 of 2 client organizations')).toBeTruthy();
     expect((screen.getByRole('combobox', { name: 'Status' }) as HTMLSelectElement).value).toBe(
       'inactive',
     );
 
     await user.click(screen.getByRole('button', { name: 'Reset' }));
-    expect(await screen.findByText('Showing 1–10 of 12 clinics')).toBeTruthy();
+    expect(await screen.findByText('Showing 1–10 of 12 client organizations')).toBeTruthy();
   });
 
   it('gives a Platform Administrator the platform overview dashboard', async () => {
     await renderApp('/dashboard', 'platform-administrator');
-    await screen.findByText('Overview of clinics, progress and impact');
-    const total = await screen.findByRole('region', { name: 'Total clinics' });
+    await screen.findByText('Overview of client organizations, progress and impact');
+    const total = await screen.findByRole('region', { name: 'Total client organizations' });
     expect(within(total).getByText('12')).toBeTruthy();
-    expect(screen.getByRole('region', { name: 'Active clinics' })).toBeTruthy();
-    const inactive = screen.getByRole('region', { name: 'Inactive clinics' });
+    expect(screen.getByRole('region', { name: 'Active clients' })).toBeTruthy();
+    const inactive = screen.getByRole('region', { name: 'Inactive clients' });
     expect(within(inactive).getByText('2')).toBeTruthy();
-    const legend = screen.getByRole('list', { name: 'Clinics by status' });
+    const legend = screen.getByRole('list', { name: 'Client organizations by status' });
     expect(
       within(legend)
         .getAllByRole('listitem')
         .map((li) => li.textContent),
-    ).toEqual(['Active4(29%)', 'Prospects4(29%)', 'In progress4(29%)', 'Inactive2(14%)']);
+    ).toEqual(['Active4(29%)', 'Prospective clients4(29%)', 'In progress4(29%)', 'Inactive2(14%)']);
     // Feed and highlights come from the clinics list only.
     const feed = await screen.findByRole('list', { name: 'Recent activity' });
     expect(within(feed).getAllByRole('link').length).toBeGreaterThan(0);
@@ -145,9 +149,14 @@ describe('web app against the contract mocks', () => {
     expect(screen.queryByText('Recent conversations')).toBeNull();
   });
 
-  it('labels the list "My Clinics" for users who do not see all clinics', async () => {
+  it('labels the list "My Client Portfolio" for users who do not see all clinics', async () => {
     await renderApp('/dashboard', 'digital-success-manager');
-    expect(await navLabels()).toEqual(['Dashboard', 'My Clinics', 'Audit Reports', 'Settings']);
+    expect(await navLabels()).toEqual([
+      'Dashboard',
+      'My Client Portfolio',
+      'Digital Presence Assessments',
+      'Settings',
+    ]);
     expect(screen.getByText('Digital Success Manager')).toBeTruthy();
   });
 
@@ -172,10 +181,12 @@ describe('web app against the contract mocks', () => {
       level: 1,
     });
     expect(router.state.location.pathname).toBe('/dashboard');
-    const total = await screen.findByRole('region', { name: 'My clinics' });
+    const total = await screen.findByRole('region', { name: 'My Client Portfolio' });
     expect(await within(total).findByText('4')).toBeTruthy();
     // Clinics with an assessment submitted for review are listed.
-    const attention = await screen.findByRole('list', { name: 'Clinics needing attention' });
+    const attention = await screen.findByRole('list', {
+      name: 'Client organizations needing attention',
+    });
     expect(
       (await within(attention).findAllByText(/Audit ready for review/)).length,
     ).toBeGreaterThan(0);
@@ -188,22 +199,28 @@ describe('web app against the contract mocks', () => {
     expect(
       await screen.findByRole('heading', { name: 'Smile Dental Care', level: 2 }),
     ).toBeTruthy();
-    const sections = within(screen.getByRole('navigation', { name: 'Clinic sections' }));
+    const sections = within(
+      screen.getByRole('navigation', { name: 'Client organization sections' }),
+    );
     expect(sections.getAllByRole('link').map((l) => l.firstChild?.textContent)).toEqual([
       'Overview',
       'Digital Presence',
-      'Social Media',
+      'Social Presence Insights',
       'Listings',
-      'Audit Report',
+      'Digital Presence Assessment',
       'Media',
       'Activity',
-      'Chat',
+      'Client Collaboration',
     ]);
-    expect(sections.getByRole('link', { name: /Chat/ }).getAttribute('aria-current')).toBe('page');
-    expect(await screen.findByText(/Please use these for the website as well/)).toBeTruthy();
-    // The sidebar keeps "My Clinics" active while inside a clinic.
     expect(
-      (await mainNav()).getByRole('link', { name: 'My Clinics' }).getAttribute('aria-current'),
+      sections.getByRole('link', { name: /Client Collaboration/ }).getAttribute('aria-current'),
+    ).toBe('page');
+    expect(await screen.findByText(/Please use these for the website as well/)).toBeTruthy();
+    // The sidebar keeps "My Client Portfolio" active while inside a clinic.
+    expect(
+      (await mainNav())
+        .getByRole('link', { name: 'My Client Portfolio' })
+        .getAttribute('aria-current'),
     ).toBe('true');
   });
 
@@ -213,32 +230,36 @@ describe('web app against the contract mocks', () => {
       await screen.findByRole('heading', { name: 'Smile Dental Care', level: 2 }),
     ).toBeTruthy();
     // Platform Administrators have no clinic chat; the clinic's DSM chats.
-    const sections = within(screen.getByRole('navigation', { name: 'Clinic sections' }));
-    expect(sections.queryByRole('link', { name: /Chat/ })).toBeNull();
+    const sections = within(
+      screen.getByRole('navigation', { name: 'Client organization sections' }),
+    );
+    expect(sections.queryByRole('link', { name: /Client Collaboration/ })).toBeNull();
     await router.navigate({ to: '/clinics/$clinicId', params: { clinicId: BRIGHT } });
     expect(
       await screen.findByRole('heading', { name: 'Bright Smile Clinic', level: 2 }),
     ).toBeTruthy();
   });
 
-  it('shows clinic details: photo, main doctor, status actions and activity', async () => {
+  it('shows clinic details: photo, main practitioner, status actions and activity', async () => {
     const user = userEvent.setup();
     await renderApp(`/clinics/${SMILE}`, 'platform-administrator');
-    await screen.findByRole('heading', { name: 'Clinic details', level: 1 });
+    await screen.findByRole('heading', { name: 'Client organization details', level: 1 });
     expect(await screen.findByRole('img', { name: 'Photo of Smile Dental Care' })).toBeTruthy();
     expect((await screen.findAllByText('Dr. Rahul Mehta')).length).toBeGreaterThan(0);
     expect(screen.getByRole('link', { name: /View on Google Maps/ })).toBeTruthy();
-    expect(await screen.findByRole('button', { name: 'Change manager' })).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'Change portfolio allocation' })).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: 'More' }));
-    await user.click(await screen.findByRole('menuitem', { name: 'Archive clinic' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Archive client organization' }));
     await user.type(screen.getByRole('textbox', { name: /Reason/ }), 'Not interested right now');
     const dialog = within(screen.getByRole('dialog'));
-    await user.click(dialog.getByRole('button', { name: 'Archive clinic' }));
+    await user.click(dialog.getByRole('button', { name: 'Archive client organization' }));
     expect(await screen.findByText('Archived: Not interested right now')).toBeTruthy();
 
     await user.click(screen.getByRole('link', { name: 'Activity' }));
-    expect(await screen.findByText('Clinic archived: Not interested right now')).toBeTruthy();
+    expect(
+      await screen.findByText('Client organization archived: Not interested right now'),
+    ).toBeTruthy();
   });
 
   it.each(['digital-success-manager', 'platform-administrator'] as const)(
@@ -247,7 +268,7 @@ describe('web app against the contract mocks', () => {
       const user = userEvent.setup();
       const container = document.body;
       await renderApp(`/clinics/${SMILE}/media`, persona);
-      expect(await screen.findByRole('heading', { name: 'Doctor photos' })).toBeTruthy();
+      expect(await screen.findByRole('heading', { name: 'Practitioner photos' })).toBeTruthy();
       // Categories from the product reference.
       expect(screen.getByRole('heading', { name: 'Exterior & signage' })).toBeTruthy();
       expect(screen.getByRole('heading', { name: 'Logo & cover photo' })).toBeTruthy();
@@ -286,13 +307,15 @@ describe('web app against the contract mocks', () => {
 
   it('shows no sections for a clinic outside the caller’s access', async () => {
     await renderApp(`/clinics/${BRIGHT}`, 'digital-success-manager');
-    expect(await screen.findByText('This clinic isn’t available')).toBeTruthy();
-    const sections = within(screen.getByRole('navigation', { name: 'Clinic sections' }));
+    expect(await screen.findByText('This client organization isn’t available')).toBeTruthy();
+    const sections = within(
+      screen.getByRole('navigation', { name: 'Client organization sections' }),
+    );
     expect(sections.queryAllByRole('link')).toHaveLength(0);
   });
 
-  it('renders the unified audit, never scoring unavailable components as 0', async () => {
-    await renderApp(`/clinics/${SMILE}/audit`, 'digital-success-manager');
+  it('renders the Digital Presence Assessment, never scoring unavailable components as 0', async () => {
+    await renderApp(`/clinics/${SMILE}/assessment`, 'digital-success-manager');
     const overall = await screen.findByRole('region', { name: 'Overall score' });
     expect(within(overall).getByText('62 out of 100')).toBeTruthy();
     const social = screen.getByRole('region', { name: 'Social Presence' });

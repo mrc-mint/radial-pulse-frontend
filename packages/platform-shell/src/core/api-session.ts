@@ -21,6 +21,7 @@ export function createApiSessionAdapter(auth: AuthProvider, api: ApiClient): Ses
   }
 
   return {
+    signInMethod: auth.method,
     signInOptions: auth.signInOptions,
     restore,
     async signIn(optionId) {

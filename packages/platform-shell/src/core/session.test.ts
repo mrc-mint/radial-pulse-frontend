@@ -9,7 +9,7 @@ const me: MeResponse = {
   platform_role: 'digital_success_manager',
   permissions: ['clinics:create'],
   all_clinics: false,
-  sign_in_method: 'google',
+  sign_in_method: 'email_password',
   clinics: [
     {
       clinic_id: 'c1b2a3d4-0000-4000-8000-000000000001',

@@ -1,7 +1,8 @@
 import type { ModuleManifest } from '@radial-pulse/platform-shell/core';
 
 /**
- * Clinics / My Clinics: one route; "My Clinics" when the user does not see all
+ * Client Organizations / My Client Portfolio: one route (`/clinics`); "My
+ * Client Portfolio" when the user does not see all
  * clinics (`MeResponse.all_clinics` is false, docs/scope-v1.md). Owns the clinic
  * workspace landing sections. Assigning a Digital Success Manager happens
  * inside the clinic, not in a separate module.
@@ -11,8 +12,8 @@ export const clinicsModule: ModuleManifest = {
   navEntries: [
     {
       id: 'clinics',
-      label: 'Clinics',
-      scopedLabel: 'My Clinics',
+      label: 'Client Organizations',
+      scopedLabel: 'My Client Portfolio',
       to: '/clinics',
       icon: 'clinics',
       placement: 'primary',

@@ -1,31 +1,25 @@
 import { useConfig, useSession } from '@radial-pulse/platform-shell/core';
 import { AuthLayout, FullPageLoading } from '@radial-pulse/platform-shell/web';
-import { Badge, Card, ErrorState } from '@radial-pulse/ui/web';
+import { Badge, Button, Card, ErrorState } from '@radial-pulse/ui/web';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, LogIn } from 'lucide-react';
 import { useEffect } from 'react';
+import { authErrorMessage, safeReturnPath } from '../app/cognito';
 import './sign-in.css';
 
-/** Only same-origin app paths (never sign-in itself) are accepted as a destination. */
-function safeRedirect(value: unknown): string | undefined {
-  return typeof value === 'string' &&
-    value.startsWith('/') &&
-    !value.startsWith('//') &&
-    !value.startsWith('/sign-in')
-    ? value
-    : undefined;
-}
-
 export const Route = createFileRoute('/sign-in')({
-  validateSearch: (search: Record<string, unknown>): { redirect?: string } => ({
-    redirect: safeRedirect(search.redirect),
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { redirect?: string; auth_error?: string } => ({
+    redirect: safeReturnPath(search.redirect),
+    auth_error: typeof search.auth_error === 'string' ? search.auth_error : undefined,
   }),
   component: SignInPage,
 });
 
 function SignInPage() {
-  const { state, signIn, signInOptions, retry } = useSession();
-  const { redirect } = Route.useSearch();
+  const { state, signIn, signInOptions, signInMethod, retry } = useSession();
+  const { redirect, auth_error: authError } = Route.useSearch();
   const router = useRouter();
   const config = useConfig();
 
@@ -41,8 +35,18 @@ function SignInPage() {
         <div className="rp-sign-in">
           <div className="rp-sign-in__heading">
             <h1>Sign in</h1>
-            <p>Welcome back. Choose how you want to continue.</p>
+            <p>
+              {signInMethod === 'cognito'
+                ? 'Welcome back. Sign in with your Radial Pulse email and password.'
+                : 'Welcome back. Choose how you want to continue.'}
+            </p>
           </div>
+
+          {authError && state.status !== 'error' && (
+            <p className="rp-form__error" role="alert">
+              {authErrorMessage(authError)}
+            </p>
+          )}
 
           {state.status === 'error' && (
             <ErrorState
@@ -52,7 +56,22 @@ function SignInPage() {
             />
           )}
 
-          {signInOptions.length > 0 ? (
+          {signInMethod === 'cognito' ? (
+            <>
+              <Button
+                fullWidth
+                size="lg"
+                leadingIcon={<LogIn size={18} aria-hidden="true" />}
+                onClick={() => void signIn()}
+              >
+                Sign in
+              </Button>
+              <p className="rp-sign-in__note">
+                You’ll continue on the secure Radial Pulse sign-in page. Clinic Administrators use
+                the Radial Pulse mobile app.
+              </p>
+            </>
+          ) : signInOptions.length > 0 ? (
             <>
               {config.appEnv !== 'prod' && (
                 <Badge tone="warning" dot>
@@ -82,11 +101,9 @@ function SignInPage() {
               </ul>
             </>
           ) : (
-            // Cognito sign-in arrives in Phase 7 (ADR 0006). Until then only the
-            // API mocks provide sign-in options.
             <p className="rp-sign-in__unavailable" role="status">
-              Sign-in isn’t configured for this environment yet. Use a build with API mocking
-              enabled, or wait for Cognito sign-in.
+              Sign-in isn’t configured for this environment yet. Set the Cognito values in
+              config.json, or use a build with API mocking enabled.
             </p>
           )}
         </div>

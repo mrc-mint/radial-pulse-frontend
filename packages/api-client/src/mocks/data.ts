@@ -1,6 +1,6 @@
 import type { components, Schema } from '@radial-pulse/shared-types';
 import { clinicPhotoSvg, mockPractitioners, mockSnapshots } from './extras';
-import { mockClinicMedia } from './media';
+import { MOCK_MEDIA_TAXONOMY, mockClinicMedia, type MockApproval, type MockAsset } from './media';
 import { MOCK_PERSONAS } from './personas';
 
 /**
@@ -24,6 +24,24 @@ const uuid = (prefix: string, n: number) =>
   `${prefix.padEnd(8, '0')}-0000-4000-8000-${String(n).padStart(12, '0')}`;
 
 const ORG = uuid('0f', 1);
+
+/**
+ * The API's stage groups (backend decision D5): prospects = stages 1-2,
+ * in_progress = 3-4, active = 5. Mirrored here only so the mocks answer like
+ * the API; screens read `stage_group` from responses.
+ */
+export function mockStageGroup(stage: S<'ClinicStage'>): S<'ClinicStageGroup'> {
+  switch (stage) {
+    case 'prospective_client':
+    case 'profile_enriched':
+      return 'prospects';
+    case 'assessment_completed':
+    case 'client_discussion':
+      return 'in_progress';
+    case 'active_client':
+      return 'active';
+  }
+}
 
 // ── People ──────────────────────────────────────────────────────────────────
 
@@ -58,7 +76,7 @@ function user(
 
 interface ClinicSeed {
   name: string;
-  doctor: string;
+  practitioner: string;
   city: string;
   state: string;
   specialty: string;
@@ -75,7 +93,7 @@ interface ClinicSeed {
 const CLINICS: ClinicSeed[] = [
   {
     name: 'Smile Dental Care',
-    doctor: 'Dr. Rahul Mehta',
+    practitioner: 'Dr. Rahul Mehta',
     city: 'Kakinada',
     state: 'Andhra Pradesh',
     specialty: 'General Dentistry, Implants',
@@ -87,7 +105,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'Bright Smile Clinic',
-    doctor: 'Dr. Neha Gupta',
+    practitioner: 'Dr. Neha Gupta',
     city: 'Bengaluru',
     state: 'Karnataka',
     specialty: 'Cosmetic Dentistry',
@@ -99,7 +117,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'CarePlus Dental',
-    doctor: 'Dr. Suresh Reddy',
+    practitioner: 'Dr. Suresh Reddy',
     city: 'Hyderabad',
     state: 'Telangana',
     specialty: 'Orthodontics',
@@ -111,7 +129,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'Elite Dental Clinic',
-    doctor: 'Dr. Kavya Sharma',
+    practitioner: 'Dr. Kavya Sharma',
     city: 'Pune',
     state: 'Maharashtra',
     specialty: 'Endodontics',
@@ -123,7 +141,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'Happy Teeth',
-    doctor: 'Dr. Anil Kumar',
+    practitioner: 'Dr. Anil Kumar',
     city: 'Chennai',
     state: 'Tamil Nadu',
     specialty: 'Paediatric Dentistry',
@@ -135,7 +153,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'Dental Health Hub',
-    doctor: 'Dr. Meera Nair',
+    practitioner: 'Dr. Meera Nair',
     city: 'Kochi',
     state: 'Kerala',
     specialty: 'Periodontics',
@@ -147,7 +165,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'Smile Care Plus',
-    doctor: 'Dr. Vikram Singh',
+    practitioner: 'Dr. Vikram Singh',
     city: 'Jaipur',
     state: 'Rajasthan',
     specialty: 'Prosthodontics',
@@ -159,7 +177,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'Family Dental Clinic',
-    doctor: 'Dr. Pooja Shah',
+    practitioner: 'Dr. Pooja Shah',
     city: 'Ahmedabad',
     state: 'Gujarat',
     specialty: 'Family Dentistry',
@@ -171,7 +189,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'Advanced Dental',
-    doctor: 'Dr. Rakesh Menon',
+    practitioner: 'Dr. Rakesh Menon',
     city: 'Mysuru',
     state: 'Karnataka',
     specialty: 'Oral Surgery',
@@ -183,7 +201,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'City Dental Care',
-    doctor: 'Dr. Nisha Rao',
+    practitioner: 'Dr. Nisha Rao',
     city: 'Visakhapatnam',
     state: 'Andhra Pradesh',
     specialty: 'General Dentistry',
@@ -195,7 +213,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'Pearl Dental Studio',
-    doctor: 'Dr. Farah Khan',
+    practitioner: 'Dr. Farah Khan',
     city: 'Lucknow',
     state: 'Uttar Pradesh',
     specialty: 'Cosmetic Dentistry',
@@ -207,7 +225,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'Sunrise Orthodontics',
-    doctor: 'Dr. Arvind Joshi',
+    practitioner: 'Dr. Arvind Joshi',
     city: 'Indore',
     state: 'Madhya Pradesh',
     specialty: 'Orthodontics',
@@ -220,7 +238,7 @@ const CLINICS: ClinicSeed[] = [
   // Inactive (archived) clinics: out of the active totals, counted as `archived`.
   {
     name: 'Lotus Dental Studio',
-    doctor: 'Dr. Meera Nair',
+    practitioner: 'Dr. Meera Nair',
     city: 'Chennai',
     state: 'Tamil Nadu',
     specialty: 'General Dentistry',
@@ -234,7 +252,7 @@ const CLINICS: ClinicSeed[] = [
   },
   {
     name: 'Sunrise Dental Care',
-    doctor: 'Dr. Vikram Rao',
+    practitioner: 'Dr. Vikram Rao',
     city: 'Kochi',
     state: 'Kerala',
     specialty: 'Pediatric Dentistry',
@@ -250,7 +268,8 @@ const CLINICS: ClinicSeed[] = [
 
 export interface MockDb {
   users: MockUser[];
-  clinics: Array<S<'ClinicRead'> & { primary_practitioner_name: string }>;
+  /** `stage_group` is derived from `stage` on the way out (mockStageGroup). */
+  clinics: Array<Omit<S<'ClinicRead'>, 'stage_group'> & { primary_practitioner_name: string }>;
   /** clinicId → active DSM user id. */
   assignments: Map<string, S<'AssignmentRead'>>;
   /** clinicId → clinic user id → clinic role (Clinic Administrator persona). */
@@ -262,8 +281,9 @@ export interface MockDb {
   messages: Array<S<'ChatMessageRead'>>;
   /** userId → clinicId → last read message timestamp. */
   chatReads: Map<string, Map<string, string>>;
-  assets: Map<string, S<'AssetRead'> & { blob?: Blob }>;
-  approvals: Array<S<'ApprovalRead'>>;
+  assets: Map<string, MockAsset>;
+  approvals: MockApproval[];
+  mediaTaxonomy: Array<S<'MediaTaxonomyValueRead'>>;
   practitioners: Array<S<'PractitionerRead'>>;
   snapshots: Array<S<'MetricSnapshotRead'>>;
   auditEvents: Array<S<'AuditEventRead'>>;
@@ -710,7 +730,7 @@ export function createMockDb(): MockDb {
       id: uuid('c1', i + 1),
       organization_id: ORG,
       name: c.name,
-      primary_practitioner_name: c.doctor,
+      primary_practitioner_name: c.practitioner,
       specialty: c.specialty,
       description: `${c.specialty} for families in ${c.city}.`,
       website_url: c.site,
@@ -828,7 +848,13 @@ export function createMockDb(): MockDb {
     const rows: Array<
       [S<'PresencePlatform'>, string, S<'PresenceVerification'>, number | null, string]
     > = [
-      ['website', c.website_url ?? `https://${handle}.in`, 'confirmed', null, 'Onboarding form'],
+      [
+        'website',
+        c.website_url ?? `https://${handle}.in`,
+        'confirmed',
+        null,
+        'Client activation form',
+      ],
       [
         'google_business_profile',
         `https://maps.google.com/?cid=${1000 + profileSeq}`,
@@ -981,10 +1007,10 @@ export function createMockDb(): MockDb {
     ]),
   );
 
-  const doctor = users.find((u) => u.id === uuid('a1', 101))!;
+  const clinicAdmin = users.find((u) => u.id === uuid('a1', 101))!;
   const priya = users.find((u) => u.id === uuid('a1', 2))!;
   const attachmentId = uuid('aa', 1);
-  const assets = new Map<string, S<'AssetRead'> & { blob?: Blob }>([
+  const assets = new Map<string, MockAsset>([
     [
       attachmentId,
       {
@@ -996,7 +1022,7 @@ export function createMockDb(): MockDb {
         size_bytes: 48_213,
         status: 'uploaded',
         approval_state: 'draft',
-        owner_user_id: doctor.id,
+        owner_user_id: clinicAdmin.id,
         previous_version_id: null,
         provenance: {},
         version: 1,
@@ -1028,12 +1054,15 @@ export function createMockDb(): MockDb {
     });
   });
 
+  const practitioners = mockPractitioners(clinics, (n) => uuid('b2', n));
+
   // Sample media with approvals for each clinic Dr. Rahul Mehta administers.
-  const approvals: Array<S<'ApprovalRead'>> = [];
+  const approvals: MockApproval[] = [];
   [clinics[0]!, clinics[7]!].forEach((c, i) => {
     const media = mockClinicMedia(
       c.id,
-      doctor.id,
+      practitioners.find((p) => p.clinic_id === c.id && p.is_primary)?.id ?? null,
+      clinicAdmin.id,
       priya.id,
       (n, kind) => uuid(`${kind === 'asset' ? 'md' : 'ap'}${i}`, n),
       (days) => ago(days),
@@ -1041,8 +1070,6 @@ export function createMockDb(): MockDb {
     for (const a of media.assets) assets.set(a.id, a);
     approvals.push(...media.approvals);
   });
-
-  const practitioners = mockPractitioners(clinics, (n) => uuid('b2', n));
 
   let snapshotSeq = 0;
   const snapshots = clinics.flatMap((c, i) => {
@@ -1086,7 +1113,7 @@ export function createMockDb(): MockDb {
     chat(
       2,
       smile.id,
-      doctor,
+      clinicAdmin,
       'clinic',
       'Thank you Priya. Could you also check why our Sunday timings look wrong on Google?',
       ago(3, 4),
@@ -1096,19 +1123,26 @@ export function createMockDb(): MockDb {
       smile.id,
       priya,
       'radial_pulse',
-      'Yes, that is one of the critical findings. We have added a task to fix it this week.',
+      'Yes, that is one of the critical findings. We have added an improvement work item to fix it this week.',
       ago(2, 20),
     ),
     chat(
       4,
       smile.id,
-      doctor,
+      clinicAdmin,
       'clinic',
       'Great. I have attached our current clinic timings.',
       ago(1, 5),
       attachmentId,
     ),
-    chat(5, smile.id, doctor, 'clinic', 'Please use these for the website as well.', ago(1, 5)),
+    chat(
+      5,
+      smile.id,
+      clinicAdmin,
+      'clinic',
+      'Please use these for the website as well.',
+      ago(1, 5),
+    ),
     chat(
       6,
       clinics[7]!.id,
@@ -1149,6 +1183,7 @@ export function createMockDb(): MockDb {
     chatReads,
     assets,
     approvals,
+    mediaTaxonomy: [...MOCK_MEDIA_TAXONOMY],
     practitioners,
     snapshots,
     auditEvents,

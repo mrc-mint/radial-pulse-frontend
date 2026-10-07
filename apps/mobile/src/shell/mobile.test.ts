@@ -3,17 +3,18 @@ import { componentCaption } from './assessment-kit';
 import { connectionSubtitle, offeredConnections } from './connection-row';
 import { mockConnectBrowser } from './mock-connect-browser';
 import { isTabVisible, TAB_SECTIONS } from './module-registry';
+import { createChunkedSecureStorage } from './secure-token-storage';
 
 // The mobile app's API path (in-process contract mocks behind the client's
 // fetch) is tested with the mocks in packages/api-client (mocks/in-process).
 
 describe('tabs', () => {
-  it('are Home, Insights, Social Media, Reports and Profile — chat is not a tab', () => {
+  it('are Home, Insights, Social Presence, Assessments and Profile — chat is not a tab', () => {
     expect(TAB_SECTIONS.map((s) => s.label)).toEqual([
       'Home',
       'Insights',
-      'Social Media',
-      'Reports',
+      'Social Presence',
+      'Assessments',
       'Profile',
     ]);
   });
@@ -77,5 +78,37 @@ describe('component captions', () => {
 
   it('prefer the backend summary', () => {
     expect(componentCaption({ status: 'completed', summary: 'Good basics.' })).toBe('Good basics.');
+  });
+});
+
+describe('secure token storage', () => {
+  function fakeStore() {
+    const values = new Map<string, string>();
+    return {
+      values,
+      getItemAsync: async (k: string) => values.get(k) ?? null,
+      setItemAsync: async (k: string, v: string) => void values.set(k, v),
+      deleteItemAsync: async (k: string) => void values.delete(k),
+    };
+  }
+
+  it('splits large tokens into chunks and reads them back', async () => {
+    const store = fakeStore();
+    const storage = createChunkedSecureStorage(store);
+    const token = 'x'.repeat(4000);
+    await storage.setItem('rp.auth.tokens', token);
+    expect(await storage.getItem('rp.auth.tokens')).toBe(token);
+    expect(store.values.get('rp.auth.tokens.n')).toBe('3');
+    for (const v of store.values.values()) expect(v.length).toBeLessThanOrEqual(1800);
+  });
+
+  it('removes every chunk, and treats a half-written value as absent', async () => {
+    const store = fakeStore();
+    const storage = createChunkedSecureStorage(store);
+    await storage.setItem('k', 'y'.repeat(3000));
+    store.values.delete('k.1');
+    expect(await storage.getItem('k')).toBeNull();
+    await storage.removeItem('k');
+    expect(store.values.size).toBe(0);
   });
 });

@@ -47,7 +47,7 @@ const GROUPS = [
   },
   {
     id: 'prospects',
-    label: 'Prospects',
+    label: 'Prospective clients',
     color: 'var(--rp-color-chart-series1)',
   },
   {
@@ -65,8 +65,8 @@ const GROUPS = [
 type GrowthMetric = 'total' | 'new';
 
 const GROWTH_OPTIONS: Array<{ value: GrowthMetric; label: string }> = [
-  { value: 'total', label: 'Total clinics' },
-  { value: 'new', label: 'New clinics' },
+  { value: 'total', label: 'Total client organizations' },
+  { value: 'new', label: 'New client organizations' },
 ];
 
 /** Every clinic row the feed and highlights need (the API's maximum page). */
@@ -97,7 +97,7 @@ export function PlatformDashboard() {
       <PageHeader
         className="rp-dashboard__header"
         title="Dashboard"
-        description="Overview of clinics, progress and impact"
+        description="Overview of client organizations, progress and impact"
       />
 
       {summary.isError ? (
@@ -108,19 +108,19 @@ export function PlatformDashboard() {
         <>
           <div className="rp-grid rp-dashboard__tiles" aria-busy={summary.isLoading || undefined}>
             <MetricCard
-              label="Total clinics"
+              label="Total client organizations"
               value={data?.total_clinics}
               icon={<Building2 size={20} />}
               iconTone="brand"
             />
             <MetricCard
-              label="Active clinics"
+              label="Active clients"
               value={data?.active}
               icon={<BadgeCheck size={20} />}
               iconTone="success"
             />
             <MetricCard
-              label="Prospects"
+              label="Prospective clients"
               value={data?.prospects}
               icon={<Sparkles size={20} />}
               iconTone="info"
@@ -132,7 +132,7 @@ export function PlatformDashboard() {
               iconTone="warning"
             />
             <MetricCard
-              label="Inactive clinics"
+              label="Inactive clients"
               value={data?.archived}
               icon={<CirclePause size={20} />}
               iconTone="neutral"
@@ -140,12 +140,12 @@ export function PlatformDashboard() {
           </div>
 
           <div className="rp-grid rp-grid--2">
-            <Card title="Clinic status overview">
+            <Card title="Client status overview">
               {data ? (
                 <DonutChart
-                  label="Clinics by status"
-                  unit="clinics"
-                  centerLabel="All clinics"
+                  label="Client organizations by status"
+                  unit="client organizations"
+                  centerLabel="All clients"
                   total={data.total_clinics + data.archived}
                   items={GROUPS.map((g) => ({
                     id: g.id,
@@ -160,7 +160,7 @@ export function PlatformDashboard() {
             </Card>
 
             <Card
-              title="Clinic growth trend"
+              title="Client growth trend"
               actions={
                 <Select
                   label="Growth measure"
@@ -174,8 +174,12 @@ export function PlatformDashboard() {
             >
               {growth ? (
                 <LineChart
-                  label={metric === 'total' ? 'Total clinics by month' : 'New clinics by month'}
-                  unit={metric === 'total' ? 'clinics' : 'new clinics'}
+                  label={
+                    metric === 'total'
+                      ? 'Total client organizations by month'
+                      : 'New client organizations by month'
+                  }
+                  unit={metric === 'total' ? 'client organizations' : 'new client organizations'}
                   items={growth.map((m) => ({
                     id: m.month,
                     label: monthLabel(m.month),
@@ -224,7 +228,7 @@ function RecentActivity() {
       ) : events.length === 0 ? (
         <EmptyState
           title="No activity yet"
-          description="New clinics and stage changes appear here."
+          description="New client organizations and stage changes appear here."
         />
       ) : (
         <ul className="rp-dashboard__feed" aria-label="Recent activity">
@@ -292,7 +296,7 @@ function KeyHighlights() {
       id: 'unassigned',
       icon: UserRoundX,
       tone: count > 0 ? 'warning' : 'neutral',
-      text: `${count} ${count === 1 ? 'clinic has' : 'clinics have'} no Digital Success Manager`,
+      text: `${count} ${count === 1 ? 'client organization is' : 'client organizations are'} not allocated to a portfolio`,
     });
   }
 

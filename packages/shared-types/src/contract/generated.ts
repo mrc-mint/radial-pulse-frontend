@@ -1,10 +1,27 @@
 /**
- * GENERATED from contracts/api/openapi.json (contract 0.1.0-unreleased) by
+ * GENERATED from contracts/api/openapi.json (contract 0.3.0-unreleased) by
  * tools/scripts/generate-contract-types.mjs. Do not edit by hand:
  * run `pnpm api:sync --version <x.y.z>`.
  */
 
 export interface paths {
+    "/api/v1/assessments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Audit Reports: assessments of every clinic the caller may see (clinic users: PUBLISHED only) */
+        get: operations["list_all_assessments_api_v1_assessments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/me": {
         parameters: {
             query?: never;
@@ -14,7 +31,9 @@ export interface paths {
         };
         /**
          * Who am I, and what can I do?
-         * @description Sign-in happens in Cognito (Hosted UI, Google, PKCE). This returns the platform view of the caller.
+         * @description Sign-in happens in Cognito (Managed Login: email + password, PKCE).
+         *
+         *     This returns the platform view of the caller.
          */
         get: operations["me_api_v1_auth_me_get"];
         put?: never;
@@ -176,7 +195,10 @@ export interface paths {
         put?: never;
         /**
          * submit / approve / reject / redo / publish / handoff
-         * @description The per-action permission (e.g. approvals:decide) is checked by the service.
+         * @description The per-action permission (e.g. approvals:decide, media:review) is checked by the service.
+         *
+         *     ``comment`` is an internal note (Radial Pulse staff only); ``clinic_message`` is what the
+         *     clinic reads (e.g. why a photo must be retaken).
          */
         post: operations["apply_action_api_v1_clinics__clinic_id__approvals_actions_post"];
         delete?: never;
@@ -261,7 +283,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Assets */
+        /** Clinic users never see unpublished report files */
         get: operations["list_assets_api_v1_clinics__clinic_id__assets_get"];
         put?: never;
         post?: never;
@@ -288,6 +310,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/clinics/{clinic_id}/assets/{asset_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One file with its labels and review */
+        get: operations["get_asset_api_v1_clinics__clinic_id__assets__asset_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/clinics/{clinic_id}/assets/{asset_id}/confirm": {
         parameters: {
             query?: never;
@@ -297,7 +336,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Step 3: confirm the upload finished (API verifies the object in S3) */
+        /**
+         * Step 3: confirm the upload finished (API verifies the object in S3)
+         * @description Clinic media (clinic_photo, practitioner_photo, audio) is submitted for review here.
+         */
         post: operations["confirm_upload_api_v1_clinics__clinic_id__assets__asset_id__confirm_post"];
         delete?: never;
         options?: never;
@@ -699,7 +741,7 @@ export interface paths {
         /** Clinic-side people and roles */
         get: operations["list_team_api_v1_clinics__clinic_id__team_get"];
         put?: never;
-        /** Add a Clinic Administrator (sends an invite email) */
+        /** Add a Clinic Administrator (creates their sign-in; Cognito emails the invite) */
         post: operations["add_team_member_api_v1_clinics__clinic_id__team_post"];
         delete?: never;
         options?: never;
@@ -794,6 +836,96 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/internal/clinics/{clinic_id}/presence-profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Service: where the clinic is online (scope presence.read) */
+        get: operations["list_presence_profiles_api_v1_internal_clinics__clinic_id__presence_profiles_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/clinics/{clinic_id}/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Service: the client context (scope profile.read). `team` is always empty for services */
+        get: operations["get_profile_api_v1_internal_clinics__clinic_id__profile_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/clinics/{clinic_id}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Service: register a report version (scope reports.write) */
+        post: operations["create_report_api_v1_internal_clinics__clinic_id__reports_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/clinics/{clinic_id}/snapshots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Service: ingest metric snapshots (scope snapshots.write) */
+        post: operations["ingest_snapshots_api_v1_internal_clinics__clinic_id__snapshots_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/taxonomy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Media labels: photo categories, doctor-photo apron / angle / outfit, voice samples
+         * @description The values to offer when uploading clinic media, grouped by ``dimension`` and in display
+         *     order (``sort_order``). Use the ``code`` in ``POST /clinics/{id}/assets/uploads``. The list
+         *     can grow (e.g. new outfits): build screens from it instead of hard-coding the values.
+         */
+        get: operations["list_taxonomy_api_v1_media_taxonomy_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/notifications": {
         parameters: {
             query?: never;
@@ -877,7 +1009,8 @@ export interface paths {
          * Create User
          * @description Pre-provision a Radial Pulse staff user (Platform Administrator or Digital Success Manager).
          *
-         *     An invite email is sent; they then sign in with Google using this email.
+         *     Their Cognito sign-in is created and Cognito emails them a temporary password; they sign in
+         *     with this email address through Managed Login and choose their own password.
          */
         post: operations["create_user_api_v1_users_post"];
         delete?: never;
@@ -899,7 +1032,10 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Edit or deactivate a user */
+        /**
+         * Edit or deactivate a user
+         * @description Deactivating also disables the person's Cognito sign-in and signs them out everywhere.
+         */
         patch: operations["update_user_api_v1_users__user_id__patch"];
         trace?: never;
     };
@@ -914,6 +1050,23 @@ export interface paths {
         put?: never;
         /** Resend Invite */
         post: operations["resend_invite_api_v1_users__user_id__resend_invite_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/work-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Work queue: work items of every clinic the caller may see */
+        get: operations["list_all_work_items_api_v1_work_items_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -968,6 +1121,8 @@ export interface components {
             action: components["schemas"]["ApprovalAction"];
             /** Assignee User Id */
             assignee_user_id?: string | null;
+            /** Clinic Message */
+            clinic_message?: string | null;
             /** Comment */
             comment?: string | null;
             /**
@@ -982,11 +1137,15 @@ export interface components {
         ApprovalRead: {
             /** Assignee User Id */
             assignee_user_id: string | null;
+            /** Available Actions */
+            available_actions: components["schemas"]["ApprovalAction"][];
             /**
              * Clinic Id
              * Format: uuid
              */
             clinic_id: string;
+            /** Clinic Message */
+            clinic_message: string | null;
             /**
              * Created At
              * Format: date-time
@@ -1085,6 +1244,50 @@ export interface components {
             /** Summary */
             summary: string | null;
         };
+        /**
+         * AssessmentListItem
+         * @description A row of the cross-clinic Audit Reports list (``GET /assessments``).
+         */
+        AssessmentListItem: {
+            approval_state: components["schemas"]["ApprovalState"];
+            /**
+             * Clinic Id
+             * Format: uuid
+             */
+            clinic_id: string;
+            /** Clinic Name */
+            clinic_name: string;
+            /** Completed At */
+            completed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Methodology Version */
+            methodology_version: string;
+            /** Overall Score */
+            overall_score: number | null;
+            /** Primary Practitioner Name */
+            primary_practitioner_name: string | null;
+            publication_state: components["schemas"]["PublicationState"];
+            /** Published At */
+            published_at: string | null;
+            /** Requested By User Id */
+            requested_by_user_id: string | null;
+            /** Sequence */
+            sequence: number;
+            /** Started At */
+            started_at: string | null;
+            status: components["schemas"]["AssessmentStatus"];
+            /** Summary */
+            summary: string | null;
+        };
         /** AssessmentRead */
         AssessmentRead: {
             approval_state: components["schemas"]["ApprovalState"];
@@ -1149,7 +1352,13 @@ export interface components {
         AssetKind: "clinic_photo" | "practitioner_photo" | "brand_asset" | "logo" | "audio" | "video" | "report" | "generated_media" | "document" | "chat_attachment";
         /** AssetRead */
         AssetRead: {
+            /** Angle */
+            angle?: string | null;
             approval_state: components["schemas"]["ApprovalState"];
+            /** Apron */
+            apron?: string | null;
+            /** Category */
+            category?: string | null;
             /**
              * Clinic Id
              * Format: uuid
@@ -1170,14 +1379,19 @@ export interface components {
             mime_type: string;
             /** Original Filename */
             original_filename: string | null;
+            /** Outfit */
+            outfit?: string | null;
             /** Owner User Id */
             owner_user_id: string | null;
+            /** Practitioner Id */
+            practitioner_id?: string | null;
             /** Previous Version Id */
             previous_version_id: string | null;
             /** Provenance */
             provenance: {
                 [key: string]: unknown;
             };
+            review?: components["schemas"]["AssetReview"] | null;
             /** Size Bytes */
             size_bytes: number;
             status: components["schemas"]["AssetStatus"];
@@ -1190,12 +1404,45 @@ export interface components {
             version: number;
         };
         /**
+         * AssetReview
+         * @description The review of a file (clinic media): its approval, as the CALLER may see it.
+         */
+        AssetReview: {
+            /**
+             * Approval Id
+             * Format: uuid
+             */
+            approval_id: string;
+            /** Available Actions */
+            available_actions: components["schemas"]["ApprovalAction"][];
+            /** Clinic Message */
+            clinic_message: string | null;
+            /** Decided By User Id */
+            decided_by_user_id: string | null;
+            /** Internal Note */
+            internal_note: string | null;
+            state: components["schemas"]["ApprovalState"];
+            /** Submitted By User Id */
+            submitted_by_user_id: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
          * AssetStatus
          * @enum {string}
          */
         AssetStatus: "pending_upload" | "uploaded" | "failed" | "deleted";
         /** AssetUploadRequest */
         AssetUploadRequest: {
+            /** Angle */
+            angle?: string | null;
+            /** Apron */
+            apron?: string | null;
+            /** Category */
+            category?: string | null;
             /** Checksum Sha256 */
             checksum_sha256?: string | null;
             kind: components["schemas"]["AssetKind"];
@@ -1203,6 +1450,10 @@ export interface components {
             mime_type: string;
             /** Original Filename */
             original_filename?: string | null;
+            /** Outfit */
+            outfit?: string | null;
+            /** Practitioner Id */
+            practitioner_id?: string | null;
             /** Previous Version Id */
             previous_version_id?: string | null;
             /** Size Bytes */
@@ -1552,6 +1803,7 @@ export interface components {
              * Format: date-time
              */
             stage_changed_at: string;
+            stage_group: components["schemas"]["ClinicStageGroup"];
             /** State */
             state: string | null;
             /**
@@ -1650,6 +1902,7 @@ export interface components {
              * Format: date-time
              */
             stage_changed_at: string;
+            stage_group: components["schemas"]["ClinicStageGroup"];
             /** State */
             state: string | null;
             /**
@@ -1678,6 +1931,15 @@ export interface components {
          * @enum {string}
          */
         ClinicStage: "prospective_client" | "profile_enriched" | "assessment_completed" | "client_discussion" | "active_client";
+        /**
+         * ClinicStageGroup
+         * @description The Admin tabs (decision D5): Prospects = stages 1-2, In Progress = 3-4, Active = 5.
+         *
+         *     The API applies this grouping itself (``GET /clinics?group=…``, ``stage_group`` on every
+         *     clinic, the dashboard tiles) so no screen has to repeat it.
+         * @enum {string}
+         */
+        ClinicStageGroup: "prospects" | "in_progress" | "active";
         /**
          * ClinicUpdate
          * @description Edit clinic details. Stage and archiving have their own routes.
@@ -1954,10 +2216,10 @@ export interface components {
             platform_role: components["schemas"]["PlatformRole"];
             /**
              * Sign In Method
-             * @default google
+             * @default email_password
              * @constant
              */
-            sign_in_method?: "google";
+            sign_in_method?: "email_password";
         };
         /**
          * MeUpdate
@@ -1968,6 +2230,23 @@ export interface components {
             full_name?: string | null;
             /** Phone */
             phone?: string | null;
+        };
+        /**
+         * MediaTaxonomyDimension
+         * @description WHICH list a media label belongs to. The VALUES live in the ``media_taxonomy`` table,
+         *     so a new outfit or voice sample is a new row, not a code change.
+         * @enum {string}
+         */
+        MediaTaxonomyDimension: "clinic_photo_category" | "voice_sample" | "practitioner_apron" | "practitioner_angle" | "practitioner_outfit";
+        /** MediaTaxonomyValueRead */
+        MediaTaxonomyValueRead: {
+            /** Code */
+            code: string;
+            dimension: components["schemas"]["MediaTaxonomyDimension"];
+            /** Label */
+            label: string;
+            /** Sort Order */
+            sort_order: number;
         };
         /** MetricSnapshotBatch */
         MetricSnapshotBatch: {
@@ -2132,6 +2411,17 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** Page[AssessmentListItem] */
+        Page_AssessmentListItem_: {
+            /** Items */
+            items: components["schemas"]["AssessmentListItem"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Total */
+            total: number;
+        };
         /** Page[AssessmentRead] */
         Page_AssessmentRead_: {
             /** Items */
@@ -2242,6 +2532,17 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** Page[WorkItemListItem] */
+        Page_WorkItemListItem_: {
+            /** Items */
+            items: components["schemas"]["WorkItemListItem"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Total */
+            total: number;
+        };
         /** Page[WorkItemRead] */
         Page_WorkItemRead_: {
             /** Items */
@@ -2257,7 +2558,7 @@ export interface components {
          * Permission
          * @enum {string}
          */
-        Permission: "clinics:create" | "users:read" | "users:manage" | "assignments:manage" | "settings:manage" | "clinics:read" | "clinics:write" | "clinics:manage" | "team:manage" | "practitioners:read" | "practitioners:write" | "profile:read" | "profile:write" | "presence:read" | "presence:write" | "assets:read" | "assets:upload" | "assessments:read" | "assessments:request" | "assessments:write_results" | "reports:read" | "reports:write" | "approvals:submit" | "approvals:decide" | "approvals:publish" | "work_items:read" | "work_items:write" | "snapshots:read" | "snapshots:write" | "audit_log:read" | "chat:read" | "chat:write" | "connections:read" | "connections:manage";
+        Permission: "clinics:create" | "users:read" | "users:manage" | "assignments:manage" | "settings:manage" | "clinics:read" | "clinics:write" | "clinics:manage" | "team:manage" | "practitioners:read" | "practitioners:write" | "profile:read" | "profile:write" | "presence:read" | "presence:write" | "assets:read" | "assets:upload" | "assessments:read" | "assessments:request" | "assessments:write_results" | "reports:read" | "reports:write" | "approvals:submit" | "approvals:decide" | "approvals:publish" | "work_items:read" | "work_items:write" | "snapshots:read" | "snapshots:write" | "audit_log:read" | "chat:read" | "chat:write" | "connections:read" | "connections:manage" | "media:upload" | "media:review";
         /** PersonRef */
         PersonRef: {
             /** Email */
@@ -2588,6 +2889,23 @@ export interface components {
             /** Name */
             name: string;
         };
+        /**
+         * ServiceReportCreate
+         * @description A report registered by a backend service (/api/v1/internal). Services have no file upload
+         *     route, so no ``asset_id``: they cannot point a report at a clinic's files.
+         */
+        ServiceReportCreate: {
+            /** Provenance */
+            provenance?: {
+                [key: string]: unknown;
+            };
+            /** Report Key */
+            report_key: string;
+            /** Report Type */
+            report_type: string;
+            /** Title */
+            title: string;
+        };
         /** ServicesSection */
         ServicesSection: {
             /** Items */
@@ -2637,8 +2955,8 @@ export interface components {
         /**
          * TeamMemberCreate
          * @description Add a clinic-side person. Creates the (clinic_user) account if the email is new, and sends
-         *     an invite email. Role `clinic_administrator` (default) or `clinic_team_member` (clinic staff: view-only
-         *     plus uploading photos/files).
+         *     an invite (Cognito emails a temporary password). Role `clinic_administrator` (default) or
+         *     `clinic_team_member` (clinic staff: view-only plus uploading photos/files).
          */
         TeamMemberCreate: {
             /** Email */
@@ -2682,7 +3000,7 @@ export interface components {
         };
         /**
          * UserCreate
-         * @description Pre-provision a staff user. They get an invite email and sign in with Google using this email.
+         * @description Pre-provision a staff user. Cognito emails them a temporary password; they sign in with this email.
          */
         UserCreate: {
             /** Email */
@@ -2818,6 +3136,59 @@ export interface components {
             title?: string | null;
         };
         /**
+         * WorkItemListItem
+         * @description A row of the cross-clinic work queue (``GET /work-items``).
+         */
+        WorkItemListItem: {
+            /** Approval Id */
+            approval_id: string | null;
+            area: components["schemas"]["WorkArea"];
+            /**
+             * Clinic Id
+             * Format: uuid
+             */
+            clinic_id: string;
+            /** Clinic Name */
+            clinic_name: string;
+            /** Completed At */
+            completed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By User Id */
+            created_by_user_id: string | null;
+            /** Description */
+            description: string | null;
+            /** Due At */
+            due_at: string | null;
+            /** Finding Code */
+            finding_code: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Owner User Id */
+            owner_user_id: string | null;
+            priority: components["schemas"]["WorkItemPriority"];
+            /** Source Finding Id */
+            source_finding_id: string | null;
+            /** Source Team */
+            source_team: string | null;
+            status: components["schemas"]["WorkItemStatus"];
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
          * WorkItemPriority
          * @enum {string}
          */
@@ -2898,6 +3269,71 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_all_assessments_api_v1_assessments_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["AssessmentStatus"] | null;
+                publication_state?: components["schemas"]["PublicationState"] | null;
+                /** @description Only this clinic */
+                clinic_id?: string | null;
+                /** @description Page size */
+                limit?: number;
+                /** @description Items to skip */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_AssessmentListItem_"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated but not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or no access to this clinic */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     me_api_v1_auth_me_get: {
         parameters: {
             query?: never;
@@ -3367,8 +3803,10 @@ export interface operations {
     list_clinics_api_v1_clinics_get: {
         parameters: {
             query?: {
-                /** @description One or more stages. Prospects tab = prospective_client + profile_enriched */
+                /** @description One or more stages */
                 stage?: components["schemas"]["ClinicStage"][] | null;
+                /** @description An Admin tab: prospects (stages 1-2), in_progress (3-4) or active (5) */
+                group?: components["schemas"]["ClinicStageGroup"] | null;
                 /** @description Only clinics of this DSM */
                 dsm_user_id?: string | null;
                 /** @description Only clinics without a DSM */
@@ -3621,6 +4059,8 @@ export interface operations {
         parameters: {
             query?: {
                 state?: components["schemas"]["ApprovalState"] | null;
+                /** @description e.g. asset */
+                resource_type?: string | null;
                 /** @description Page size */
                 limit?: number;
                 /** @description Items to skip */
@@ -4086,6 +4526,18 @@ export interface operations {
         parameters: {
             query?: {
                 kind?: components["schemas"]["AssetKind"] | null;
+                status?: components["schemas"]["AssetStatus"] | null;
+                /** @description e.g. submitted = awaiting review */
+                approval_state?: components["schemas"]["ApprovalState"] | null;
+                practitioner_id?: string | null;
+                /** @description Photo category, or voice sample type with kind=audio */
+                category?: string | null;
+                /** @description Doctor photos: apron code */
+                apron?: string | null;
+                /** @description Doctor photos: angle code */
+                angle?: string | null;
+                /** @description Doctor photos: outfit code */
+                outfit?: string | null;
                 /** @description Page size */
                 limit?: number;
                 /** @description Items to skip */
@@ -4170,6 +4622,66 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AssetUploadResponse"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated but not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or no access to this clinic */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    get_asset_api_v1_clinics__clinic_id__assets__asset_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                asset_id: string;
+                /** @description Clinic (tenant) id */
+                clinic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetRead"];
                 };
             };
             /** @description Missing or invalid token */
@@ -6715,6 +7227,311 @@ export interface operations {
             };
         };
     };
+    list_presence_profiles_api_v1_internal_clinics__clinic_id__presence_profiles_get: {
+        parameters: {
+            query?: {
+                /** @description Page size */
+                limit?: number;
+                /** @description Items to skip */
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Clinic (tenant) id */
+                clinic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_PresenceProfileRead_"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated but not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or no access to this clinic */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    get_profile_api_v1_internal_clinics__clinic_id__profile_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Clinic (tenant) id */
+                clinic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClinicProfileRead"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated but not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or no access to this clinic */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    create_report_api_v1_internal_clinics__clinic_id__reports_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Clinic (tenant) id */
+                clinic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServiceReportCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportArtifactRead"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated but not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or no access to this clinic */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    ingest_snapshots_api_v1_internal_clinics__clinic_id__snapshots_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Clinic (tenant) id */
+                clinic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MetricSnapshotBatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricSnapshotRead"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated but not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or no access to this clinic */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_taxonomy_api_v1_media_taxonomy_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaTaxonomyValueRead"][];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated but not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or no access to this clinic */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     list_notifications_api_v1_notifications_get: {
         parameters: {
             query?: {
@@ -7250,6 +8067,73 @@ export interface operations {
             };
             /** @description Already signed in */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_all_work_items_api_v1_work_items_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["WorkItemStatus"] | null;
+                /** @description Only items owned by this person */
+                owner_user_id?: string | null;
+                area?: components["schemas"]["WorkArea"] | null;
+                /** @description Only this clinic */
+                clinic_id?: string | null;
+                /** @description Page size */
+                limit?: number;
+                /** @description Items to skip */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_WorkItemListItem_"];
+                };
+            };
+            /** @description Missing or invalid token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated but not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or no access to this clinic */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

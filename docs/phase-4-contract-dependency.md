@@ -1,9 +1,9 @@
 # API contract dependency and status
 
-Contract in use: **0.1.0, unreleased local import** (`contracts/api/VERSION` is
-`0.1.0-unreleased`). It is byte-identical to the backend repository's committed
-`openapi/openapi.json`; replace it with `pnpm api:sync --version 0.1.0` once the
-backend tags `v0.1.0`.
+Contract in use: **0.3.0, unreleased local import** (`contracts/api/VERSION` is
+`0.3.0-unreleased`). It is byte-identical to the backend repository's committed
+`openapi.json` the backend team supplied; replace it with
+`pnpm api:sync --version 0.3.0` once the backend tags `v0.3.0`.
 
 Domain and entity types come **only** from the generated contract
 (`packages/shared-types`: `Schema<'ClinicRead'>`, `Permission`, `PlatformRole`,
@@ -13,26 +13,26 @@ is listed below — nothing is invented.
 
 ## Built on the contract (Phase 5, web)
 
-| Area        | Operations                                                                                      | Screen                                                            |
-| ----------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Session     | `GET /auth/me`                                                                                  | Sign-in, navigation, permissions (`sessionFromMe`)                |
-| Dashboard   | `GET /dashboard/summary`, `GET /chat/inbox`                                                     | Dashboard (both roles)                                            |
-| Clinics     | `GET/POST /clinics`, `GET/PATCH /clinics/{id}`                                                  | Clinics / My Clinics, Add clinic, clinic header, Edit clinic      |
-| Assignment  | `GET …/assignments`, `PUT …/assignment`, `GET /users`                                           | Overview → Digital Success Manager                                |
-| Work items  | `GET …/work-items`                                                                              | Overview → Open work                                              |
-| Presence    | `GET/PATCH …/presence-profiles`                                                                 | Digital Information (confirm / reject)                            |
-| Assessments | `GET/POST …/assessments`, `GET …/assessments/{id}`                                              | Unified Audit, canonical `/clinics/$clinicId/audit/$assessmentId` |
-| Connections | `GET …/connections`                                                                             | Social Media → Connected accounts                                 |
-| Chat        | `GET/POST …/chat/messages`, `POST …/chat/read`, assets upload/confirm/download-url              | Chat (polling via `useChatMessages`)                              |
-| Users       | `GET/POST /users`, `POST /users/{id}/resend-invite`                                             | Users                                                             |
-| Settings    | `GET/PATCH /settings/platform`                                                                  | Settings → General                                                |
-| Media       | `GET …/assets`, `GET …/assets/{id}/download-url`, `GET …/approvals`, `POST …/approvals/actions` | Clinic → Media (review: approve, request retake, reject)          |
+| Area        | Operations                                                                                      | Screen                                                                                   |
+| ----------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Session     | `GET /auth/me`                                                                                  | Sign-in, navigation, permissions (`sessionFromMe`)                                       |
+| Dashboard   | `GET /dashboard/summary`, `GET /chat/inbox`                                                     | Dashboard (both roles)                                                                   |
+| Clinics     | `GET/POST /clinics`, `GET/PATCH /clinics/{id}`                                                  | Client Organizations / My Client Portfolio, Add client organization, header, Edit clinic |
+| Assignment  | `GET …/assignments`, `PUT …/assignment`, `GET /users`                                           | Overview → Portfolio allocation                                                          |
+| Work items  | `GET …/work-items`                                                                              | Overview → Open work                                                                     |
+| Presence    | `GET/PATCH …/presence-profiles`                                                                 | Digital Information (confirm / reject)                                                   |
+| Assessments | `GET/POST …/assessments`, `GET …/assessments/{id}`                                              | Digital Presence Assessment, canonical `/clinics/$clinicId/assessment/$assessmentId`     |
+| Connections | `GET …/connections`                                                                             | Social Presence Insights → Connected accounts                                            |
+| Chat        | `GET/POST …/chat/messages`, `POST …/chat/read`, assets upload/confirm/download-url              | Client Collaboration (polling via `useChatMessages`)                                     |
+| Users       | `GET/POST /users`, `POST /users/{id}/resend-invite`                                             | Users                                                                                    |
+| Settings    | `GET/PATCH /settings/platform`                                                                  | Settings → General                                                                       |
+| Media       | `GET …/assets`, `GET …/assets/{id}/download-url`, `GET …/approvals`, `POST …/approvals/actions` | Clinic → Media (review: approve, request retake, reject)                                 |
 
 Contract conventions applied: problem+json errors (`errors[]`, `request_id`,
 `type` → `ApiError.code`; 404 = not found or no access; 502 → `upstream`; 503 →
 `unavailable`), `limit`/`offset`/`total` paging, two-level permissions
 (`MeResponse.permissions` + per-clinic `ClinicAccess.permissions`),
-`all_clinics` for the "My Clinics" label, `ComponentStatus` (`not_available`,
+`all_clinics` for the "My Client Portfolio" label, `ComponentStatus` (`not_available`,
 `pending`, `failed` never shown as a number), `FindingPriority`,
 `PresenceVerification`. Enum display labels are owned by the frontend
 (`@radial-pulse/utils` labels, typed `Record<ContractEnum, string>`).
@@ -46,9 +46,9 @@ All of the above run against contract-based MSW mocks
 | ---------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | Session / access | `GET /auth/me`, `GET /clinics`                                                                        | Sign-in, "use the web portal" / no-access gates, clinic switcher       |
 | Assessments      | `GET …/assessments` (published only for clinic users), `GET …/assessments/{id}`                       | Home, Insights (overview + six components), Reports, assessment detail |
-| Connections      | `GET …/connections`, `GET …/connections/{platform}`, `POST …/start`, `…/complete`, `…/disconnect`     | Connect Your Accounts, Social Media, connection detail                 |
+| Connections      | `GET …/connections`, `GET …/connections/{platform}`, `POST …/start`, `…/complete`, `…/disconnect`     | Connect Your Accounts, Social Presence, connection detail              |
 | Clinic           | `GET/PATCH /clinics/{id}`, `ClinicListItem.dsm` / `primary_practitioner_name`                         | Profile, Clinic information (edit with `clinics:write`)                |
-| Chat             | `GET /chat/inbox`, `GET/POST …/chat/messages`, `POST …/chat/read`, assets upload/confirm/download-url | Chat modal and floating button badge                                   |
+| Chat             | `GET /chat/inbox`, `GET/POST …/chat/messages`, `POST …/chat/read`, assets upload/confirm/download-url | Client Collaboration modal and floating button badge                   |
 | Media            | `GET …/assets`, assets upload/confirm/download-url, `GET …/approvals`, `GET …/practitioners`          | Profile → Media (upload, replace, status, playback)                    |
 
 Not built (outside V1 or not in the contract): posts/reels, follower and
@@ -61,9 +61,9 @@ scope.
 
 | #   | Gap                                                                                                                                                                                                               | Blocked screen / behaviour                                                                                                                                                                                                                                                                  |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | No allowed actions on an approval or assessment (`available_actions`); transitions live only in backend code                                                                                                      | Unified Audit: submit / approve / reject / publish buttons                                                                                                                                                                                                                                  |
-| 2   | Stage groups (Prospects / In progress / Active) exist only in the dashboard counts, backend code and the `stage` filter note; the list has no group field                                                         | Web shows a clinic **status** from one exhaustive stage-to-group table in `@radial-pulse/utils` (`clinicStatus`), plus Inactive for archived clinics; a published group field or enum would replace it                                                                                      |
-| 3   | No cross-clinic assessments list                                                                                                                                                                                  | Audit Reports page                                                                                                                                                                                                                                                                          |
+| 1   | No allowed actions on an approval or assessment (`available_actions`); transitions live only in backend code                                                                                                      | Digital Presence Assessment: submit / approve / reject / publish buttons                                                                                                                                                                                                                    |
+| 2   | Stage groups (Prospective clients / In progress / Active) exist only in the dashboard counts, backend code and the `stage` filter note; the list has no group field                                               | Web shows a clinic **status** from one exhaustive stage-to-group table in `@radial-pulse/utils` (`clinicStatus`), plus Inactive for archived clinics; a published group field or enum would replace it                                                                                      |
+| 3   | No cross-clinic assessments list                                                                                                                                                                                  | Digital Presence Assessments page                                                                                                                                                                                                                                                           |
 | 4   | No cross-clinic work-item list (dashboard has counts only)                                                                                                                                                        | DSM work-queue list on the dashboard                                                                                                                                                                                                                                                        |
 | 5   | No recent activity, highlights, tile deltas or period filter in `DashboardSummary`                                                                                                                                | Platform Administrator dashboard: no % change or "Last 30 days"; Recent activity and Key highlights are built from the clinics list instead (gap 18)                                                                                                                                        |
 | 6   | Social metrics are free-form `metric_key` snapshots with an untyped `value`; no catalog of keys, labels or units                                                                                                  | Web Social Media and mobile Social Media show the latest snapshots, labelling known keys (`instagram.followers`…) and showing others by key; mocks use sample keys until the catalogue is published                                                                                         |
@@ -90,21 +90,39 @@ scope.
 | 27  | Download URL lifetime, cache and disposition headers, bucket privacy are not in the contract                                                                                                                      | Security sign-off (DevOps)                                                                                                                                                                                                                                                                  |
 | 28  | No thumbnails                                                                                                                                                                                                     | Grids load full-size photos                                                                                                                                                                                                                                                                 |
 
+### Status after contract 0.3.0
+
+- **Resolved by the contract:** 2 (`stage_group` and the `group` filter), 20
+  (`GET /media/taxonomy`; `category`, `apron`, `angle`, `outfit` on files),
+  21 (`practitioner_id`), 23 for media (`AssetRead.review.available_actions`),
+  24 (`media:upload` / `media:review`), and approvals now carry
+  `available_actions` and a separate `clinic_message`. The web and mobile
+  media screens use all of these.
+- **Now possible, not built yet:** 1 for the Digital Presence Assessment
+  (`ApprovalRead.available_actions`), 3 (`GET /assessments`), 4
+  (`GET /work-items`).
+- **Partly open:** 22 — the asset `resource_type` value appears only as an
+  example ("e.g. asset"); the taxonomy has labels but no descriptions or
+  per-category targets (hints and the "3 per category" target are frontend
+  copy).
+- **Still open:** 25 (replaced versions in the list; no delete), 26 (file
+  limits), 27 (storage and cache headers; DevOps), 28 (thumbnails).
+
 ## Other dependencies
 
-1. **Authenticated API access in development:** the gateway needs a Cognito
-   access token (Phase 7). Until then only the MSW mocks can be used.
+1. **Authenticated API access in development:** Cognito Managed Login is
+   implemented (docs/phase-7-auth.md); a DEV run needs the Cognito domain, app
+   clients, callback URLs and test users listed there.
 2. **Dev environment:** the dev API base URL for `config.json`, and backend
    `CORS_ALLOWED_ORIGINS` including `http://localhost:4200` (its example lists
    5173 and 8081).
-3. **Auth library:** decided — Amplify Auth (`signInWithRedirect`, ADR 0006) on
-   web and mobile, Phase 7. Mobile then needs an Expo development build
-   (Amplify's native modules do not run in Expo Go).
+3. **Auth:** Cognito Managed Login, email and password, Authorization Code +
+   PKCE (ADR 0006). No Amplify, no social sign-in.
 4. **Tooling:** `pnpm api:sync` needs the GitHub CLI (`gh`, authenticated).
 5. **Mobile Connect redirect:** the app's `<scheme>://connect/callback` (per
    environment: `radialpulse-local`, `radialpulse-dev`, `radialpulse`) must be
-   on the backend's `OAUTH_REDIRECT_URIS`, and the mobile scheme on Cognito's
-   allowed callback URLs (Phase 7).
+   on the backend's `OAUTH_REDIRECT_URIS`; Cognito's own callbacks are listed
+   in docs/phase-7-auth.md.
 6. **Platform brand marks:** Lucide has no brand logos; connected platforms use
    neutral icons beside their names until official marks are supplied.
 

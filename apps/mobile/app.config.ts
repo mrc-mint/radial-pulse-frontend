@@ -38,7 +38,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         'expo-image-picker',
         {
           photosPermission:
-            'Radial Pulse uses your photo library so you can upload clinic and doctor photos.',
+            'Radial Pulse uses your photo library so you can upload clinic and practitioner photos.',
           cameraPermission: false,
           microphonePermission: false,
         },

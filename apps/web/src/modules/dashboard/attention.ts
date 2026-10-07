@@ -58,7 +58,7 @@ export function clinicsNeedingAttention(
     }
     const open = clinic.open_work.reduce((n, a) => n + a.open_count, 0);
     if (open > 0) {
-      reasons.push(plural(open, 'open work item', 'open work items'));
+      reasons.push(plural(open, 'open improvement work item', 'open improvement work items'));
       times.push(clinic.updated_at);
     }
 

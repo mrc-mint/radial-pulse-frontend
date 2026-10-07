@@ -1,8 +1,9 @@
-import type { UploadFile } from '@radial-pulse/api-client';
+import type { UploadFile, UploadLabels } from '@radial-pulse/api-client';
 import {
   useClinic,
-  useClinicApprovals,
   useClinicAssets,
+  useMediaTaxonomy,
+  usePractitioners,
   useSetClinicPhoto,
   useUploadAsset,
 } from '@radial-pulse/api-client/react';
@@ -11,12 +12,11 @@ import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
 import type { Schema } from '@radial-pulse/shared-types';
 import { Tabs, textStyle } from '@radial-pulse/ui/native';
 import {
-  approvalForResource,
   buildMediaBoard,
-  CLINIC_PHOTO_CATEGORIES,
-  DOCTOR_PHOTO_OUTFITS,
+  CLINIC_PHOTO_TARGET,
+  LOGO_COVER_ROW,
   MEDIA_ASSET_KINDS,
-  type DoctorPhotoOutfit,
+  mediaLabels,
 } from '@radial-pulse/utils';
 import { Plus } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
@@ -27,6 +27,7 @@ import { pickAudio, pickPhoto } from './pick-media';
 import { VoiceSamples } from './voice-samples';
 
 type Asset = Schema<'AssetRead'>;
+type MediaKind = 'practitioner_photo' | 'clinic_photo' | 'logo' | 'audio';
 
 const SHOOTING_TIPS = [
   'Use daylight from a window in front of you; avoid harsh overhead light.',
@@ -36,55 +37,58 @@ const SHOOTING_TIPS = [
 ];
 
 /**
- * Profile → Media (Clinic Administrator): doctor photos by outfit and angle,
- * hospital photos by category and voice samples, laid out as in the product
- * reference. The Clinic Administrator uploads and replaces; reviewing belongs
- * to Radial Pulse staff on the web, so there are no review controls here.
- *
- * The contract has no angle, outfit or category fields yet (backend gap 20):
- * uploads are stored with their kind only and appear under "Uploaded …" until
- * the backend can place them. Outfit frames added here are layout only.
+ * Profile → Media (Clinic Administrator): practitioner photos by apron, outfit and
+ * angle, hospital photos by category and voice samples, all laid out from the
+ * media taxonomy (`GET /media/taxonomy`). Each upload carries its labels and
+ * the main practitioner. Uploading needs `media:upload`; reviewing belongs to
+ * Radial Pulse staff on the web, so there are no review controls here.
  */
 export function MediaSection() {
   const clinicId = useClinicId();
-  const canUpload = useClinicCan(clinicId, 'assets:upload');
+  const canUpload = useClinicCan(clinicId, 'media:upload');
   const canSetCover = useClinicCan(clinicId, 'clinics:write');
   const clinic = useClinic(clinicId);
+  const taxonomy = useMediaTaxonomy();
   const assets = useClinicAssets(clinicId, MEDIA_ASSET_KINDS);
-  const approvals = useClinicApprovals(clinicId);
+  const practitioners = usePractitioners(clinicId);
   const upload = useUploadAsset(clinicId);
   const setCover = useSetClinicPhoto(clinicId);
-  const [outfit, setOutfit] = useState<DoctorPhotoOutfit>('with_apron');
-  const [outfitCounts, setOutfitCounts] = useState<Partial<Record<DoctorPhotoOutfit, number>>>({});
+  const [apronCode, setApronCode] = useState<string | null>(null);
+  const [outfitsShown, setOutfitsShown] = useState<Record<string, number>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
 
+  const labels = useMemo(
+    () => (taxonomy.data ? mediaLabels(taxonomy.data) : null),
+    [taxonomy.data],
+  );
   const board = useMemo(
     () =>
-      assets.data && clinic.data
-        ? buildMediaBoard(assets.data, { coverAssetId: clinic.data.cover_asset_id }, outfitCounts)
+      assets.data && clinic.data && labels
+        ? buildMediaBoard(
+            assets.data,
+            labels,
+            { coverAssetId: clinic.data.cover_asset_id },
+            outfitsShown,
+          )
         : null,
-    [assets.data, clinic.data, outfitCounts],
+    [assets.data, clinic.data, labels, outfitsShown],
   );
-  const notes = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const asset of assets.data ?? []) {
-      const comment = approvalForResource(approvals.data?.items ?? [], asset.id)?.last_comment;
-      if (comment) map.set(asset.id, comment);
-    }
-    return map;
-  }, [assets.data, approvals.data]);
 
-  if (assets.isError || clinic.isError) {
+  if (assets.isError || clinic.isError || taxonomy.isError) {
     return (
       <QueryErrorState
-        error={assets.error ?? clinic.error}
-        onRetry={() => void Promise.all([assets.refetch(), clinic.refetch()])}
+        error={assets.error ?? clinic.error ?? taxonomy.error}
+        onRetry={() => void Promise.all([assets.refetch(), clinic.refetch(), taxonomy.refetch()])}
       />
     );
   }
-  if (!board) return <CardSkeleton lines={6} />;
+  if (!board || !labels) return <CardSkeleton lines={6} />;
+
+  // V1: media belongs to the clinic's main practitioner.
+  const practitionerId =
+    practitioners.data?.items.find((p) => p.is_primary && p.is_active)?.id ?? null;
 
   /** Pick a file, then run the upload; `key` marks the busy frame. */
   async function run(
@@ -104,118 +108,139 @@ export function MediaSection() {
       setBusy(null);
     }
   }
-  const uploadPhoto = (
-    key: string,
-    kind: 'practitioner_photo' | 'clinic_photo' | 'logo',
-    replaces?: Asset | null,
-  ) =>
-    canUpload
-      ? () =>
-          void run(key, pickPhoto, (file) =>
-            upload.mutateAsync({ kind, file, replaces: replaces?.id }),
-          )
-      : undefined;
-  const uploadCover = (key: string) =>
+  const uploader =
+    (kind: MediaKind, pick: () => Promise<UploadFile | null>) =>
+    (key: string, labels: UploadLabels, replaces?: Asset | null) =>
+      canUpload
+        ? () =>
+            void run(key, pick, (file) =>
+              upload.mutateAsync({ kind, file, labels, replaces: replaces?.id }),
+            )
+        : undefined;
+  const uploadDoctor = uploader('practitioner_photo', pickPhoto);
+  const uploadClinic = uploader('clinic_photo', pickPhoto);
+  const uploadLogo = uploader('logo', pickPhoto);
+  const uploadCover =
     canUpload && canSetCover
-      ? () => void run(key, pickPhoto, (file) => setCover.mutateAsync(file))
+      ? () => void run('cover', pickPhoto, (file) => setCover.mutateAsync(file))
       : undefined;
-  const uploadVoice = (replaces: Asset | null) =>
-    void run(replaces?.id ?? 'new', pickAudio, (file) =>
-      upload.mutateAsync({ kind: 'audio', file, replaces: replaces?.id }),
+  const uploadVoice = (category: string, replaces: Asset | null) =>
+    void run(replaces?.id ?? `new-${category}`, pickAudio, (file) =>
+      upload.mutateAsync({
+        kind: 'audio',
+        file,
+        labels: { category, practitioner_id: practitionerId },
+        replaces: replaces?.id,
+      }),
     );
 
-  const outfits = board.doctor[outfit];
-  const outfitLabel = DOCTOR_PHOTO_OUTFITS.find((o) => o.id === outfit)!.label;
-  const views = outfits.reduce((n, o) => n + o.uploaded, 0);
-  const frames = outfits.length * 5;
+  const apron = board.practitioner.find((d) => d.apron.code === apronCode) ?? board.practitioner[0];
+  const views = apron ? apron.outfits.reduce((n, o) => n + o.uploaded, 0) : 0;
+  const frames = apron ? apron.outfits.length * labels.angles.length : 0;
 
   return (
     <View style={styles.stack}>
       {error ? <Callout tone="danger">{mutationErrorMessage(error)}</Callout> : null}
 
-      <CollapsibleCard title="Doctor photos" subtitle="Five angles per outfit, apron and non-apron">
+      <CollapsibleCard
+        title="Practitioner photos"
+        subtitle="Five angles per outfit, apron and non-apron"
+      >
         <Text style={styles.intro}>
           {canUpload
             ? 'Five fixed angles per outfit. Tap a frame to upload, the pencil to replace.'
             : 'Five fixed angles per outfit.'}
         </Text>
-        <Tabs
-          label="Outfit"
-          value={outfit}
-          onChange={setOutfit}
-          items={DOCTOR_PHOTO_OUTFITS.map((o) => ({ value: o.id, label: o.label }))}
-        />
-        <Text style={styles.caption}>
-          {outfitLabel} · {outfits.length} {outfits.length === 1 ? 'outfit' : 'outfits'} · {views}{' '}
-          of {frames} views uploaded
-        </Text>
-        {outfits.map((o) => (
-          <View key={o.number} style={styles.group}>
-            <GroupHeader
-              title={`Outfit ${o.number}`}
-              hint={
-                o.needsChanges > 0
-                  ? `${o.needsChanges} ${o.needsChanges === 1 ? 'needs' : 'need'} a retake`
-                  : o.uploaded === o.slots.length
-                    ? 'All angles uploaded'
-                    : `${o.slots.length - o.uploaded} still to upload`
-              }
-              count={o.uploaded}
-              target={o.slots.length}
+        {apron ? (
+          <>
+            <Tabs
+              label="Apron"
+              value={apron.apron.code}
+              onChange={setApronCode}
+              items={board.practitioner.map((d) => ({ value: d.apron.code, label: d.apron.label }))}
             />
-            <View style={styles.grid}>
-              {o.slots.map((slot) => {
-                const key = `${outfit}-${o.number}-${slot.angle}`;
-                return slot.asset ? (
-                  <PhotoTile
-                    key={key}
-                    clinicId={clinicId}
-                    asset={slot.asset}
-                    label={slot.label}
-                    shape="portrait"
-                    busy={busy === key}
-                    onReplace={uploadPhoto(key, 'practitioner_photo', slot.asset)}
-                  />
-                ) : (
-                  <AddTile
-                    key={key}
-                    label={slot.label}
-                    shape="portrait"
-                    busy={busy === key}
-                    onPress={uploadPhoto(key, 'practitioner_photo')}
-                  />
-                );
-              })}
-            </View>
-          </View>
-        ))}
-        {canUpload ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => setOutfitCounts((c) => ({ ...c, [outfit]: outfits.length + 1 }))}
-            style={({ pressed }) => [styles.addOutfit, pressed && styles.pressed]}
-          >
-            <View style={styles.addOutfitIcon}>
-              <Plus size={18} color={t.color.status.brand.fg} />
-            </View>
-            <View style={styles.flex}>
-              <Text style={styles.groupTitle}>Add outfit</Text>
-              <Text style={styles.hint}>Five fresh angles for a new outfit</Text>
-            </View>
-          </Pressable>
+            <Text style={styles.caption}>
+              {apron.apron.label} · {apron.outfits.length}{' '}
+              {apron.outfits.length === 1 ? 'outfit' : 'outfits'} · {views} of {frames} views
+              uploaded
+            </Text>
+            {apron.outfits.map((o) => (
+              <View key={o.outfit.code} style={styles.group}>
+                <GroupHeader
+                  title={o.outfit.label}
+                  hint={
+                    o.needsChanges > 0
+                      ? `${o.needsChanges} ${o.needsChanges === 1 ? 'needs' : 'need'} a retake`
+                      : o.uploaded === o.slots.length
+                        ? 'All angles uploaded'
+                        : `${o.slots.length - o.uploaded} still to upload`
+                  }
+                  count={o.uploaded}
+                  target={o.slots.length}
+                />
+                <View style={styles.grid}>
+                  {o.slots.map((slot) => {
+                    const key = `${apron.apron.code}-${o.outfit.code}-${slot.angle.code}`;
+                    const slotLabels: UploadLabels = {
+                      apron: apron.apron.code,
+                      outfit: o.outfit.code,
+                      angle: slot.angle.code,
+                      practitioner_id: practitionerId,
+                    };
+                    return slot.asset ? (
+                      <PhotoTile
+                        key={key}
+                        clinicId={clinicId}
+                        asset={slot.asset}
+                        label={slot.angle.label}
+                        shape="portrait"
+                        busy={busy === key}
+                        onReplace={uploadDoctor(key, slotLabels, slot.asset)}
+                      />
+                    ) : (
+                      <AddTile
+                        key={key}
+                        label={slot.angle.label}
+                        shape="portrait"
+                        busy={busy === key}
+                        onPress={uploadDoctor(key, slotLabels)}
+                      />
+                    );
+                  })}
+                </View>
+              </View>
+            ))}
+            {canUpload && apron.hasMoreOutfits ? (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() =>
+                  setOutfitsShown((c) => ({ ...c, [apron.apron.code]: apron.outfits.length + 1 }))
+                }
+                style={({ pressed }) => [styles.addOutfit, pressed && styles.pressed]}
+              >
+                <View style={styles.addOutfitIcon}>
+                  <Plus size={18} color={t.color.status.brand.fg} />
+                </View>
+                <View style={styles.flex}>
+                  <Text style={styles.groupTitle}>Add outfit</Text>
+                  <Text style={styles.hint}>Five fresh angles for a new outfit</Text>
+                </View>
+              </Pressable>
+            ) : null}
+          </>
         ) : null}
-        {board.doctorUnplaced.length > 0 ? (
+        {board.practitionerUnplaced.length > 0 ? (
           <View style={styles.group}>
-            <GroupHeader title="Uploaded photos" hint="Not yet matched to an outfit and angle" />
+            <GroupHeader title="Other photos" hint="No outfit or angle recorded" />
             <View style={styles.grid}>
-              {board.doctorUnplaced.map((asset) => (
+              {board.practitionerUnplaced.map((asset) => (
                 <PhotoTile
                   key={asset.id}
                   clinicId={clinicId}
                   asset={asset}
                   shape="portrait"
                   busy={busy === asset.id}
-                  onReplace={uploadPhoto(asset.id, 'practitioner_photo', asset)}
+                  onReplace={uploadDoctor(asset.id, { practitioner_id: practitionerId }, asset)}
                 />
               ))}
             </View>
@@ -226,88 +251,88 @@ export function MediaSection() {
 
       <CollapsibleCard title="Hospital photos" subtitle="Clinic photos for your Google listing">
         <Text style={styles.intro}>
-          These show on Google Maps beside your reviews. Three per category is the target. Swipe
-          each row.
+          These show on Google Maps beside your reviews. {CLINIC_PHOTO_TARGET} per category is the
+          target. Swipe each row.
         </Text>
-        {CLINIC_PHOTO_CATEGORIES.map((category) => {
-          const row = board.clinic.find((c) => c.id === category.id)!;
-          return (
-            <View key={category.id} style={styles.group}>
-              <GroupHeader
-                title={category.title}
-                hint={category.hint}
-                count={row.assets.length}
-                target={category.target}
+        {board.clinic.map((row) => (
+          <View key={row.category.code} style={styles.group}>
+            <GroupHeader
+              title={row.category.label}
+              hint={row.hint ?? ''}
+              count={row.assets.length}
+              target={CLINIC_PHOTO_TARGET}
+            />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.row}>
+                {row.assets.map((asset) => (
+                  <PhotoTile
+                    key={asset.id}
+                    clinicId={clinicId}
+                    asset={asset}
+                    shape="landscape"
+                    busy={busy === asset.id}
+                    onReplace={uploadClinic(asset.id, { category: row.category.code }, asset)}
+                  />
+                ))}
+                {row.assets.length < CLINIC_PHOTO_TARGET ? (
+                  <AddTile
+                    label="Add"
+                    shape="landscape"
+                    busy={busy === row.category.code}
+                    onPress={uploadClinic(row.category.code, { category: row.category.code })}
+                  />
+                ) : null}
+              </View>
+            </ScrollView>
+          </View>
+        ))}
+        <View style={styles.group}>
+          <GroupHeader
+            title={LOGO_COVER_ROW.title}
+            hint={LOGO_COVER_ROW.hint}
+            count={[board.logo, board.cover].filter(Boolean).length}
+            target={LOGO_COVER_ROW.target}
+          />
+          <View style={styles.row}>
+            {board.logo ? (
+              <PhotoTile
+                clinicId={clinicId}
+                asset={board.logo}
+                label="Logo"
+                shape="landscape"
+                busy={busy === 'logo'}
+                onReplace={uploadLogo('logo', {}, board.logo)}
               />
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.row}>
-                  {category.id === 'logo_cover' ? (
-                    <>
-                      {board.logo ? (
-                        <PhotoTile
-                          clinicId={clinicId}
-                          asset={board.logo}
-                          label="Logo"
-                          shape="landscape"
-                          busy={busy === 'logo'}
-                          onReplace={uploadPhoto('logo', 'logo', board.logo)}
-                        />
-                      ) : (
-                        <AddTile
-                          label="Logo"
-                          shape="landscape"
-                          busy={busy === 'logo'}
-                          onPress={uploadPhoto('logo', 'logo')}
-                        />
-                      )}
-                      {board.cover ? (
-                        <PhotoTile
-                          clinicId={clinicId}
-                          asset={board.cover}
-                          label="Cover"
-                          shape="landscape"
-                          busy={busy === 'cover'}
-                          onReplace={uploadCover('cover')}
-                        />
-                      ) : (
-                        <AddTile
-                          label="Cover"
-                          shape="landscape"
-                          busy={busy === 'cover'}
-                          onPress={uploadCover('cover')}
-                        />
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {row.assets.map((asset) => (
-                        <PhotoTile
-                          key={asset.id}
-                          clinicId={clinicId}
-                          asset={asset}
-                          shape="landscape"
-                          busy={busy === asset.id}
-                          onReplace={uploadPhoto(asset.id, 'clinic_photo', asset)}
-                        />
-                      ))}
-                      {row.assets.length < category.target ? (
-                        <AddTile
-                          label="Add"
-                          shape="landscape"
-                          busy={busy === category.id}
-                          onPress={uploadPhoto(category.id, 'clinic_photo')}
-                        />
-                      ) : null}
-                    </>
-                  )}
-                </View>
-              </ScrollView>
-            </View>
-          );
-        })}
+            ) : (
+              <AddTile
+                label="Logo"
+                shape="landscape"
+                busy={busy === 'logo'}
+                onPress={uploadLogo('logo', {})}
+              />
+            )}
+            {board.cover ? (
+              <PhotoTile
+                clinicId={clinicId}
+                asset={board.cover}
+                label="Cover"
+                shape="landscape"
+                busy={busy === 'cover'}
+                onReplace={uploadCover}
+              />
+            ) : (
+              <AddTile
+                label="Cover"
+                shape="landscape"
+                busy={busy === 'cover'}
+                onPress={uploadCover}
+              />
+            )}
+          </View>
+        </View>
         {board.clinicUnplaced.length > 0 ? (
           <View style={styles.group}>
-            <GroupHeader title="Uploaded photos" hint="Not yet sorted into a category" />
+            <GroupHeader title="Other photos" hint="No category recorded" />
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.row}>
                 {board.clinicUnplaced.map((asset) => (
@@ -317,7 +342,7 @@ export function MediaSection() {
                     asset={asset}
                     shape="landscape"
                     busy={busy === asset.id}
-                    onReplace={uploadPhoto(asset.id, 'clinic_photo', asset)}
+                    onReplace={uploadClinic(asset.id, {}, asset)}
                   />
                 ))}
               </View>
@@ -330,7 +355,7 @@ export function MediaSection() {
         <VoiceSamples
           clinicId={clinicId}
           samples={board.voice}
-          notes={notes}
+          sampleTypes={labels.voiceSamples}
           playingId={playingId}
           onPlay={setPlayingId}
           canUpload={canUpload}

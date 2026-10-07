@@ -28,8 +28,8 @@ const modules: ModuleManifest[] = [
     navEntries: [
       {
         id: 'clinics',
-        label: 'Clinics',
-        scopedLabel: 'My Clinics',
+        label: 'Client Organizations',
+        scopedLabel: 'My Client Portfolio',
         to: '/clinics',
         icon: 'clinics',
         placement: 'primary',
@@ -46,7 +46,7 @@ const modules: ModuleManifest[] = [
       },
       {
         id: 'audit',
-        label: 'Unified Audit',
+        label: 'Digital Presence Assessment',
         path: 'audit',
         order: 30,
         requiredPermission: 'assessments:read',
@@ -69,7 +69,13 @@ const modules: ModuleManifest[] = [
   {
     id: 'chat',
     clinicSections: [
-      { id: 'chat', label: 'Chat', path: 'chat', order: 50, requiredPermission: 'chat:read' },
+      {
+        id: 'chat',
+        label: 'Client Collaboration',
+        path: 'chat',
+        order: 50,
+        requiredPermission: 'chat:read',
+      },
     ],
   },
 ];
@@ -77,12 +83,12 @@ const modules: ModuleManifest[] = [
 describe('resolveNavigation', () => {
   it('uses the scoped label and hides entries without the platform permission', () => {
     const nav = resolveNavigation(modules, new Set(['clinics:create']), { allClinics: false });
-    expect(nav.map((n) => n.label)).toEqual(['Dashboard', 'My Clinics']);
+    expect(nav.map((n) => n.label)).toEqual(['Dashboard', 'My Client Portfolio']);
   });
 
   it('shows permission-gated entries and the full label for all-clinics users', () => {
     const nav = resolveNavigation(modules, new Set(['users:read']), { allClinics: true });
-    expect(nav.map((n) => n.label)).toEqual(['Dashboard', 'Clinics', 'Users']);
+    expect(nav.map((n) => n.label)).toEqual(['Dashboard', 'Client Organizations', 'Users']);
   });
 
   it('carries the icon name through', () => {
@@ -99,7 +105,7 @@ describe('resolveClinicSections', () => {
     );
     expect(sections).toEqual([
       { id: 'overview', label: 'Overview', to: '/clinics/clinic_42', exact: true },
-      { id: 'chat', label: 'Chat', to: '/clinics/clinic_42/chat', exact: false },
+      { id: 'chat', label: 'Client Collaboration', to: '/clinics/clinic_42/chat', exact: false },
     ]);
   });
 

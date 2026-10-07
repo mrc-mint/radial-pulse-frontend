@@ -15,10 +15,11 @@ contract (`contracts/api/`), via API Gateway.
   the V1 web portal (dashboards, clinics, clinic details, audit, social media,
   chat, users, settings) and the Clinic Administrator mobile app (home,
   insights, social media, reports, profile, chat, connect accounts).
-- **Data:** API contract 0.1.0 (unreleased). While the backend is not
+- **Data:** API contract 0.3.0 (unreleased). While the backend is not
   deployed, both apps run on contract-based mock data (never in prod).
-- **Next:** real sign-in with Cognito managed login through Amplify
-  (Phase 7). Until then only development personas sign in, and only with mocks.
+- **Sign-in (Phase 7):** Cognito Managed Login, email and password,
+  Authorization Code + PKCE ([docs/phase-7-auth.md](docs/phase-7-auth.md)).
+  With API mocking on, development personas sign in instead.
 - Backend gaps and what each one blocks:
   [docs/phase-4-contract-dependency.md](docs/phase-4-contract-dependency.md).
 
@@ -43,8 +44,9 @@ pnpm dev:mobile:web  # Clinic Administrator app in a browser on http://localhost
 
 With API mocking on (`apps/web/public/config.json`, and `apps/mobile/.env`
 with `EXPO_PUBLIC_API_MOCKING=true`), each app serves its own contract mocks:
-web through a service worker, mobile in-process. Mobile needs a development
-build (not Expo Go) once real sign-in lands in Phase 7.
+web through a service worker, mobile in-process. Real Cognito sign-in on
+mobile needs a development or store build, because Cognito only redirects to
+the app's registered scheme (Expo Go uses an `exp://` address).
 
 ## How it fits together
 
@@ -113,15 +115,15 @@ Lint fails the build if any of these is broken
 
 ## Who owns what
 
-| Area                                                   | Owner                                   |
-| ------------------------------------------------------ | --------------------------------------- |
-| This repository (web, mobile, shared packages)         | Frontend (Central Tech)                 |
-| API contract, auth, permissions, data                  | Backend team                            |
-| Scores, severities, findings, recommendations, metrics | Domain / engine teams (via the backend) |
-| AWS, Cognito, CloudFront, EAS builds                   | DevOps                                  |
+| Area                                                             | Owner                                   |
+| ---------------------------------------------------------------- | --------------------------------------- |
+| This repository (web, mobile, shared packages)                   | Frontend (Central Tech)                 |
+| API contract, auth, permissions, data                            | Backend team                            |
+| Scores, severities, findings, improvement opportunities, metrics | Domain / engine teams (via the backend) |
+| AWS, Cognito, CloudFront, EAS builds                             | DevOps                                  |
 
 **The frontend never computes scores, severities, availability,
-recommendations or work items.** It shows what the API returns.
+improvement opportunities or improvement work items.** It shows what the API returns.
 
 ## Read before contributing
 

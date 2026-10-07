@@ -5,11 +5,7 @@ import {
 } from '@radial-pulse/api-client/react';
 import type { Schema } from '@radial-pulse/shared-types';
 import { Button, DropdownMenu, Input, Modal, Select } from '@radial-pulse/ui/web';
-import {
-  CLINIC_STAGE_LABELS,
-  CLINIC_STATUS_LABELS,
-  CLINIC_STATUS_OF_STAGE,
-} from '@radial-pulse/utils';
+import { CLINIC_STAGE_LABELS } from '@radial-pulse/utils';
 import { Archive, ArchiveRestore, ArrowRightLeft } from 'lucide-react';
 import { useState } from 'react';
 import { fieldErrors, mutationErrorMessage } from '../../app/page-kit';
@@ -45,7 +41,7 @@ export function ClinicMoreMenu({ clinic }: { clinic: Clinic }) {
                 },
                 {
                   id: 'archive',
-                  label: 'Archive clinic',
+                  label: 'Archive client organization',
                   icon: <Archive size={16} />,
                   tone: 'danger',
                   onSelect: () => setDialog('archive'),
@@ -54,7 +50,7 @@ export function ClinicMoreMenu({ clinic }: { clinic: Clinic }) {
             : [
                 {
                   id: 'restore',
-                  label: restore.isPending ? 'Restoring…' : 'Restore clinic',
+                  label: restore.isPending ? 'Restoring…' : 'Restore client organization',
                   icon: <ArchiveRestore size={16} />,
                   disabled: restore.isPending,
                   onSelect: () => restore.mutate(),
@@ -115,13 +111,13 @@ function ChangeStatusDialog({ clinic, onClose }: { clinic: Clinic; onClose: () =
           onChange={setStage}
           options={STAGES.map((s) => ({
             value: s,
-            label: `${CLINIC_STATUS_LABELS[CLINIC_STATUS_OF_STAGE[s]]} · ${CLINIC_STAGE_LABELS[s]}`,
+            label: CLINIC_STAGE_LABELS[s],
             disabled: s === clinic.stage,
           }))}
         />
         <Input
           label="Note"
-          hint="Optional. Shown in the clinic’s activity."
+          hint="Optional. Shown in the client organization’s activity."
           value={note}
           onChange={(e) => setNote(e.target.value)}
         />
@@ -145,7 +141,7 @@ function ArchiveDialog({ clinic, onClose }: { clinic: Clinic; onClose: () => voi
     <Modal
       open
       onClose={onClose}
-      title="Archive clinic"
+      title="Archive client organization"
       description={`${clinic.name} will move to Inactive. You can restore it later.`}
       footer={
         <>
@@ -158,7 +154,7 @@ function ArchiveDialog({ clinic, onClose }: { clinic: Clinic; onClose: () => voi
             disabled={!valid}
             onClick={() => archive.mutate(reason.trim(), { onSuccess: onClose })}
           >
-            Archive clinic
+            Archive client organization
           </Button>
         </>
       }

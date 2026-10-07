@@ -1,7 +1,7 @@
 import { unwrap, type ApiClient } from '../http';
 import { clinicPath, type BodyOf, type QueryOf } from './types';
 
-/** Clinic chat and the inbox. */
+/** Client Collaboration: each clinic's chat and the inbox. */
 export const chatService = {
   inbox: (api: ApiClient, query: QueryOf<'/api/v1/chat/inbox', 'get'> = {}) =>
     unwrap(api.GET('/api/v1/chat/inbox', { params: { query } })),

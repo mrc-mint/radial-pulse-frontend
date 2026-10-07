@@ -19,7 +19,7 @@ type Editable =
   | 'postal_code';
 
 const FIELDS: Array<[Editable, string, string?]> = [
-  ['name', 'Clinic name'],
+  ['name', 'Client organization name'],
   ['specialty', 'Specialty'],
   ['description', 'Description'],
   ['website_url', 'Website', 'url'],
@@ -71,7 +71,7 @@ export function EditClinicDrawer({
     <Drawer
       open={open}
       onClose={close}
-      title="Edit clinic"
+      title="Edit client organization"
       footer={
         <>
           <Button variant="secondary" onClick={close}>
@@ -117,8 +117,10 @@ function PhotoField({ clinic }: { clinic: Schema<'ClinicRead'> }) {
     <div className="rp-photo-field">
       <ClinicPhoto clinicId={clinic.id} assetId={clinic.cover_asset_id} name={clinic.name} />
       <div className="rp-stack-sm">
-        <span className="rp-photo-field__label">Clinic photo</span>
-        <span className="rp-muted rp-small">Shown on the clinic page. JPG or PNG works best.</span>
+        <span className="rp-photo-field__label">Photo</span>
+        <span className="rp-muted rp-small">
+          Shown on the client organization page. JPG or PNG works best.
+        </span>
         <input
           ref={input}
           type="file"

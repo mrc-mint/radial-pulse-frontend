@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ConfigError, createConfig } from './schema';
+import { ConfigError, createConfig, isCognitoConfigured } from './schema';
 
 const valid = {
   appEnv: 'dev',
@@ -22,5 +22,15 @@ describe('createConfig', () => {
 
   it('rejects a missing API base URL', () => {
     expect(() => createConfig({ ...valid, apiBaseUrl: undefined })).toThrow(/apiBaseUrl/);
+  });
+
+  it('defaults the OAuth scopes to openid and email', () => {
+    expect(createConfig(valid).cognito.scopes).toEqual(['openid', 'email']);
+  });
+
+  it('treats placeholder Cognito values as not configured', () => {
+    expect(isCognitoConfigured(createConfig(valid))).toBe(true);
+    const placeholder = { ...valid, cognito: { ...valid.cognito, domain: 'REPLACE_ME' } };
+    expect(isCognitoConfigured(createConfig(placeholder))).toBe(false);
   });
 });

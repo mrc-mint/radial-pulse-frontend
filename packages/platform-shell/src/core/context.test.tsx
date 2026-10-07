@@ -106,7 +106,7 @@ describe('capabilities', () => {
       platform_role: 'platform_administrator',
       permissions: ['users:read', 'users:manage'],
       all_clinics: true,
-      sign_in_method: 'google',
+      sign_in_method: 'email_password',
       clinics: [],
       ...me,
     });

@@ -1,6 +1,6 @@
 import type { ApiClient, StorageFetch } from '@radial-pulse/api-client';
 import { createQueryClient } from '@radial-pulse/api-client/react';
-import type { AppConfig } from '@radial-pulse/config';
+import { isCognitoConfigured, type AppConfig } from '@radial-pulse/config';
 import {
   createAppServices,
   unconfiguredAuth,
@@ -8,6 +8,7 @@ import {
 } from '@radial-pulse/platform-shell/core';
 import type { QueryClient } from '@tanstack/react-query';
 import { loadConfig } from '../lib/config';
+import { createMobileCognitoAuth } from './cognito';
 import { systemConnectBrowser, type ConnectBrowser } from './connect-browser';
 import type * as Mocking from './mocking';
 
@@ -23,9 +24,9 @@ export interface MobileServices {
 
 /**
  * Composition root: config, auth, API client, session and query cache.
- * Phase 7 replaces `unconfiguredAuth` with Cognito managed login (Amplify
- * Auth, tokens in expo-secure-store). Until then only mocked APIs sign in.
- * Screens never see tokens or the client.
+ * Auth is Cognito Managed Login (Authorization Code + PKCE, tokens in the
+ * secure store) when configured, development personas with API mocking, and
+ * otherwise no sign-in. Screens never see tokens or the client.
  */
 export function createMobileServices(): MobileServices {
   const config = loadConfig();
@@ -35,7 +36,10 @@ export function createMobileServices(): MobileServices {
     ? // eslint-disable-next-line @typescript-eslint/no-require-imports
       (require('./mocking') as typeof Mocking).startMocking(config)
     : null;
-  const { api, session } = createAppServices(config, mocks?.auth ?? unconfiguredAuth, {
+  const auth =
+    mocks?.auth ??
+    (isCognitoConfigured(config) ? createMobileCognitoAuth(config) : unconfiguredAuth);
+  const { api, session } = createAppServices(config, auth, {
     fetch: mocks?.fetch,
   });
   const queryClient = createQueryClient();

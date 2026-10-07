@@ -68,7 +68,7 @@ export function FindingCard({
       {description ? <Text style={styles.description}>{description}</Text> : null}
       {recommendation ? (
         <View style={styles.recommendation}>
-          <Text style={styles.overline}>Recommendation</Text>
+          <Text style={styles.overline}>Improvement opportunity</Text>
           <Text style={styles.recommendationText}>{recommendation}</Text>
         </View>
       ) : null}

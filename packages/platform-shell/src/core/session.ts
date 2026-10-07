@@ -1,4 +1,5 @@
 import type { AuthBridge } from '@radial-pulse/api-client';
+import type { SignInMethod } from './auth-provider';
 import type {
   Capability,
   ClinicRole,
@@ -10,9 +11,9 @@ import type {
 /**
  * Session boundary (architecture: Auth, ADR 0006, ADR 0008).
  *
- * The shell sees a session through a `SessionAdapter`. Phase 7 provides the
- * Cognito adapter; until then the app supplies a development adapter. The
- * session content always comes from the contract's `GET /api/v1/auth/me`
+ * The shell sees a session through a `SessionAdapter` built over an
+ * `AuthProvider` (Cognito Managed Login, or mock personas with API mocking).
+ * The session content always comes from the contract's `GET /api/v1/auth/me`
  * (`sessionFromMe`). Screens never see tokens: they read `useSession()`.
  * Only the composition root hands `controller.authBridge` to the API client.
  */
@@ -96,6 +97,8 @@ export interface SessionAdapter {
   getAccessToken(): Promise<string | null>;
   /** Choices shown on the sign-in screen, if the provider offers any. */
   readonly signInOptions?: ReadonlyArray<SignInOption>;
+  /** Which provider signs users in (shapes the sign-in screen). */
+  readonly signInMethod?: SignInMethod;
 }
 
 export type SessionState =
@@ -111,6 +114,7 @@ export interface SessionController {
   signIn(optionId?: string): Promise<void>;
   signOut(): Promise<void>;
   readonly signInOptions: ReadonlyArray<SignInOption>;
+  readonly signInMethod: SignInMethod;
   /** For the API client only (composition root). Never pass to screens. */
   readonly authBridge: AuthBridge;
 }
@@ -158,6 +162,7 @@ export function createSessionController(adapter: SessionAdapter): SessionControl
       set({ status: 'unauthenticated' });
     },
     signInOptions: adapter.signInOptions ?? [],
+    signInMethod: adapter.signInMethod ?? (adapter.signInOptions?.length ? 'mock' : 'none'),
     authBridge: {
       getAccessToken: () => adapter.getAccessToken(),
       // A gateway 401 means the session is gone: return to sign-in.

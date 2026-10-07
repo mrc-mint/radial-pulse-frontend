@@ -52,7 +52,9 @@ export const mockedEndpoints: ReadonlyArray<{ operation: string; contractVersion
   'GET /api/v1/clinics/{clinic_id}/chat/messages',
   'POST /api/v1/clinics/{clinic_id}/chat/messages',
   'POST /api/v1/clinics/{clinic_id}/chat/read',
+  'GET /api/v1/media/taxonomy',
   'GET /api/v1/clinics/{clinic_id}/assets',
+  'GET /api/v1/clinics/{clinic_id}/assets/{asset_id}',
   'POST /api/v1/clinics/{clinic_id}/assets/uploads',
   'POST /api/v1/clinics/{clinic_id}/assets/{asset_id}/confirm',
   'GET /api/v1/clinics/{clinic_id}/assets/{asset_id}/download-url',
@@ -62,4 +64,4 @@ export const mockedEndpoints: ReadonlyArray<{ operation: string; contractVersion
   'GET /api/v1/settings/platform',
   'PATCH /api/v1/settings/platform',
   'GET /health',
-].map((operation) => ({ operation, contractVersion: '0.1.0' }));
+].map((operation) => ({ operation, contractVersion: '0.3.0' }));

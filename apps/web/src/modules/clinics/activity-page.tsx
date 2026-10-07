@@ -67,11 +67,18 @@ export function ClinicActivityPage() {
 
   const events = activity.data.items;
   return (
-    <Card title="Activity" description="Everything that happened for this clinic" padding="none">
+    <Card
+      title="Activity"
+      description="Everything that happened for this client organization"
+      padding="none"
+    >
       {events.length === 0 ? (
-        <EmptyState title="No activity yet" description="Changes to this clinic appear here." />
+        <EmptyState
+          title="No activity yet"
+          description="Changes to this client organization appear here."
+        />
       ) : (
-        <ol className="rp-activity" aria-label="Clinic activity">
+        <ol className="rp-activity" aria-label="Client organization activity">
           {events.map((e) => {
             const Icon =
               RESOURCE_ICON[e.resource_type] ??

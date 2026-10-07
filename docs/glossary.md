@@ -1,45 +1,68 @@
 # Glossary
 
+Canonical product terminology comes from the Project Entity & Terminology
+Mapping. Each term below lists the **canonical term** (product and docs), the
+**API identifier** it maps to in contract 0.3.0 (never renamed for
+terminology), and the **UI copy** the apps show.
+
+## Core terms
+
+| Canonical term                      | API identifier (contract 0.3.0)                                     | UI copy                                                                                 | Replaces                    |
+| ----------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | --------------------------- |
+| Platform Administrator              | `platform_administrator`                                            | Platform Administrator                                                                  | Internal Admin (never used) |
+| Digital Success Manager             | `digital_success_manager`, `dsm`, `dsm_user_id`                     | Digital Success Manager                                                                 | Internal User (never used)  |
+| Clinic Administrator                | `clinic_user` + clinic role `clinic_administrator`                  | Clinic Administrator                                                                    | Clinic Owner                |
+| Clinic Team Member                  | clinic role `clinic_team_member`                                    | Clinic Team Member (future; not a V1 experience)                                        | Clinic Staff                |
+| Client Organization                 | `clinic` (`ClinicRead`, `/clinics`, `clinic_id`)                    | Staff web: "client organization"; mobile (the clinic itself): "your clinic"             | Clinic                      |
+| Practitioner                        | `practitioner` (`PractitionerRead`, `practitioner_photo`)           | Practitioner, Practitioner photos; personal titles such as "Dr." are kept               | Doctor                      |
+| Digital Presence Intelligence Agent | (backend agent; stage `profile_enriched`)                           | Not named in the UI; the stage label stays "Profile enriched"                           | Profile Enrichment Agent    |
+| Digital Growth Team                 | `source_team` (work items; not shown)                               | Not shown in V1                                                                         | SEO Team                    |
+| Digital Presence Assessment         | `assessment` (`/assessments`)                                       | Digital Presence Assessment(s); mobile tab "Assessments"                                | Audit Report, Unified Audit |
+| Improvement Opportunities           | `FindingRead.recommendation`                                        | "Improvement opportunity" on each finding; "Findings and improvement opportunities"     | Recommendations             |
+| Improvement Work Items              | `work_items` (`WorkItemRead`, `WorkArea`)                           | Improvement work items                                                                  | Actions / Tasks             |
+| Portfolio Allocation                | `assignment` (`AssignmentRead`, `assignments:manage`, `unassigned`) | Portfolio allocation, Allocate to portfolio, Change portfolio allocation, Not allocated | Assignments                 |
+| Prospective Client                  | stage `prospective_client`; stage group `prospects`                 | Prospective client(s)                                                                   | Prospect                    |
+| Client Activation                   | (stage moves towards `active_client`)                               | Client activation                                                                       | Onboarding                  |
+| Client Collaboration                | `chat` (`/chat`, `chat:read`, `ChatMessageRead`)                    | Client Collaboration (section); "Chat" as the compact action word                       | Clinic Chat                 |
+| My Client Portfolio                 | `all_clinics: false` on `GET /auth/me`; `GET /clinics`              | My Client Portfolio                                                                     | My Clinics                  |
+| Social Presence Insights            | `connections`, `snapshots`, assessment component `social_presence`  | Web: Social Presence Insights; mobile tab: Social Presence                              | Social Media Audit          |
+
+## Other terms
+
 | Term                              | Meaning                                                                    | Notes                                                                                                                                                                                           |
 | --------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Platform Administrator            | Platform-level administrator (`platform_administrator`)                    | Never "Internal Admin"                                                                                                                                                                          |
-| Digital Success Manager           | Staff user working with assigned clinics (`digital_success_manager`)       | Never "Internal User"                                                                                                                                                                           |
-| Clinic Administrator              | Clinic-side owner (`clinic_user` + clinic role `clinic_administrator`)     | May have several clinics                                                                                                                                                                        |
-| Clinic Team Member                | Future role                                                                | Not a V1 experience                                                                                                                                                                             |
-| Assessment                        | The one unified digital-presence assessment                                | Code name                                                                                                                                                                                       |
-| Audit Report / Unified Audit      | User-facing label for an Assessment                                        | No "audit type" anywhere                                                                                                                                                                        |
 | Section / Component               | A component of an assessment (`AssessmentComponentKey`)                    | Shown as SEO (`website`), Google Business Profile, Local Search, AEO (`search_readiness`), Social Presence, Competitor Benchmark. The Google Business Profile score is not shown (findings are) |
 | Not Available                     | Component status `not_available`: no engine available                      | Never a score of 0                                                                                                                                                                              |
 | Unverified / Confirmed / Rejected | `PresenceVerification` of a discovered profile                             | Human decisions win                                                                                                                                                                             |
 | Priority                          | `FindingPriority` of a finding (critical → info)                           | Never "severity" in code or copy                                                                                                                                                                |
-| Work item                         | A backend-produced action for a clinic                                     | Kinds owned by the backend                                                                                                                                                                      |
 | Permission                        | A contract `Permission` from `GET /auth/me` (platform-level or per clinic) | UI only; backend enforces                                                                                                                                                                       |
 | Module                            | A feature that registers a manifest with the shell                         | Modules don't import each other                                                                                                                                                                 |
 
-## Clinic status
+## Client status
 
-What the web app shows for a clinic. It groups the contract `ClinicStage` values the way the backend dashboard does, and adds Inactive for archived clinics:
+What the web app shows for a client organization: the API's `stage_group`,
+plus Inactive for archived ones. The frontend key for the first group is
+`prospect` (frontend-only; the contract code is `prospects`).
 
-| Status      | Contract data                                             |
-| ----------- | --------------------------------------------------------- |
-| Prospect    | `prospective_client`, `profile_enriched`                  |
-| In progress | `assessment_completed`, `client_discussion`               |
-| Active      | `active_client`                                           |
-| Inactive    | archived clinic (`is_active` false; a reason is required) |
+| Status             | Contract data                                                             |
+| ------------------ | ------------------------------------------------------------------------- |
+| Prospective client | `stage_group` `prospects` (`prospective_client`, `profile_enriched`)      |
+| In progress        | `stage_group` `in_progress` (`assessment_completed`, `client_discussion`) |
+| Active             | `stage_group` `active` (`active_client`)                                  |
+| Inactive           | archived (`is_active` false; a reason is required)                        |
 
-## Clinic media
+## Client media
 
-| Term                     | Meaning                                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| Doctor photos            | `practitioner_photo` files: outfits with or without apron, five angles each (90° L, 45° L, 0°, 45° R, 90° R) |
-| Hospital photos          | `clinic_photo` files by category, plus the logo (`logo`) and the cover photo (`ClinicRead.cover_asset_id`)   |
-| Voice samples            | `audio` files for the clinic's phone assistant                                                               |
-| Awaiting review          | `ApprovalState` `submitted`                                                                                  |
-| Verified                 | `approved`                                                                                                   |
-| Needs retake / re-record | `redo_requested` (re-record for voice samples); the action is "Request retake"                               |
-| Rejected                 | `rejected`                                                                                                   |
-| Not submitted            | `draft`                                                                                                      |
+| Term                     | Meaning                                                                                                               |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Practitioner photos      | `practitioner_photo` files by apron option, outfit and angle (labels from `GET /media/taxonomy`)                      |
+| Hospital photos          | `clinic_photo` files by category (taxonomy), plus the logo (`logo`) and the cover photo (`ClinicRead.cover_asset_id`) |
+| Voice samples            | `audio` files by sample type (taxonomy), for the clinic's phone assistant                                             |
+| Awaiting review          | `ApprovalState` `submitted`                                                                                           |
+| Verified                 | `approved`                                                                                                            |
+| Needs retake / re-record | `redo_requested` (re-record for voice samples); the action is "Request retake"                                        |
+| Rejected                 | `rejected`                                                                                                            |
+| Not submitted            | `draft`                                                                                                               |
 
-Clinic Administrators upload and replace; Platform Administrators and Digital
-Success Managers review. Categories, apron options and angles are layout only
-until the backend adds the fields (docs/media-backend-request.md).
+Clinic Administrators upload and replace (`media:upload`); Platform
+Administrators and Digital Success Managers review (`media:review`).

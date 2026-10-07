@@ -46,7 +46,7 @@ export function QueryError({
 export function ClinicStatusBadge({
   clinic,
 }: {
-  clinic: Pick<Schema<'ClinicRead'>, 'stage' | 'is_active'>;
+  clinic: Pick<Schema<'ClinicRead'>, 'stage_group' | 'is_active'>;
 }) {
   const status = clinicStatus(clinic);
   return (

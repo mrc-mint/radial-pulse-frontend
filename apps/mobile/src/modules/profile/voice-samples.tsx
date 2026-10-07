@@ -7,9 +7,9 @@ import {
   formatRelativeTime,
   textStyle,
 } from '@radial-pulse/ui/native';
-import { mediaReviewLabel, needsChanges } from '@radial-pulse/utils';
+import { mediaReviewLabel, needsChanges, type MediaLabel } from '@radial-pulse/utils';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import { AudioLines, Mic, Pause, Play, RefreshCw } from 'lucide-react-native';
+import { AudioLines, Mic, Pause, Play, Plus, RefreshCw } from 'lucide-react-native';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Tips } from './media-kit';
 
@@ -22,18 +22,15 @@ const VOICE_TIPS = [
   'Read the clinic greeting and a short passage about your services.',
 ];
 
-/** "Clinic greeting.wav" → "Clinic greeting". */
-const sampleTitle = (asset: Asset) =>
-  (asset.original_filename ?? 'Voice sample').replace(/\.[a-z0-9]+$/i, '');
-
 /**
- * Voice samples: upload area, one row per sample with its review status and
- * the reviewer's note, playback, and re-upload when a re-record is asked.
+ * Voice samples: one upload button per sample type from the media taxonomy,
+ * then one row per sample with its review status and the message from the
+ * reviewer, playback, and re-upload when a re-record is asked.
  */
 export function VoiceSamples({
   clinicId,
   samples,
-  notes,
+  sampleTypes,
   playingId,
   onPlay,
   canUpload,
@@ -41,50 +38,60 @@ export function VoiceSamples({
   onUpload,
 }: {
   clinicId: string;
-  samples: ReadonlyArray<Asset>;
-  /** Reviewer notes by asset id (`ApprovalRead.last_comment`). */
-  notes: ReadonlyMap<string, string>;
+  samples: ReadonlyArray<{ asset: Asset; title: string }>;
+  /** `voice_sample` values of the media taxonomy, in display order. */
+  sampleTypes: ReadonlyArray<MediaLabel>;
   playingId: string | null;
   onPlay: (assetId: string | null) => void;
   canUpload: boolean;
-  /** 'new' while a new sample uploads, or the id of the sample being replaced. */
+  /** `new-<type>` while a new sample uploads, or the id of the sample being replaced. */
   busyId: string | null;
-  onUpload: (replaces: Asset | null) => void;
+  onUpload: (category: string, replaces: Asset | null) => void;
 }) {
   return (
     <View style={styles.list}>
       {canUpload ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Upload a voice sample"
-          onPress={() => onUpload(null)}
-          disabled={busyId !== null}
-          style={({ pressed }) => [styles.drop, pressed && styles.pressed]}
-        >
-          {busyId === 'new' ? (
-            <ActivityIndicator color={t.color.text.secondary} />
-          ) : (
-            <Mic size={22} color={t.color.text.secondary} />
-          )}
-          <Text style={styles.dropTitle}>Choose an audio file</Text>
+        <View style={styles.drop}>
+          <Mic size={22} color={t.color.text.secondary} />
           <Text style={styles.dropHint}>A few clear minutes of you speaking naturally.</Text>
-        </Pressable>
+          <View style={styles.types}>
+            {sampleTypes.map((type) => (
+              <Pressable
+                key={type.code}
+                accessibilityRole="button"
+                accessibilityLabel={`Upload a ${type.label} recording`}
+                onPress={() => onUpload(type.code, null)}
+                disabled={busyId !== null}
+                style={({ pressed }) => [styles.type, pressed && styles.pressed]}
+              >
+                {busyId === `new-${type.code}` ? (
+                  <ActivityIndicator size="small" color={t.color.text.link} />
+                ) : (
+                  <Plus size={16} color={t.color.text.link} />
+                )}
+                <Text style={styles.dropTitle}>{type.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
       ) : null}
 
       {samples.length === 0 ? (
         <Text style={styles.empty}>No voice samples yet.</Text>
       ) : (
-        samples.map((asset) => (
+        samples.map(({ asset, title }) => (
           <SampleRow
             key={asset.id}
             clinicId={clinicId}
             asset={asset}
-            note={notes.get(asset.id) ?? null}
+            title={title}
             playing={playingId === asset.id}
             onPlay={() => onPlay(playingId === asset.id ? null : asset.id)}
             busy={busyId === asset.id}
             onReplace={
-              canUpload && needsChanges(asset.approval_state) ? () => onUpload(asset) : undefined
+              canUpload && asset.category && needsChanges(asset.approval_state)
+                ? () => onUpload(asset.category!, asset)
+                : undefined
             }
           />
         ))
@@ -98,7 +105,7 @@ export function VoiceSamples({
 function SampleRow({
   clinicId,
   asset,
-  note,
+  title,
   playing,
   onPlay,
   busy,
@@ -106,14 +113,14 @@ function SampleRow({
 }: {
   clinicId: string;
   asset: Asset;
-  note: string | null;
+  title: string;
   playing: boolean;
   onPlay: () => void;
   busy: boolean;
   onReplace?: () => void;
 }) {
   const tone = APPROVAL_STATE_TONES[asset.approval_state];
-  const title = sampleTitle(asset);
+  const note = asset.review?.clinic_message ?? null;
   return (
     <View style={styles.row}>
       <View style={[styles.icon, { backgroundColor: t.color.status[tone].bg }]}>
@@ -231,6 +238,18 @@ function LoadedPlayer({ uri, title, onStop }: { uri: string; title: string; onSt
 
 const styles = StyleSheet.create({
   list: { gap: t.space[3] },
+  types: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: t.space[2] },
+  type: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: t.space[1],
+    minHeight: 40,
+    paddingHorizontal: t.space[3],
+    borderRadius: t.radius.full,
+    borderWidth: 1,
+    borderColor: t.color.border.default,
+    backgroundColor: t.color.bg.surface,
+  },
   drop: {
     alignItems: 'center',
     gap: t.space[1],

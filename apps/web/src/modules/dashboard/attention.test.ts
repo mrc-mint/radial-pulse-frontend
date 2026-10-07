@@ -38,7 +38,7 @@ describe('clinicsNeedingAttention', () => {
     ]);
     expect(items.map((i) => [i.clinic.id, i.reasons])).toEqual([
       ['b', ['Client replied in chat', '1 profile to review']],
-      ['a', ['Audit ready for review', '2 open work items']],
+      ['a', ['Audit ready for review', '2 open improvement work items']],
     ]);
     expect(items[0]!.at).toBe('2026-09-25T00:00:00Z');
   });

@@ -10,13 +10,12 @@ attached to a GitHub release by backend CI). `VERSION` records which one.
 - The frontend consumes only this API contract. Engine data contracts between
   domain engines and the platform are backend-internal.
 
-## Current snapshot: 0.1.0, unreleased
+## Current snapshot: 0.3.0, unreleased
 
-`VERSION` is `0.1.0-unreleased`. The snapshot was imported by hand from the
-backend repository's committed `openapi/openapi.json` (byte-identical to the
-file the backend team supplied) because the backend repository and its
-`v0.1.0` release are not on GitHub yet. Backend release CI has therefore not
-yet verified it against the code.
+`VERSION` is `0.3.0-unreleased`. The snapshot was imported by hand from the
+`openapi.json` the backend team supplied (byte-identical), because the backend
+repository and its releases are not on GitHub yet. Backend release CI has
+therefore not yet verified it against the code.
 
-When the backend tags `v0.1.0`, replace this import with
-`pnpm api:sync --version 0.1.0` and confirm the file is unchanged.
+When the backend tags `v0.3.0`, replace this import with
+`pnpm api:sync --version 0.3.0` and confirm the file is unchanged.

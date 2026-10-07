@@ -51,7 +51,14 @@ export type { ClinicSelection } from './clinic-context';
 export { ConfigProvider, useConfig } from './config-context';
 
 export { createMockAuth, SignInUnavailableError, unconfiguredAuth } from './auth-provider';
-export type { AuthProvider, TokenStorage } from './auth-provider';
+export type { AuthProvider, SignInMethod, TokenStorage } from './auth-provider';
+export { base64Url, CognitoAuthError, createCognitoAuth } from './cognito-auth';
+export type {
+  AuthStorage,
+  CognitoAuthProvider,
+  CognitoPlatform,
+  CognitoSettings,
+} from './cognito-auth';
 export { createApiSessionAdapter } from './api-session';
 export { createAppServices } from './app-services';
 export type { AppServices } from './app-services';

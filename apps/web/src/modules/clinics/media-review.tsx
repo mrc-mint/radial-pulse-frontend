@@ -1,4 +1,4 @@
-import { useApplyApprovalAction, useAssetDownloadUrl } from '@radial-pulse/api-client/react';
+import { useAssetDownloadUrl, useReviewAsset } from '@radial-pulse/api-client/react';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   APPROVAL_STATE_TONES,
@@ -10,63 +10,51 @@ import {
   ProtectedAudio,
   ProtectedImage,
 } from '@radial-pulse/ui/web';
-import {
-  approvalForResource,
-  MEDIA_REVIEW_ACTION_LABELS,
-  mediaReviewDecisions,
-  mediaReviewLabel,
-  type MediaReviewDecision,
-} from '@radial-pulse/utils';
+import { MEDIA_REVIEW_ACTION_LABELS, mediaActions, mediaReviewLabel } from '@radial-pulse/utils';
 import { ImageOff } from 'lucide-react';
 import { useState } from 'react';
 import { mutationErrorMessage } from '../../app/page-kit';
 
 type Asset = Schema<'AssetRead'>;
+type Action = Schema<'ApprovalAction'>;
+
+/** Actions that send a file back: the clinic must be told why. */
+const NEEDS_MESSAGE: ReadonlySet<Action> = new Set(['redo', 'reject']);
+/** Button order: send back first, approve last (primary). */
+const ORDER: ReadonlyArray<Action> = ['reject', 'redo', 'submit', 'handoff', 'publish', 'approve'];
 
 /**
  * Review one clinic photo or voice sample: view it (protected viewer, no
- * download), see its review status and the last reviewer note, and approve,
- * request a retake or reject it when allowed. A retake or rejection needs a
- * note, so the clinic knows what to change.
+ * download), see its review status and notes, and take the actions the API
+ * offers (`review.available_actions`). A retake or rejection needs a message
+ * the clinic reads; the internal note stays with Radial Pulse staff.
  */
 export function MediaReviewDialog({
   clinicId,
   asset,
   title,
-  approvals,
-  canDecide,
   onClose,
 }: {
   clinicId: string;
   asset: Asset;
   title: string;
-  approvals: ReadonlyArray<Schema<'ApprovalRead'>>;
-  canDecide: boolean;
   onClose: () => void;
 }) {
   const url = useAssetDownloadUrl(clinicId, asset.id);
-  const apply = useApplyApprovalAction(clinicId);
+  const review = useReviewAsset(clinicId);
+  const [message, setMessage] = useState('');
   const [note, setNote] = useState('');
-  const approval = approvalForResource(approvals, asset.id);
-  // Actions need the approval record: it carries the resource_type to send.
-  const decisions = approval ? mediaReviewDecisions(asset.approval_state, canDecide) : [];
+  const actions = ORDER.filter((a) => mediaActions(asset).includes(a));
   const isAudio = asset.kind === 'audio';
-  const decisionLabel = (d: MediaReviewDecision) =>
-    d === 'redo' && isAudio ? 'Request re-record' : MEDIA_REVIEW_ACTION_LABELS[d];
+  const label = (a: Action) =>
+    a === 'redo' && isAudio ? 'Request re-record' : MEDIA_REVIEW_ACTION_LABELS[a];
+  const hasMessage = message.trim().length >= 3;
 
-  const decide = (action: MediaReviewDecision) => {
-    if (!approval) return;
-    apply.mutate(
-      {
-        resource_type: approval.resource_type,
-        resource_id: approval.resource_id,
-        action,
-        comment: note.trim() || null,
-      },
+  const decide = (action: Action) =>
+    review.mutate(
+      { assetId: asset.id, action, clinicMessage: message.trim(), internalNote: note.trim() },
       { onSuccess: onClose },
     );
-  };
-  const needsNote = note.trim().length < 3;
 
   return (
     <Modal
@@ -76,31 +64,21 @@ export function MediaReviewDialog({
       title={title}
       description={asset.original_filename ?? undefined}
       footer={
-        decisions.length > 0 ? (
+        actions.length > 0 ? (
           <>
-            {decisions.includes('reject') && (
+            {actions.map((action) => (
               <Button
-                variant="danger"
-                disabled={needsNote || apply.isPending}
-                onClick={() => decide('reject')}
+                key={action}
+                variant={
+                  action === 'approve' ? 'primary' : action === 'reject' ? 'danger' : 'secondary'
+                }
+                loading={review.isPending && action === 'approve'}
+                disabled={review.isPending || (NEEDS_MESSAGE.has(action) && !hasMessage)}
+                onClick={() => decide(action)}
               >
-                {decisionLabel('reject')}
+                {label(action)}
               </Button>
-            )}
-            {decisions.includes('redo') && (
-              <Button
-                variant="secondary"
-                disabled={needsNote || apply.isPending}
-                onClick={() => decide('redo')}
-              >
-                {decisionLabel('redo')}
-              </Button>
-            )}
-            {decisions.includes('approve') && (
-              <Button loading={apply.isPending} onClick={() => decide('approve')}>
-                {decisionLabel('approve')}
-              </Button>
-            )}
+            ))}
           </>
         ) : (
           <Button variant="secondary" onClick={onClose}>
@@ -144,33 +122,44 @@ export function MediaReviewDialog({
               {asset.version > 1 ? ` · Version ${asset.version}` : ''}
             </dd>
           </div>
-          {approval?.last_comment && (
+          {asset.review?.clinic_message && (
             <div>
-              <dt>Reviewer note</dt>
-              <dd>{approval.last_comment}</dd>
+              <dt>Message to the client</dt>
+              <dd>{asset.review.clinic_message}</dd>
+            </div>
+          )}
+          {asset.review?.internal_note && (
+            <div>
+              <dt>Internal note</dt>
+              <dd>{asset.review.internal_note}</dd>
             </div>
           )}
         </dl>
 
-        {decisions.length > 0 && (
-          <Input
-            label="Note to the clinic"
-            hint="Required to request a retake or reject. Optional when approving."
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            maxLength={2000}
-          />
+        {actions.length > 0 && (
+          <div className="rp-form">
+            <Input
+              label="Message to the client"
+              hint="The client sees this. Required to request a retake or reject."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              maxLength={2000}
+            />
+            <Input
+              label="Internal note"
+              hint="Optional. Only Radial Pulse staff see this."
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              maxLength={2000}
+            />
+          </div>
         )}
-        {decisions.length === 0 && asset.approval_state === 'submitted' && (
-          <p className="rp-media-review__hint">
-            {canDecide
-              ? 'This file has no review record yet.'
-              : 'You can view this file, but reviewing it needs approval permission.'}
-          </p>
+        {actions.length === 0 && asset.approval_state === 'submitted' && (
+          <p className="rp-media-review__hint">You can view this file, but you can’t review it.</p>
         )}
-        {apply.isError && (
+        {review.isError && (
           <p className="rp-form__error" role="alert">
-            {mutationErrorMessage(apply.error)}
+            {mutationErrorMessage(review.error)}
           </p>
         )}
       </div>

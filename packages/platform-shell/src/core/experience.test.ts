@@ -10,7 +10,7 @@ const base: MeResponse = {
   platform_role: 'clinic_user',
   permissions: [],
   all_clinics: false,
-  sign_in_method: 'google',
+  sign_in_method: 'email_password',
   clinics: [],
 };
 const clinic = (id: string, role: MeResponse['clinics'][number]['clinic_role']) => ({
