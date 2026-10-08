@@ -57,13 +57,13 @@ export function SocialMediaPage() {
                   {c.external_account_name && (
                     <p className="rp-social__account">{c.external_account_name}</p>
                   )}
-                  <p className="rp-muted rp-small">
-                    {synced
-                      ? `Last synced ${synced}`
-                      : c.available
-                        ? 'The client connects this account from the mobile app.'
-                        : 'This platform isn’t supported yet.'}
-                  </p>
+                  {/* No claim about how an account gets connected: clients connect
+                      from the Clinic app, which is V2. The badge shows the status. */}
+                  {(synced || !c.available) && (
+                    <p className="rp-muted rp-small">
+                      {synced ? `Last synced ${synced}` : 'This platform isn’t supported yet.'}
+                    </p>
+                  )}
                   {c.last_error && (
                     <p className="rp-callout rp-callout--warning" role="note">
                       {c.last_error}

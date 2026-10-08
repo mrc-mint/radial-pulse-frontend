@@ -7,7 +7,7 @@ import {
 import { FullPageError, FullPageLoading, WebAppShell } from '@radial-pulse/platform-shell/web';
 import { createFileRoute, Outlet, useRouter } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { MobileAppRequired } from '../app/mobile-app-required';
+import { ClinicAccountBlocked } from '../app/clinic-account-blocked';
 import { environmentLabel, renderShellLink, useAppNavigation, usePathname } from '../app/shell';
 
 /**
@@ -49,9 +49,10 @@ function AuthenticatedLayout() {
     );
   }
 
-  // Clinic accounts use the mobile app; the internal portal is never rendered.
+  // Clinic accounts are not supported in V1 (Clinic is V2): Studio is never
+  // rendered for them, only a clear message and sign-out.
   if (productExperience(state.session) !== 'internal-web') {
-    return <MobileAppRequired onSignOut={() => void signOut()} />;
+    return <ClinicAccountBlocked onSignOut={() => void signOut()} />;
   }
 
   const { user } = state.session;

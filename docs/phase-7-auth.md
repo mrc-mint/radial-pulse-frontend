@@ -4,6 +4,9 @@ Real sign-in for both apps: Cognito Managed Login, email and password,
 Authorization Code + PKCE, then `GET /api/v1/auth/me`. Decision record:
 [ADR 0006](adr/0006-auth-managed-login.md). Contract: 0.3.0.
 
+V1 deploys Studio only, so V1 needs the Studio app client. The Clinic column
+below describes V2 code (not deployed in V1).
+
 ## Flow
 
 1. The sign-in screen calls `session.signIn()`.
@@ -17,10 +20,11 @@ Authorization Code + PKCE, then `GET /api/v1/auth/me`. Decision record:
 5. The access token goes to the API as `Authorization: Bearer …`. The session
    is built from `GET /api/v1/auth/me`.
 6. Experience gate: Platform Administrators and Digital Success Managers use
-   the web portal; Clinic Administrators use the mobile app (and see "Use the
-   Radial Pulse mobile app" on web). Inside an app, permissions gate screens.
+   Studio. Clinic accounts are blocked from Studio in V1 ("Clinic accounts
+   can't use Radial Pulse Studio", sign-out only); they use the Clinic app in
+   V2. Inside an app, permissions gate screens.
 
-| Concern             | Web                                       | Mobile                                                   |
+| Concern             | Studio (web)                              | Clinic (mobile)                                          |
 | ------------------- | ----------------------------------------- | -------------------------------------------------------- |
 | Code                | `apps/web/src/app/cognito.ts`             | `apps/mobile/src/shell/cognito.ts`                       |
 | Opens Managed Login | Full-page redirect                        | System auth session (expo-web-browser)                   |
@@ -66,7 +70,7 @@ API mocking on, development personas sign in instead (never in prod).
    accepted by the API Gateway / FastAPI authorizer with these scopes).
 5. **Token revocation** enabled on both clients; access-token and
    refresh-token lifetimes confirmed.
-6. **CloudFront CSP** for the web portal: `connect-src` must allow the API
+6. **CloudFront CSP** for Studio: `connect-src` must allow the API
    domain, the Cognito domain (`/oauth2/token`, `/oauth2/revoke`) and the
    media CloudFront/S3 domain used by download URLs; `img-src` and
    `media-src` must allow the media domain.

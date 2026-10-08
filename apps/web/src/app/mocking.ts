@@ -15,8 +15,8 @@ import { createMockAuth, type AuthProvider } from '@radial-pulse/platform-shell/
 export async function startMocking(config: AppConfig): Promise<AuthProvider> {
   const worker = setupWorker(...createMockHandlers({ baseUrl: config.apiBaseUrl, latencyMs: 350 }));
   await worker.start({ onUnhandledRequest: 'bypass', quiet: true });
-  // The web portal is for Radial Pulse staff: Clinic Administrators use the
-  // mobile app, so their persona is not offered here.
+  // Studio is for Radial Pulse staff: Clinic Administrators use the
+  // Clinic app, so their persona is not offered here.
   const staff = MOCK_PERSONAS.filter((p) => p.id !== 'clinic-administrator');
   return createMockAuth(config, staff, MOCK_TOKEN_PREFIX);
 }

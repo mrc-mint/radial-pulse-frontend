@@ -8,13 +8,13 @@ import { Platform } from 'react-native';
 import { createChunkedSecureStorage } from './secure-token-storage';
 
 /**
- * Cognito Managed Login for the mobile app (Authorization Code + PKCE, ADR
+ * Cognito Managed Login for Clinic (Authorization Code + PKCE, ADR
  * 0006). Managed Login opens in the system auth session
  * (ASWebAuthenticationSession / Custom Tabs), which hands the callback
  * straight back; tokens are kept in the secure store.
  *
  * Redirects (`<scheme>://auth/callback`, `<scheme>://signed-out`) must be on
- * the mobile app client's allowed callback and sign-out URLs. The scheme is
+ * the Clinic app client's allowed callback and sign-out URLs. The scheme is
  * per environment (app.config.ts): radialpulse-local, radialpulse-dev,
  * radialpulse. Expo Go uses an exp:// address instead, so Cognito sign-in
  * needs a development build.

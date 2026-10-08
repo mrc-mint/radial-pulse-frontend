@@ -12,6 +12,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useMemo } from 'react';
 import { webModules } from '../../../app/module-registry';
 import { renderShellLink, useNavLabel, usePathname } from '../../../app/shell';
+import { STUDIO_FEATURES } from '../../../app/release';
 import { ClinicHeader } from '../../../modules/clinics/clinic-header';
 
 /**
@@ -27,7 +28,9 @@ function ClinicLayout() {
   const { clinicId } = Route.useParams();
   const permissions = useClinicPermissions(clinicId);
   // Platform Administrators don't chat with clinics; the clinic's DSM does.
-  const chats = !useCurrentSession().allClinics;
+  // Client Collaboration is V2 (STUDIO_FEATURES): no polling, badge or section.
+  const allClinics = useCurrentSession().allClinics;
+  const chats = STUDIO_FEATURES.clientCollaboration && !allClinics;
   const pathname = usePathname();
   const backLabel = useNavLabel('clinics', 'Client Organizations');
   // Slow poll for the Chat tab's unread badge; the chat itself polls faster.

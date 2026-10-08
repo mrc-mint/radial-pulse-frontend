@@ -1,5 +1,10 @@
 # Clinic media: backend and DevOps request
 
+> **Scope update:** V1 deploys Studio only and needs **photos only**. Voice
+> samples and uploading from the Clinic (mobile) app are **V2**. This request
+> is kept as written; read its V1 label as superseded by
+> [scope-v1.md](scope-v1.md).
+
 Feature: Clinic Media & Voice Samples (V1). Clinic Administrators upload
 practitioner photos (doctor photos), hospital photos and voice samples in the mobile app. Platform
 Administrators and Digital Success Managers review them on the web (approve,

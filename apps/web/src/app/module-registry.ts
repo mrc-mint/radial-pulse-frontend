@@ -6,6 +6,7 @@ import { dashboardModule } from '../modules/dashboard/manifest';
 import { settingsModule } from '../modules/settings/manifest';
 import { socialMediaModule } from '../modules/social-media/manifest';
 import { usersModule } from '../modules/users/manifest';
+import { STUDIO_FEATURES } from './release';
 
 /**
  * The ONE list of modules this app includes. If a feature is not registered
@@ -22,6 +23,7 @@ export const webModules: ReadonlyArray<ModuleManifest> = [
   usersModule,
   assessmentsModule,
   socialMediaModule,
-  chatModule,
+  // Client Collaboration is V2 (STUDIO_FEATURES).
+  ...(STUDIO_FEATURES.clientCollaboration ? [chatModule] : []),
   settingsModule,
 ];

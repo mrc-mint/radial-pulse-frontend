@@ -2,6 +2,7 @@
   "name": "@radial-pulse/mobile",
   "version": "0.0.0",
   "private": true,
+  "description": "Radial Pulse Clinic (V2, not deployed in V1): the clinic-facing mobile application (Clinic Administrators).",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",

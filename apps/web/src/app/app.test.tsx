@@ -169,9 +169,10 @@ describe('web app against the contract mocks', () => {
     expect(screen.getByText('Digital Success Manager')).toBeTruthy();
   });
 
-  it('sends a Clinic Administrator to the mobile app, never the internal portal', async () => {
+  it('blocks clinic accounts with a clear message, never the internal portal', async () => {
     await renderApp(`/clinics/${SMILE}`, 'clinic-administrator');
-    expect(await screen.findByText('Use the Radial Pulse mobile app')).toBeTruthy();
+    expect(await screen.findByText('Clinic accounts can’t use Radial Pulse Studio')).toBeTruthy();
+    expect(screen.getByText(/Access for clinics is planned for a later release/)).toBeTruthy();
     expect(screen.queryByRole('navigation', { name: 'Main' })).toBeNull();
     expect(screen.queryByText('Smile Dental Care')).toBeNull();
     await userEvent.click(screen.getByRole('button', { name: 'Sign out' }));
@@ -200,11 +201,13 @@ describe('web app against the contract mocks', () => {
       (await within(attention).findAllByText(/Audit ready for review/)).length,
     ).toBeGreaterThan(0);
     expect(await screen.findByRole('list', { name: 'Recent activity' })).toBeTruthy();
-    expect(screen.getByText('Recent conversations')).toBeTruthy();
+    // Client Collaboration is V2: no chat widgets in V1.
+    expect(screen.queryByText('Recent conversations')).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Unread messages' })).toBeNull();
   });
 
   it('scopes the clinic workspace to the clinic in the URL', async () => {
-    await renderApp(`/clinics/${SMILE}/chat`, 'digital-success-manager');
+    await renderApp(`/clinics/${SMILE}/activity`, 'digital-success-manager');
     expect(
       await screen.findByRole('heading', { name: 'Smile Dental Care', level: 2 }),
     ).toBeTruthy();
@@ -219,12 +222,10 @@ describe('web app against the contract mocks', () => {
       'Digital Presence Assessment',
       'Media',
       'Activity',
-      'Client Collaboration',
     ]);
-    expect(
-      sections.getByRole('link', { name: /Client Collaboration/ }).getAttribute('aria-current'),
-    ).toBe('page');
-    expect(await screen.findByText(/Please use these for the website as well/)).toBeTruthy();
+    expect(sections.getByRole('link', { name: 'Activity' }).getAttribute('aria-current')).toBe(
+      'page',
+    );
     // The sidebar keeps "My Client Portfolio" active while inside a clinic.
     expect(
       (await mainNav())
@@ -335,12 +336,25 @@ describe('web app against the contract mocks', () => {
     ).toBeTruthy();
   });
 
-  it('sends a chat message', async () => {
+  it('keeps V2 features out of Studio V1: Client Collaboration and voice samples', async () => {
     const user = userEvent.setup();
-    await renderApp(`/clinics/${SMILE}/chat`, 'digital-success-manager');
-    const box = await screen.findByRole('textbox', { name: 'Message' });
-    await user.type(box, 'We fixed the Sunday hours on Google.{Enter}');
-    expect(await screen.findByText('We fixed the Sunday hours on Google.')).toBeTruthy();
+    const router = await renderApp(`/clinics/${SMILE}/chat`, 'digital-success-manager');
+    // The chat URL goes to the Overview; no section links to it.
+    await screen.findByRole('heading', { name: 'Practitioner Profile' });
+    expect(router.state.location.pathname).toBe(`/clinics/${SMILE}`);
+    expect(screen.queryByRole('link', { name: /Client Collaboration/ })).toBeNull();
+    expect(screen.queryByRole('textbox', { name: 'Message' })).toBeNull();
+
+    // Media is photos only.
+    await user.click(screen.getByRole('link', { name: 'Media' }));
+    expect(await screen.findByRole('heading', { name: 'Practitioner photos' })).toBeTruthy();
+    expect(screen.queryByRole('tab', { name: /Voice samples/ })).toBeNull();
+    expect(screen.queryByText(/Voice samples/)).toBeNull();
+
+    // No claim that clients connect accounts from an app that is not in V1.
+    await user.click(screen.getByRole('link', { name: 'Social Presence Insights' }));
+    expect(await screen.findByRole('list', { name: 'Connected accounts' })).toBeTruthy();
+    expect(screen.queryByText(/mobile app/)).toBeNull();
   });
 
   it('shows not found for unknown routes', async () => {

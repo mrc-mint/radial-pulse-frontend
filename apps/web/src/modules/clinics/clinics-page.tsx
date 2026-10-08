@@ -28,6 +28,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { MapPin, Plus } from 'lucide-react';
 import { useDeferredValue, useState } from 'react';
 import { ClinicStatusBadge, ExternalLink, mapsUrl, QueryError } from '../../app/page-kit';
+import { STUDIO_FEATURES } from '../../app/release';
 import { useNavLabel } from '../../app/shell';
 import { AddClinicDrawer } from './add-clinic-drawer';
 
@@ -204,7 +205,7 @@ export function ClinicsPage() {
               onSelect: () =>
                 void navigate({ to: '/clinics/$clinicId/assessment', params: { clinicId: c.id } }),
             },
-            ...(session.allClinics
+            ...(session.allClinics || !STUDIO_FEATURES.clientCollaboration
               ? []
               : [
                   {

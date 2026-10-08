@@ -6,7 +6,7 @@ import {
 } from '@radial-pulse/platform-shell/core';
 
 /**
- * Cognito Managed Login for the web portal (Authorization Code + PKCE, ADR
+ * Cognito Managed Login for Studio (Authorization Code + PKCE, ADR
  * 0006). Tokens live in sessionStorage: tab-scoped, survive a reload, gone
  * when the tab closes. The page leaves for Managed Login and comes back to
  * AUTH_CALLBACK_PATH, which boot completes before the app mounts.
