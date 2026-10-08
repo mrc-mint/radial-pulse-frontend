@@ -11,7 +11,7 @@ import { Avatar, Badge, Button, Card, PageHeader, Tabs, textStyle } from '@radia
 import { CLINIC_ROLE_LABELS } from '@radial-pulse/utils';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
-import { Building2, Info, Link2, Mail, UserRound } from 'lucide-react-native';
+import { Building2, Info, Link2, Mail, Stethoscope, UserRound } from 'lucide-react-native';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSelectedClinicRow } from '../../shell/clinic-data';
@@ -97,6 +97,16 @@ export function ProfileScreen() {
                       .join(' · ')}
                     onPress={() => router.push('/clinic-information')}
                     a11yLabel={`${clinic.name}. Clinic information`}
+                  />
+                  <ListRow
+                    icon={
+                      <IconBubble>
+                        <Stethoscope size={20} color={t.color.status.brand.fg} />
+                      </IconBubble>
+                    }
+                    title="Practitioner Profile"
+                    subtitle="Practitioner, consultation and practice details"
+                    onPress={() => router.push('/practitioner-profile')}
                   />
                   <ListRow
                     last

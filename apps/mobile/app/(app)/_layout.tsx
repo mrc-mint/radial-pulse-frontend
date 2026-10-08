@@ -33,6 +33,10 @@ export default function SignedInLayout() {
           name="clinic-information"
           options={{ headerShown: true, title: 'Clinic information' }}
         />
+        <Stack.Screen
+          name="practitioner-profile"
+          options={{ headerShown: true, title: 'Practitioner Profile' }}
+        />
       </Stack>
     </ClinicAdministratorGate>
   );

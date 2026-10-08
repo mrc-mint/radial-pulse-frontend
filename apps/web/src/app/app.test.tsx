@@ -11,8 +11,9 @@ import { createAppServices, createMockAuth } from '@radial-pulse/platform-shell/
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from '@tanstack/react-router';
+import { getResponse, http, HttpResponse, type RequestHandler } from 'msw';
 import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { App } from './app';
 import { createAppRouter } from './router';
 
@@ -34,14 +35,22 @@ beforeAll(() => {
 afterEach(() => {
   cleanup();
   server.resetHandlers();
+  vi.restoreAllMocks();
 });
 afterAll(() => server.close());
 
 const SMILE = 'c1000000-0000-4000-8000-000000000001';
 const BRIGHT = 'c1000000-0000-4000-8000-000000000002';
 
-async function renderApp(path: string, persona?: PersonaId) {
-  server.use(...createMockHandlers({ baseUrl: config.apiBaseUrl, db: createMockDb() }));
+async function renderApp(
+  path: string,
+  persona?: PersonaId,
+  /** Handlers that take precedence over the mocks (they receive the mocks to delegate to). */
+  overrides?: (mocks: RequestHandler[]) => RequestHandler[],
+) {
+  const mocks = createMockHandlers({ baseUrl: config.apiBaseUrl, db: createMockDb() });
+  server.use(...mocks);
+  if (overrides) server.use(...overrides(mocks));
   const storage = new Map<string, string>();
   const auth = createMockAuth(config, MOCK_PERSONAS, MOCK_TOKEN_PREFIX, {
     getItem: (k) => storage.get(k) ?? null,
@@ -344,5 +353,173 @@ describe('web app against the contract mocks', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Sign out' }));
     await screen.findByRole('heading', { name: 'Sign in' });
     expect(router.state.location.pathname).toBe('/sign-in');
+  });
+});
+
+describe('Practitioner Profile (web, staff)', () => {
+  const api = `${config.apiBaseUrl}/api/v1`;
+  const profileUrl = `${api}/clinics/${SMILE}/profile`;
+  const EDIT = { name: 'Edit Practitioner Profile' };
+
+  /** The signed-in user's clinic permissions without `profile:write`. */
+  const withoutProfileWrite = (mocks: RequestHandler[]) => [
+    http.get(`${api}/auth/me`, async ({ request }) => {
+      const me = (await (await getResponse(mocks, request))!.json()) as {
+        clinics: Array<{ permissions: string[] }>;
+      };
+      for (const c of me.clinics) {
+        c.permissions = c.permissions.filter((p) => p !== 'profile:write');
+      }
+      return HttpResponse.json(me);
+    }),
+  ];
+
+  /** Records PUT /profile bodies, then lets the mocks answer. */
+  const recordPuts = (bodies: unknown[]) => (mocks: RequestHandler[]) => [
+    http.put(profileUrl, async ({ request }) => {
+      bodies.push(await request.clone().json());
+      return (await getResponse(mocks, request))!;
+    }),
+  ];
+
+  it('shows the profile with its structured schedule, fee, address and services', async () => {
+    await renderApp(`/clinics/${SMILE}`, 'digital-success-manager');
+    await screen.findByRole('heading', { name: 'Practitioner Profile' });
+    for (const text of [
+      'Client organization information',
+      'Consultation schedule',
+      '09:30–13:00, 17:00–20:00',
+      '₹500.00',
+      'Braces',
+      'Professional highlights',
+      'Invisalign-certified provider. Speaker at the Indian Dental Conference 2024.',
+    ]) {
+      expect((await screen.findAllByText(text)).length).toBeGreaterThan(0);
+    }
+    expect(screen.getAllByText('Weekly holiday').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Doctor/)).toBeNull();
+    expect(screen.getByRole('button', EDIT)).toBeTruthy();
+  });
+
+  it('is read-only without profile:write', async () => {
+    await renderApp(`/clinics/${SMILE}`, 'digital-success-manager', withoutProfileWrite);
+    expect((await screen.findAllByText('09:30–13:00, 17:00–20:00')).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('button', EDIT)).toBeNull();
+  });
+
+  it('validates, then saves only changed fields with the version read', async () => {
+    const user = userEvent.setup();
+    const bodies: unknown[] = [];
+    await renderApp(`/clinics/${SMILE}`, 'digital-success-manager', recordPuts(bodies));
+    await user.click(await screen.findByRole('button', EDIT));
+    const form = within(await screen.findByRole('dialog'));
+
+    const fee = form.getByRole('textbox', { name: /Consultation fee/ });
+    await user.clear(fee);
+    await user.type(fee, '750.50');
+    await user.click(form.getByRole('checkbox', { name: 'Saturday weekly holiday' }));
+    // Saturday still has a window: the form asks to resolve that before saving.
+    await user.click(form.getByRole('button', { name: 'Save changes' }));
+    expect(form.getAllByText(/Saturday is a weekly holiday/).length).toBeGreaterThan(0);
+    expect(bodies).toHaveLength(0);
+    await user.click(form.getByRole('button', { name: 'Remove Saturday window 1' }));
+    await user.click(form.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(bodies).toEqual([
+      {
+        version: 1,
+        practitioner_profile: {
+          consultation_schedule: expect.objectContaining({
+            timezone: 'Asia/Kolkata',
+            days: expect.not.objectContaining({ sat: expect.anything() }),
+          }),
+          weekly_holiday: ['sat', 'sun'],
+          consultation_fee: { amount_minor: 75050, currency: 'INR' },
+        },
+      },
+    ]);
+    const days = (
+      bodies[0] as { practitioner_profile: { consultation_schedule: { days: object } } }
+    ).practitioner_profile.consultation_schedule.days;
+    expect(Object.keys(days)).toEqual(['mon', 'tue', 'wed', 'thu', 'fri']);
+    expect(await screen.findByText('₹750.50')).toBeTruthy();
+  });
+
+  it('shows API validation errors on the field', async () => {
+    const user = userEvent.setup();
+    await renderApp(`/clinics/${SMILE}`, 'digital-success-manager', () => [
+      http.put(profileUrl, () =>
+        HttpResponse.json(
+          {
+            type: 'validation_error',
+            title: 'Invalid input',
+            status: 422,
+            errors: [
+              {
+                loc: ['body', 'practitioner_profile', 'specialization'],
+                msg: 'Unknown specialization',
+                type: 'value_error',
+              },
+            ],
+          },
+          { status: 422, headers: { 'content-type': 'application/problem+json' } },
+        ),
+      ),
+    ]);
+    await user.click(await screen.findByRole('button', EDIT));
+    const form = within(await screen.findByRole('dialog'));
+    const specialization = form.getByRole('textbox', { name: 'Specialization' });
+    await user.clear(specialization);
+    await user.type(specialization, 'Dentistry');
+    await user.click(form.getByRole('button', { name: 'Save changes' }));
+    // On the field and in the summary.
+    expect(await form.findAllByText(/Unknown specialization/)).toHaveLength(2);
+    expect(specialization.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('warns before reloading after a version conflict', async () => {
+    const user = userEvent.setup();
+    // Someone else saves first, so this save gets the API's 409.
+    await renderApp(`/clinics/${SMILE}`, 'digital-success-manager', (mocks) => [
+      http.put(
+        profileUrl,
+        async ({ request }) => {
+          const { version } = (await request.clone().json()) as { version: number };
+          const other = new Request(request.url, {
+            method: 'PUT',
+            headers: request.headers,
+            body: JSON.stringify({ version, practitioner_profile: { patients_treated: 99999 } }),
+          });
+          await getResponse(mocks, other);
+          return (await getResponse(mocks, request))!;
+        },
+        { once: true },
+      ),
+    ]);
+    await user.click(await screen.findByRole('button', EDIT));
+    const form = within(await screen.findByRole('dialog'));
+    const years = () =>
+      form.getByRole('textbox', { name: 'Total years of medical experience' }) as HTMLInputElement;
+    await user.clear(years());
+    await user.type(years(), '30');
+    await user.click(form.getByRole('button', { name: 'Save changes' }));
+    expect(await form.findByText(/Someone else saved this Practitioner Profile/)).toBeTruthy();
+
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false);
+    await user.click(form.getByRole('button', { name: 'Reload latest profile' }));
+    expect(confirm).toHaveBeenCalledWith(expect.stringMatching(/unsaved changes .* discarded/));
+    expect(years().value).toBe('30');
+
+    confirm.mockReturnValueOnce(true);
+    await user.click(form.getByRole('button', { name: 'Reload latest profile' }));
+    await waitFor(() =>
+      expect(
+        (form.getByRole('textbox', { name: 'Approximate patients treated' }) as HTMLInputElement)
+          .value,
+      ).toBe('99999'),
+    );
+    expect(years().value).not.toBe('30');
+    expect(form.queryByText(/Someone else saved/)).toBeNull();
   });
 });

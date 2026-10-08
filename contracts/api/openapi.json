@@ -1769,6 +1769,69 @@
         "title": "ClinicAccess",
         "type": "object"
       },
+      "ClinicAddress": {
+        "additionalProperties": false,
+        "description": "The clinic's postal address (the same fields as on the clinic).",
+        "properties": {
+          "address_line": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address Line"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "country": {
+            "default": "IN",
+            "maxLength": 2,
+            "minLength": 2,
+            "title": "Country",
+            "type": "string"
+          },
+          "postal_code": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postal Code"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          }
+        },
+        "title": "ClinicAddress",
+        "type": "object"
+      },
       "ClinicCreate": {
         "additionalProperties": false,
         "properties": {
@@ -1857,6 +1920,18 @@
             "minLength": 1,
             "title": "Name",
             "type": "string"
+          },
+          "operating_since": {
+            "anyOf": [
+              {
+                "minimum": 1800.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operating Since"
           },
           "organization_id": {
             "anyOf": [
@@ -2084,6 +2159,17 @@
             "title": "Open Work",
             "type": "array"
           },
+          "operating_since": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operating Since"
+          },
           "organization_id": {
             "format": "uuid",
             "title": "Organization Id",
@@ -2186,6 +2272,7 @@
           "country",
           "phone",
           "website_url",
+          "operating_since",
           "latitude",
           "longitude",
           "cover_asset_id",
@@ -2232,6 +2319,9 @@
             "title": "Consents",
             "type": "array"
           },
+          "practitioner_profile": {
+            "$ref": "#/components/schemas/PractitionerProfileRead"
+          },
           "schedule": {
             "$ref": "#/components/schemas/ScheduleSection"
           },
@@ -2269,6 +2359,7 @@
           "audience",
           "services",
           "schedule",
+          "practitioner_profile",
           "consents",
           "approved_assets",
           "team",
@@ -2295,6 +2386,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/BrandSection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "practitioner_profile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PractitionerProfileUpdate"
               },
               {
                 "type": "null"
@@ -2447,6 +2548,17 @@
             "title": "Name",
             "type": "string"
           },
+          "operating_since": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operating Since"
+          },
           "organization_id": {
             "format": "uuid",
             "title": "Organization Id",
@@ -2538,6 +2650,7 @@
           "country",
           "phone",
           "website_url",
+          "operating_since",
           "latitude",
           "longitude",
           "cover_asset_id",
@@ -2684,6 +2797,18 @@
               }
             ],
             "title": "Name"
+          },
+          "operating_since": {
+            "anyOf": [
+              {
+                "minimum": 1800.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operating Since"
           },
           "phone": {
             "anyOf": [
@@ -3101,6 +3226,91 @@
           "revoked_at"
         ],
         "title": "ConsentRead",
+        "type": "object"
+      },
+      "ConsultationFee": {
+        "additionalProperties": false,
+        "description": "A money amount. ``amount_minor`` is in the currency's smallest unit (paise for INR), so\n\u20b9500 is ``{\"amount_minor\": 50000, \"currency\": \"INR\"}``. Never a formatted string.",
+        "properties": {
+          "amount_minor": {
+            "maximum": 1000000000.0,
+            "minimum": 0.0,
+            "title": "Amount Minor",
+            "type": "integer"
+          },
+          "currency": {
+            "default": "INR",
+            "maxLength": 3,
+            "minLength": 3,
+            "title": "Currency",
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount_minor"
+        ],
+        "title": "ConsultationFee",
+        "type": "object"
+      },
+      "ConsultationSchedule": {
+        "additionalProperties": false,
+        "description": "Consultation days and timings: different hours per day, several windows per day.\n\nA day that is not listed has no consultation. Windows of one day must not overlap; they are\nreturned sorted by ``opens``.",
+        "properties": {
+          "days": {
+            "patternProperties": {
+              "^(mon|tue|wed|thu|fri|sat|sun)$": {
+                "items": {
+                  "$ref": "#/components/schemas/ConsultationWindow"
+                },
+                "maxItems": 6,
+                "type": "array"
+              }
+            },
+            "title": "Days",
+            "type": "object"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "timezone": {
+            "default": "Asia/Kolkata",
+            "maxLength": 64,
+            "title": "Timezone",
+            "type": "string"
+          }
+        },
+        "title": "ConsultationSchedule",
+        "type": "object"
+      },
+      "ConsultationWindow": {
+        "additionalProperties": false,
+        "description": "One consultation window on one day, local time. Same shape as the clinic's opening hours.",
+        "properties": {
+          "closes": {
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "title": "Closes",
+            "type": "string"
+          },
+          "opens": {
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "title": "Opens",
+            "type": "string"
+          }
+        },
+        "required": [
+          "opens",
+          "closes"
+        ],
+        "title": "ConsultationWindow",
         "type": "object"
       },
       "DashboardSummary": {
@@ -4651,6 +4861,26 @@
             ],
             "title": "Bio"
           },
+          "consultation_fee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationFee"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "consultation_schedule": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationSchedule"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "full_name": {
             "anyOf": [
               {
@@ -4669,6 +4899,19 @@
             "title": "Is Primary",
             "type": "boolean"
           },
+          "patients_treated": {
+            "anyOf": [
+              {
+                "maximum": 1000000000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patients Treated"
+          },
           "practitioner_id": {
             "anyOf": [
               {
@@ -4680,6 +4923,18 @@
               }
             ],
             "title": "Practitioner Id"
+          },
+          "professional_highlights": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Professional Highlights"
           },
           "qualifications": {
             "anyOf": [
@@ -4728,9 +4983,355 @@
               }
             ],
             "title": "User Id"
+          },
+          "weekly_holiday": {
+            "items": {
+              "pattern": "^(mon|tue|wed|thu|fri|sat|sun)$",
+              "type": "string"
+            },
+            "maxItems": 7,
+            "title": "Weekly Holiday",
+            "type": "array"
+          },
+          "years_of_experience": {
+            "anyOf": [
+              {
+                "maximum": 80.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Years Of Experience"
           }
         },
         "title": "PractitionerCreate",
+        "type": "object"
+      },
+      "PractitionerProfileRead": {
+        "additionalProperties": false,
+        "description": "The Practitioner Profile: the clinic's MAIN practitioner and their clinic, in one object.\n\nA view over fields stored elsewhere (nothing is stored twice): the practitioner record\n(``specialization`` = its ``specialty``), the practitioner's link to this clinic (consultation),\nthe clinic (name, year, address) and ``services.items`` of this profile.\nPractitioner fields are null while the clinic has no main practitioner.",
+        "properties": {
+          "clinic_address": {
+            "$ref": "#/components/schemas/ClinicAddress"
+          },
+          "clinic_name": {
+            "title": "Clinic Name",
+            "type": "string"
+          },
+          "clinic_operating_since": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clinic Operating Since"
+          },
+          "consultation_fee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationFee"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "consultation_schedule": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationSchedule"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "patients_treated": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patients Treated"
+          },
+          "practitioner_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practitioner Id"
+          },
+          "professional_highlights": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Professional Highlights"
+          },
+          "qualifications": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qualifications"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceItem"
+            },
+            "title": "Services",
+            "type": "array"
+          },
+          "specialization": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialization"
+          },
+          "weekly_holiday": {
+            "items": {
+              "pattern": "^(mon|tue|wed|thu|fri|sat|sun)$",
+              "type": "string"
+            },
+            "title": "Weekly Holiday",
+            "type": "array"
+          },
+          "years_of_experience": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Years Of Experience"
+          }
+        },
+        "required": [
+          "practitioner_id",
+          "full_name",
+          "specialization",
+          "qualifications",
+          "years_of_experience",
+          "clinic_name",
+          "clinic_operating_since",
+          "clinic_address",
+          "consultation_schedule",
+          "weekly_holiday",
+          "consultation_fee",
+          "services",
+          "patients_treated",
+          "professional_highlights"
+        ],
+        "title": "PractitionerProfileRead",
+        "type": "object"
+      },
+      "PractitionerProfileUpdate": {
+        "additionalProperties": false,
+        "description": "Change the Practitioner Profile. Fields you leave out stay as they are; ``null`` clears one.\n\nWrites to the same records as the practitioner, clinic and services routes. If the clinic has\nno main practitioner yet, one is created (then ``full_name`` is required).\n``clinic_address`` replaces the whole address.",
+        "properties": {
+          "clinic_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClinicAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "clinic_name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clinic Name"
+          },
+          "clinic_operating_since": {
+            "anyOf": [
+              {
+                "minimum": 1800.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clinic Operating Since"
+          },
+          "consultation_fee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationFee"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "consultation_schedule": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationSchedule"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "patients_treated": {
+            "anyOf": [
+              {
+                "maximum": 1000000000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patients Treated"
+          },
+          "professional_highlights": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Professional Highlights"
+          },
+          "qualifications": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qualifications"
+          },
+          "services": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ServiceItem"
+                },
+                "maxItems": 200,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Services"
+          },
+          "specialization": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialization"
+          },
+          "weekly_holiday": {
+            "anyOf": [
+              {
+                "items": {
+                  "pattern": "^(mon|tue|wed|thu|fri|sat|sun)$",
+                  "type": "string"
+                },
+                "maxItems": 7,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Holiday"
+          },
+          "years_of_experience": {
+            "anyOf": [
+              {
+                "maximum": 80.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Years Of Experience"
+          }
+        },
+        "title": "PractitionerProfileUpdate",
         "type": "object"
       },
       "PractitionerRead": {
@@ -4751,6 +5352,26 @@
             "format": "uuid",
             "title": "Clinic Id",
             "type": "string"
+          },
+          "consultation_fee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationFee"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "consultation_schedule": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationSchedule"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "created_at": {
             "format": "date-time",
@@ -4773,6 +5394,28 @@
           "is_primary": {
             "title": "Is Primary",
             "type": "boolean"
+          },
+          "patients_treated": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patients Treated"
+          },
+          "professional_highlights": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Professional Highlights"
           },
           "qualifications": {
             "anyOf": [
@@ -4818,6 +5461,25 @@
               }
             ],
             "title": "User Id"
+          },
+          "weekly_holiday": {
+            "items": {
+              "pattern": "^(mon|tue|wed|thu|fri|sat|sun)$",
+              "type": "string"
+            },
+            "title": "Weekly Holiday",
+            "type": "array"
+          },
+          "years_of_experience": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Years Of Experience"
           }
         },
         "required": [
@@ -4828,9 +5490,15 @@
           "qualifications",
           "registration_number",
           "bio",
+          "years_of_experience",
+          "patients_treated",
+          "professional_highlights",
           "is_primary",
           "user_id",
           "is_active",
+          "consultation_schedule",
+          "weekly_holiday",
+          "consultation_fee",
           "created_at"
         ],
         "title": "PractitionerRead",
@@ -4838,7 +5506,7 @@
       },
       "PractitionerUpdate": {
         "additionalProperties": false,
-        "description": "Name/specialty/qualifications/registration/bio change the PERSON (every branch they work\nat). ``is_primary`` and ``is_active`` apply to THIS clinic only.",
+        "description": "Name/specialty/qualifications/registration/bio/experience/patients/highlights change the\nPERSON (every branch they work at). ``is_primary``, ``is_active`` and the consultation fields\napply to THIS clinic only.",
         "properties": {
           "bio": {
             "anyOf": [
@@ -4851,6 +5519,26 @@
               }
             ],
             "title": "Bio"
+          },
+          "consultation_fee": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationFee"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "consultation_schedule": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationSchedule"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "full_name": {
             "anyOf": [
@@ -4887,6 +5575,31 @@
             ],
             "title": "Is Primary"
           },
+          "patients_treated": {
+            "anyOf": [
+              {
+                "maximum": 1000000000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patients Treated"
+          },
+          "professional_highlights": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Professional Highlights"
+          },
           "qualifications": {
             "anyOf": [
               {
@@ -4922,6 +5635,35 @@
               }
             ],
             "title": "Specialty"
+          },
+          "weekly_holiday": {
+            "anyOf": [
+              {
+                "items": {
+                  "pattern": "^(mon|tue|wed|thu|fri|sat|sun)$",
+                  "type": "string"
+                },
+                "maxItems": 7,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Holiday"
+          },
+          "years_of_experience": {
+            "anyOf": [
+              {
+                "maximum": 80.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Years Of Experience"
           }
         },
         "title": "PractitionerUpdate",
@@ -6671,7 +7413,7 @@
   "info": {
     "description": "Platform API for Radial Pulse (clinics & practitioners). Every clinic-scoped route is authorized server-side; see docs/architecture/multi-tenancy.md.",
     "title": "Radial Pulse API",
-    "version": "0.3.0"
+    "version": "0.3.1"
   },
   "openapi": "3.1.0",
   "paths": {

@@ -73,11 +73,38 @@ export function mockPractitioners(
     qualifications: QUALIFICATIONS[i % QUALIFICATIONS.length]!,
     registration_number: `DCI-${48210 + i * 37}`,
     bio: null,
+    years_of_experience: 8 + ((i * 5) % 17),
+    patients_treated: i % 3 === 2 ? null : 4000 + i * 1500,
+    professional_highlights:
+      i === 0
+        ? 'Invisalign-certified provider. Speaker at the Indian Dental Conference 2024.'
+        : null,
     is_primary: true,
     is_active: true,
+    // Two consultation windows on weekdays, mornings only on Saturday, Sunday off.
+    consultation_schedule:
+      i % 3 === 2
+        ? null
+        : {
+            timezone: 'Asia/Kolkata',
+            days: {
+              ...Object.fromEntries(
+                (['mon', 'tue', 'wed', 'thu', 'fri'] as const).map((d) => [d, WEEKDAY_WINDOWS]),
+              ),
+              sat: [{ opens: '09:30', closes: '13:00' }],
+            },
+            notes: i === 0 ? 'By appointment on public holidays.' : null,
+          },
+    weekly_holiday: i % 3 === 2 ? [] : ['sun'],
+    consultation_fee: i % 3 === 2 ? null : { amount_minor: 50000 + i * 10000, currency: 'INR' },
     created_at: c.created_at,
   }));
 }
+
+const WEEKDAY_WINDOWS = [
+  { opens: '09:30', closes: '13:00' },
+  { opens: '17:00', closes: '20:00' },
+];
 
 // ── Social metric snapshots ─────────────────────────────────────────────────
 
