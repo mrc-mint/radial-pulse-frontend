@@ -7,6 +7,7 @@ import {
   auditEventsService,
   authService,
   chatService,
+  clinicProfileService,
   clinicsService,
   connectionsService,
   practitionersService,
@@ -170,5 +171,88 @@ describe('contract mocks', () => {
       .catch((e: unknown) => e)) as ApiRequestError;
     expect(error.kind).toBe('validation');
     expect(error.fieldErrors).toEqual({ name: ['Field required'] });
+  });
+  describe('Practitioner Profile (PUT /profile)', () => {
+    it('reads the profile with its structured consultation, fee, address and services', async () => {
+      const admin = as('clinic-administrator');
+      const profile = await clinicProfileService.get(admin, db.clinics[0]!.id);
+      expect(profile.practitioner_profile).toMatchObject({
+        full_name: 'Dr. Rahul Mehta',
+        clinic_name: 'Smile Dental Care',
+        clinic_address: { country: 'IN' },
+        weekly_holiday: ['sun'],
+        consultation_fee: { amount_minor: 50000, currency: 'INR' },
+      });
+      expect(profile.practitioner_profile.consultation_schedule?.days?.mon).toHaveLength(2);
+      expect(profile.practitioner_profile.services[0]).toEqual({
+        name: 'Braces',
+        category: 'Orthodontics',
+        description: null,
+      });
+    });
+
+    it('applies a partial update, leaves other fields alone and bumps the version', async () => {
+      const admin = as('clinic-administrator');
+      const smile = db.clinics[0]!.id;
+      const before = await clinicProfileService.get(admin, smile);
+      const after = await clinicProfileService.update(admin, smile, {
+        version: before.version,
+        practitioner_profile: {
+          years_of_experience: 15,
+          qualifications: null,
+          consultation_fee: { amount_minor: 75000, currency: 'INR' },
+          weekly_holiday: ['sat', 'sun'],
+        },
+      });
+      expect(after.version).toBe(before.version + 1);
+      expect(after.practitioner_profile).toEqual({
+        ...before.practitioner_profile,
+        years_of_experience: 15,
+        qualifications: null,
+        consultation_fee: { amount_minor: 75000, currency: 'INR' },
+        weekly_holiday: ['sat', 'sun'],
+      });
+    });
+
+    it('answers 409 for a stale version', async () => {
+      const admin = as('clinic-administrator');
+      const smile = db.clinics[0]!.id;
+      const { version } = await clinicProfileService.get(admin, smile);
+      await clinicProfileService.update(admin, smile, {
+        version,
+        practitioner_profile: { patients_treated: 13000 },
+      });
+      const error = (await clinicProfileService
+        .update(admin, smile, { version, practitioner_profile: { patients_treated: 14000 } })
+        .catch((e: unknown) => e)) as ApiRequestError;
+      expect(error.kind).toBe('conflict');
+    });
+
+    it('answers 422 with field paths for overlapping windows', async () => {
+      const admin = as('clinic-administrator');
+      const smile = db.clinics[0]!.id;
+      const { version } = await clinicProfileService.get(admin, smile);
+      const error = (await clinicProfileService
+        .update(admin, smile, {
+          version,
+          practitioner_profile: {
+            consultation_schedule: {
+              days: {
+                mon: [
+                  { opens: '09:00', closes: '13:00' },
+                  { opens: '12:00', closes: '15:00' },
+                ],
+              },
+            },
+          },
+        })
+        .catch((e: unknown) => e)) as ApiRequestError;
+      expect(error.kind).toBe('validation');
+      expect(error.fieldErrors).toEqual({
+        'practitioner_profile.consultation_schedule.days.mon': [
+          'Consultation windows must not overlap',
+        ],
+      });
+    });
   });
 });

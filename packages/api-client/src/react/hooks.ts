@@ -13,3 +13,4 @@ export * from './connections';
 export * from './assets';
 export * from './approvals';
 export * from './chat';
+export * from './profile';

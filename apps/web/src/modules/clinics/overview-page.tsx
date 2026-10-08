@@ -39,6 +39,7 @@ import {
   mutationErrorMessage,
   QueryError,
 } from '../../app/page-kit';
+import { PractitionerProfileCard } from './practitioner-profile';
 
 export function ClinicOverviewPage() {
   const clinicId = useClinicId();
@@ -46,6 +47,7 @@ export function ClinicOverviewPage() {
     <div className="rp-grid rp-grid--main-aside">
       <div className="rp-stack">
         <ClinicInformation clinicId={clinicId} />
+        <PractitionerProfileCard clinicId={clinicId} />
         <OpenWork clinicId={clinicId} />
       </div>
       <div className="rp-stack">

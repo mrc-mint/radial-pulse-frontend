@@ -1,5 +1,5 @@
 /**
- * GENERATED from contracts/api/openapi.json (contract 0.3.0-unreleased) by
+ * GENERATED from contracts/api/openapi.json (contract 0.3.1-unreleased) by
  * tools/scripts/generate-contract-types.mjs. Do not edit by hand:
  * run `pnpm api:sync --version <x.y.z>`.
  */
@@ -1708,6 +1708,25 @@ export interface components {
             /** Permissions */
             permissions: components["schemas"]["Permission"][];
         };
+        /**
+         * ClinicAddress
+         * @description The clinic's postal address (the same fields as on the clinic).
+         */
+        ClinicAddress: {
+            /** Address Line */
+            address_line?: string | null;
+            /** City */
+            city?: string | null;
+            /**
+             * Country
+             * @default IN
+             */
+            country?: string;
+            /** Postal Code */
+            postal_code?: string | null;
+            /** State */
+            state?: string | null;
+        };
         /** ClinicCreate */
         ClinicCreate: {
             /** Address Line */
@@ -1729,6 +1748,8 @@ export interface components {
             longitude?: number | null;
             /** Name */
             name: string;
+            /** Operating Since */
+            operating_since?: number | null;
             /** Organization Id */
             organization_id?: string | null;
             /** Phone */
@@ -1784,6 +1805,8 @@ export interface components {
             name: string;
             /** Open Work */
             open_work: components["schemas"]["AreaCount"][];
+            /** Operating Since */
+            operating_since: number | null;
             /**
              * Organization Id
              * Format: uuid
@@ -1830,6 +1853,7 @@ export interface components {
             clinic_id: string;
             /** Consents */
             consents: components["schemas"]["ConsentRead"][];
+            practitioner_profile: components["schemas"]["PractitionerProfileRead"];
             schedule: components["schemas"]["ScheduleSection"];
             services: components["schemas"]["ServicesSection"];
             /** Team */
@@ -1846,6 +1870,7 @@ export interface components {
         ClinicProfileUpdate: {
             audience?: components["schemas"]["AudienceSection"] | null;
             brand?: components["schemas"]["BrandSection"] | null;
+            practitioner_profile?: components["schemas"]["PractitionerProfileUpdate"] | null;
             schedule?: components["schemas"]["ScheduleSection"] | null;
             services?: components["schemas"]["ServicesSection"] | null;
             /** Version */
@@ -1885,6 +1910,8 @@ export interface components {
             longitude: number | null;
             /** Name */
             name: string;
+            /** Operating Since */
+            operating_since: number | null;
             /**
              * Organization Id
              * Format: uuid
@@ -1961,6 +1988,8 @@ export interface components {
             longitude?: number | null;
             /** Name */
             name?: string | null;
+            /** Operating Since */
+            operating_since?: number | null;
             /** Phone */
             phone?: string | null;
             /** Postal Code */
@@ -2076,6 +2105,50 @@ export interface components {
             id: string;
             /** Revoked At */
             revoked_at: string | null;
+        };
+        /**
+         * ConsultationFee
+         * @description A money amount. ``amount_minor`` is in the currency's smallest unit (paise for INR), so
+         *     ₹500 is ``{"amount_minor": 50000, "currency": "INR"}``. Never a formatted string.
+         */
+        ConsultationFee: {
+            /** Amount Minor */
+            amount_minor: number;
+            /**
+             * Currency
+             * @default INR
+             */
+            currency?: string;
+        };
+        /**
+         * ConsultationSchedule
+         * @description Consultation days and timings: different hours per day, several windows per day.
+         *
+         *     A day that is not listed has no consultation. Windows of one day must not overlap; they are
+         *     returned sorted by ``opens``.
+         */
+        ConsultationSchedule: {
+            /** Days */
+            days?: {
+                [key: string]: components["schemas"]["ConsultationWindow"][];
+            };
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Timezone
+             * @default Asia/Kolkata
+             */
+            timezone?: string;
+        };
+        /**
+         * ConsultationWindow
+         * @description One consultation window on one day, local time. Same shape as the clinic's opening hours.
+         */
+        ConsultationWindow: {
+            /** Closes */
+            closes: string;
+            /** Opens */
+            opens: string;
         };
         /**
          * DashboardSummary
@@ -2626,6 +2699,8 @@ export interface components {
         PractitionerCreate: {
             /** Bio */
             bio?: string | null;
+            consultation_fee?: components["schemas"]["ConsultationFee"] | null;
+            consultation_schedule?: components["schemas"]["ConsultationSchedule"] | null;
             /** Full Name */
             full_name?: string | null;
             /**
@@ -2633,8 +2708,12 @@ export interface components {
              * @default false
              */
             is_primary?: boolean;
+            /** Patients Treated */
+            patients_treated?: number | null;
             /** Practitioner Id */
             practitioner_id?: string | null;
+            /** Professional Highlights */
+            professional_highlights?: string | null;
             /** Qualifications */
             qualifications?: string | null;
             /** Registration Number */
@@ -2643,6 +2722,79 @@ export interface components {
             specialty?: string | null;
             /** User Id */
             user_id?: string | null;
+            /** Weekly Holiday */
+            weekly_holiday?: string[];
+            /** Years Of Experience */
+            years_of_experience?: number | null;
+        };
+        /**
+         * PractitionerProfileRead
+         * @description The Practitioner Profile: the clinic's MAIN practitioner and their clinic, in one object.
+         *
+         *     A view over fields stored elsewhere (nothing is stored twice): the practitioner record
+         *     (``specialization`` = its ``specialty``), the practitioner's link to this clinic (consultation),
+         *     the clinic (name, year, address) and ``services.items`` of this profile.
+         *     Practitioner fields are null while the clinic has no main practitioner.
+         */
+        PractitionerProfileRead: {
+            clinic_address: components["schemas"]["ClinicAddress"];
+            /** Clinic Name */
+            clinic_name: string;
+            /** Clinic Operating Since */
+            clinic_operating_since: number | null;
+            consultation_fee: components["schemas"]["ConsultationFee"] | null;
+            consultation_schedule: components["schemas"]["ConsultationSchedule"] | null;
+            /** Full Name */
+            full_name: string | null;
+            /** Patients Treated */
+            patients_treated: number | null;
+            /** Practitioner Id */
+            practitioner_id: string | null;
+            /** Professional Highlights */
+            professional_highlights: string | null;
+            /** Qualifications */
+            qualifications: string | null;
+            /** Services */
+            services: components["schemas"]["ServiceItem"][];
+            /** Specialization */
+            specialization: string | null;
+            /** Weekly Holiday */
+            weekly_holiday: string[];
+            /** Years Of Experience */
+            years_of_experience: number | null;
+        };
+        /**
+         * PractitionerProfileUpdate
+         * @description Change the Practitioner Profile. Fields you leave out stay as they are; ``null`` clears one.
+         *
+         *     Writes to the same records as the practitioner, clinic and services routes. If the clinic has
+         *     no main practitioner yet, one is created (then ``full_name`` is required).
+         *     ``clinic_address`` replaces the whole address.
+         */
+        PractitionerProfileUpdate: {
+            clinic_address?: components["schemas"]["ClinicAddress"] | null;
+            /** Clinic Name */
+            clinic_name?: string | null;
+            /** Clinic Operating Since */
+            clinic_operating_since?: number | null;
+            consultation_fee?: components["schemas"]["ConsultationFee"] | null;
+            consultation_schedule?: components["schemas"]["ConsultationSchedule"] | null;
+            /** Full Name */
+            full_name?: string | null;
+            /** Patients Treated */
+            patients_treated?: number | null;
+            /** Professional Highlights */
+            professional_highlights?: string | null;
+            /** Qualifications */
+            qualifications?: string | null;
+            /** Services */
+            services?: components["schemas"]["ServiceItem"][] | null;
+            /** Specialization */
+            specialization?: string | null;
+            /** Weekly Holiday */
+            weekly_holiday?: string[] | null;
+            /** Years Of Experience */
+            years_of_experience?: number | null;
         };
         /** PractitionerRead */
         PractitionerRead: {
@@ -2653,6 +2805,8 @@ export interface components {
              * Format: uuid
              */
             clinic_id: string;
+            consultation_fee: components["schemas"]["ConsultationFee"] | null;
+            consultation_schedule: components["schemas"]["ConsultationSchedule"] | null;
             /**
              * Created At
              * Format: date-time
@@ -2669,6 +2823,10 @@ export interface components {
             is_active: boolean;
             /** Is Primary */
             is_primary: boolean;
+            /** Patients Treated */
+            patients_treated: number | null;
+            /** Professional Highlights */
+            professional_highlights: string | null;
             /** Qualifications */
             qualifications: string | null;
             /** Registration Number */
@@ -2677,27 +2835,42 @@ export interface components {
             specialty: string | null;
             /** User Id */
             user_id: string | null;
+            /** Weekly Holiday */
+            weekly_holiday: string[];
+            /** Years Of Experience */
+            years_of_experience: number | null;
         };
         /**
          * PractitionerUpdate
-         * @description Name/specialty/qualifications/registration/bio change the PERSON (every branch they work
-         *     at). ``is_primary`` and ``is_active`` apply to THIS clinic only.
+         * @description Name/specialty/qualifications/registration/bio/experience/patients/highlights change the
+         *     PERSON (every branch they work at). ``is_primary``, ``is_active`` and the consultation fields
+         *     apply to THIS clinic only.
          */
         PractitionerUpdate: {
             /** Bio */
             bio?: string | null;
+            consultation_fee?: components["schemas"]["ConsultationFee"] | null;
+            consultation_schedule?: components["schemas"]["ConsultationSchedule"] | null;
             /** Full Name */
             full_name?: string | null;
             /** Is Active */
             is_active?: boolean | null;
             /** Is Primary */
             is_primary?: boolean | null;
+            /** Patients Treated */
+            patients_treated?: number | null;
+            /** Professional Highlights */
+            professional_highlights?: string | null;
             /** Qualifications */
             qualifications?: string | null;
             /** Registration Number */
             registration_number?: string | null;
             /** Specialty */
             specialty?: string | null;
+            /** Weekly Holiday */
+            weekly_holiday?: string[] | null;
+            /** Years Of Experience */
+            years_of_experience?: number | null;
         };
         /**
          * PresencePlatform

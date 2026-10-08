@@ -1,0 +1,116 @@
+/* ── Practitioner Profile (card + edit drawer) ── */
+.rp-profile-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-space-2);
+}
+
+.rp-profile-group__title {
+  margin: 0;
+  font-size: var(--rp-text-body-size);
+  font-weight: var(--rp-font-weight-semibold);
+  color: var(--rp-color-text-primary);
+}
+
+.rp-profile-schedule,
+.rp-profile-services {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rp-profile-schedule li {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: var(--rp-space-3);
+}
+
+.rp-profile-services li {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--rp-space-1);
+}
+
+.rp-profile-services li > .rp-small {
+  flex-basis: 100%;
+}
+
+.rp-profile-services__name {
+  font-weight: var(--rp-font-weight-semibold);
+}
+
+.rp-profile-fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-space-4);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.rp-profile-fieldset > legend {
+  margin-bottom: var(--rp-space-3);
+  padding: 0;
+  font-weight: var(--rp-font-weight-semibold);
+  color: var(--rp-color-text-primary);
+}
+
+.rp-profile-day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-space-2);
+  padding-bottom: var(--rp-space-3);
+  border-bottom: 1px solid var(--rp-color-border-subtle);
+}
+
+.rp-profile-window {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  gap: var(--rp-space-2);
+  align-items: start;
+}
+
+.rp-profile-window > .rp-muted {
+  padding-top: var(--rp-space-2);
+}
+
+.rp-profile-service {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)) auto;
+  gap: var(--rp-space-3);
+  align-items: end;
+  padding-bottom: var(--rp-space-3);
+  border-bottom: 1px solid var(--rp-color-border-subtle);
+}
+
+.rp-profile-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rp-space-1);
+  min-height: 32px;
+}
+
+.rp-profile-textarea {
+  width: 100%;
+  padding: var(--rp-space-2) var(--rp-space-3);
+  border: 1px solid var(--rp-color-border-default);
+  border-radius: var(--rp-radius-md);
+  background: var(--rp-color-bg-surface);
+  color: var(--rp-color-text-primary);
+  font: inherit;
+  resize: vertical;
+}
+
+.rp-profile-textarea[aria-invalid='true'] {
+  border-color: var(--rp-color-status-danger-border);
+}
+
+.rp-profile-conflict {
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}

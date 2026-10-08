@@ -61,6 +61,19 @@ function approvalTransition(
   }
 }
 
+/** Practitioner Profile fields stored on the main practitioner (or its link to the clinic). */
+const PRACTITIONER_FIELDS = [
+  'full_name',
+  'specialization',
+  'qualifications',
+  'years_of_experience',
+  'patients_treated',
+  'professional_highlights',
+  'consultation_schedule',
+  'weekly_holiday',
+  'consultation_fee',
+] as const satisfies ReadonlyArray<keyof Schema<'PractitionerProfileUpdate'>>;
+
 interface Principal {
   persona: MockPersona;
   user: MockDb['users'][number];
@@ -250,6 +263,178 @@ export function createMockHandlers(options: MockOptions) {
     return { ...read, stage_group: mockStageGroup(c.stage) };
   };
 
+  const mainPractitioner = (clinicId: string) =>
+    db.practitioners.find((p) => p.clinic_id === clinicId && p.is_primary && p.is_active) ?? null;
+
+  /** The client context (`ClinicProfileRead`); the Practitioner Profile is built from its sources. */
+  const profileRead = (clinicId: string): Schema<'ClinicProfileRead'> => {
+    const stored = db.profiles.get(clinicId)!;
+    const clinic = db.clinics.find((c) => c.id === clinicId)!;
+    const p = mainPractitioner(clinicId);
+    const roles = db.memberships.get(clinicId) ?? new Map<string, Schema<'ClinicRole'>>();
+    return {
+      clinic_id: clinicId,
+      version: stored.version,
+      brand: stored.brand,
+      audience: stored.audience,
+      services: stored.services,
+      schedule: stored.schedule,
+      practitioner_profile: {
+        practitioner_id: p?.id ?? null,
+        full_name: p?.full_name ?? null,
+        specialization: p?.specialty ?? null,
+        qualifications: p?.qualifications ?? null,
+        years_of_experience: p?.years_of_experience ?? null,
+        clinic_name: clinic.name,
+        clinic_operating_since: clinic.operating_since,
+        clinic_address: {
+          address_line: clinic.address_line,
+          city: clinic.city,
+          state: clinic.state,
+          postal_code: clinic.postal_code,
+          country: clinic.country,
+        },
+        consultation_schedule: p?.consultation_schedule ?? null,
+        weekly_holiday: p?.weekly_holiday ?? [],
+        consultation_fee: p?.consultation_fee ?? null,
+        services: stored.services.items ?? [],
+        patients_treated: p?.patients_treated ?? null,
+        professional_highlights: p?.professional_highlights ?? null,
+      },
+      consents: [],
+      approved_assets: [],
+      team: [...roles].flatMap(([userId, role]) => {
+        const u = db.users.find((x) => x.id === userId);
+        return u
+          ? [
+              {
+                id: `${clinicId.slice(0, 8)}-${u.id.slice(9)}`,
+                clinic_id: clinicId,
+                user_id: u.id,
+                email: u.email,
+                full_name: u.full_name,
+                role,
+                is_active: true,
+                has_signed_in: true,
+              },
+            ]
+          : [];
+      }),
+      updated_at: stored.updated_at,
+    };
+  };
+
+  /** The contract's checks on `PractitionerProfileUpdate` that the mocks enforce (422). */
+  const profileUpdateIssues = (
+    clinicId: string,
+    body: Schema<'ClinicProfileUpdate'>,
+  ): Array<Schema<'ValidationIssue'>> => {
+    const issues: Array<Schema<'ValidationIssue'>> = [];
+    const issue = (loc: Array<string | number>, msg: string) =>
+      issues.push({ loc: ['body', 'practitioner_profile', ...loc], msg, type: 'value_error' });
+    const pp = body.practitioner_profile;
+    if (!pp) return issues;
+    if (pp.clinic_name !== undefined && !pp.clinic_name?.trim()) {
+      issue(['clinic_name'], 'String should have at least 1 character');
+    }
+    if (
+      !mainPractitioner(clinicId) &&
+      !pp.full_name &&
+      PRACTITIONER_FIELDS.some((k) => pp[k] !== undefined)
+    ) {
+      issue(['full_name'], 'Field required to create the main practitioner');
+    }
+    const time = /^([01]\d|2[0-3]):[0-5]\d$/;
+    for (const [day, windows] of Object.entries(pp.consultation_schedule?.days ?? {})) {
+      const sorted = [...windows].sort((a, b) => a.opens.localeCompare(b.opens));
+      sorted.forEach((w, i) => {
+        if (!time.test(w.opens) || !time.test(w.closes)) {
+          issue(['consultation_schedule', 'days', day, i], 'Use HH:MM (24-hour) times');
+        } else if (i > 0 && w.opens < sorted[i - 1]!.closes) {
+          issue(['consultation_schedule', 'days', day], 'Consultation windows must not overlap');
+        }
+      });
+    }
+    const fee = pp.consultation_fee;
+    if (fee && (!Number.isInteger(fee.amount_minor) || fee.amount_minor < 0)) {
+      issue(['consultation_fee', 'amount_minor'], 'Input should be a non-negative integer');
+    }
+    return issues;
+  };
+
+  /** Writes a Practitioner Profile change to the records it is a view over. */
+  const applyPractitionerProfile = (clinicId: string, pp: Schema<'PractitionerProfileUpdate'>) => {
+    const clinic = db.clinics.find((c) => c.id === clinicId)!;
+    if (pp.clinic_name) clinic.name = pp.clinic_name;
+    if (pp.clinic_operating_since !== undefined) clinic.operating_since = pp.clinic_operating_since;
+    if (pp.clinic_address !== undefined) {
+      const a = pp.clinic_address;
+      clinic.address_line = a?.address_line ?? null;
+      clinic.city = a?.city ?? null;
+      clinic.state = a?.state ?? null;
+      clinic.postal_code = a?.postal_code ?? null;
+      clinic.country = a?.country ?? 'IN';
+    }
+    clinic.updated_at = nextTimestamp();
+    if (pp.services !== undefined) db.profiles.get(clinicId)!.services.items = pp.services ?? [];
+
+    if (!PRACTITIONER_FIELDS.some((k) => pp[k] !== undefined)) return;
+    let p = mainPractitioner(clinicId);
+    if (!p) {
+      p = {
+        id: crypto.randomUUID(),
+        clinic_id: clinicId,
+        user_id: null,
+        full_name: pp.full_name!,
+        specialty: null,
+        qualifications: null,
+        registration_number: null,
+        bio: null,
+        years_of_experience: null,
+        patients_treated: null,
+        professional_highlights: null,
+        is_primary: true,
+        is_active: true,
+        consultation_schedule: null,
+        weekly_holiday: [],
+        consultation_fee: null,
+        created_at: mockNow(),
+      };
+      db.practitioners.push(p);
+    }
+    if (pp.full_name) p.full_name = pp.full_name;
+    if (pp.specialization !== undefined) p.specialty = pp.specialization;
+    if (pp.qualifications !== undefined) p.qualifications = pp.qualifications;
+    if (pp.years_of_experience !== undefined) p.years_of_experience = pp.years_of_experience;
+    if (pp.patients_treated !== undefined) p.patients_treated = pp.patients_treated;
+    if (pp.professional_highlights !== undefined) {
+      p.professional_highlights = pp.professional_highlights;
+    }
+    if (pp.consultation_schedule !== undefined) {
+      const s = pp.consultation_schedule;
+      p.consultation_schedule = s && {
+        timezone: s.timezone ?? 'Asia/Kolkata',
+        notes: s.notes ?? null,
+        days: Object.fromEntries(
+          Object.entries(s.days ?? {}).map(([day, windows]) => [
+            day,
+            [...windows].sort((a, b) => a.opens.localeCompare(b.opens)),
+          ]),
+        ),
+      };
+    }
+    if (pp.weekly_holiday !== undefined) p.weekly_holiday = pp.weekly_holiday ?? [];
+    if (pp.consultation_fee !== undefined) {
+      p.consultation_fee = pp.consultation_fee && {
+        amount_minor: pp.consultation_fee.amount_minor,
+        currency: pp.consultation_fee.currency ?? 'INR',
+      };
+    }
+    if (clinic.primary_practitioner_name !== p.full_name) {
+      clinic.primary_practitioner_name = p.full_name;
+    }
+  };
+
   const assessmentsFor = (clinicId: string, me: Principal, perms: Set<Permission>) =>
     db.assessments
       .filter((a) => a.clinic_id === clinicId)
@@ -429,6 +614,7 @@ export function createMockHandlers(options: MockOptions) {
             specialty: body.specialty ?? null,
             description: body.description ?? null,
             website_url: body.website_url ?? null,
+            operating_since: body.operating_since ?? null,
             email: body.email ?? null,
             phone: body.phone ?? null,
             address_line: body.address_line ?? null,
@@ -599,6 +785,53 @@ export function createMockHandlers(options: MockOptions) {
           return HttpResponse.json(page(rows, url) satisfies Schema<'Page_PractitionerRead_'>);
         },
         { clinic: true, permission: 'practitioners:read' },
+      ),
+    ),
+
+    http.get(
+      `${api}/clinics/:clinic_id/profile`,
+      route<{ clinic_id: string }>(
+        ({ params }) => HttpResponse.json(profileRead(params.clinic_id)),
+        {
+          clinic: true,
+          permission: 'profile:read',
+        },
+      ),
+    ),
+
+    http.put(
+      `${api}/clinics/:clinic_id/profile`,
+      route<{ clinic_id: string }>(
+        async ({ request, params, me }) => {
+          const body = (await request.json()) as Schema<'ClinicProfileUpdate'>;
+          const stored = db.profiles.get(params.clinic_id)!;
+          const issues = profileUpdateIssues(params.clinic_id, body);
+          if (issues.length > 0) {
+            return problem(422, 'validation_error', 'Invalid input', undefined, issues);
+          }
+          if (body.version !== stored.version) {
+            return problem(
+              409,
+              'version_conflict',
+              'Version conflict',
+              'The profile was changed since you read it. Reload and try again.',
+            );
+          }
+          for (const section of ['brand', 'audience', 'services', 'schedule'] as const) {
+            if (body[section]) Object.assign(stored, { [section]: body[section] });
+          }
+          if (body.practitioner_profile) {
+            applyPractitionerProfile(params.clinic_id, body.practitioner_profile);
+          }
+          stored.version += 1;
+          stored.updated_at = nextTimestamp();
+          record(params.clinic_id, me, 'profile.update', 'clinic_profile', params.clinic_id, {
+            sections: Object.keys(body).filter((k) => k !== 'version'),
+            practitioner_profile: Object.keys(body.practitioner_profile ?? {}),
+          });
+          return HttpResponse.json(profileRead(params.clinic_id));
+        },
+        { clinic: true, permission: 'profile:write' },
       ),
     ),
 

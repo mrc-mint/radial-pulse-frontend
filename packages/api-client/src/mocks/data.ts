@@ -266,6 +266,15 @@ const CLINICS: ClinicSeed[] = [
   },
 ];
 
+export interface MockProfile {
+  version: number;
+  updated_at: string | null;
+  brand: S<'BrandSection'>;
+  audience: S<'AudienceSection'>;
+  services: S<'ServicesSection'>;
+  schedule: S<'ScheduleSection'>;
+}
+
 export interface MockDb {
   users: MockUser[];
   /** `stage_group` is derived from `stage` on the way out (mockStageGroup). */
@@ -285,6 +294,12 @@ export interface MockDb {
   approvals: MockApproval[];
   mediaTaxonomy: Array<S<'MediaTaxonomyValueRead'>>;
   practitioners: Array<S<'PractitionerRead'>>;
+  /**
+   * clinicId → the stored sections of the client context (`/profile`). The
+   * Practitioner Profile is a view over the clinic, its main practitioner and
+   * `services.items`, built on the way out.
+   */
+  profiles: Map<string, MockProfile>;
   snapshots: Array<S<'MetricSnapshotRead'>>;
   auditEvents: Array<S<'AuditEventRead'>>;
   settings: S<'PlatformSettingsRead'>;
@@ -734,6 +749,7 @@ export function createMockDb(): MockDb {
       specialty: c.specialty,
       description: `${c.specialty} for families in ${c.city}.`,
       website_url: c.site,
+      operating_since: i % 3 === 2 ? null : 2008 + i,
       email: c.site ? `info@${new URL(c.site).hostname.replace(/^www\./, '')}` : null,
       phone: `+91 98${String(76543210 + i * 1111).slice(0, 8)}`,
       address_line: `${12 + i * 7}, Main Road`,
@@ -1185,6 +1201,32 @@ export function createMockDb(): MockDb {
     approvals,
     mediaTaxonomy: [...MOCK_MEDIA_TAXONOMY],
     practitioners,
+    profiles: new Map(
+      clinics.map((c, i) => [
+        c.id,
+        {
+          version: 1 + i,
+          updated_at: c.updated_at,
+          brand: {},
+          audience: {},
+          services: {
+            items:
+              i % 3 === 2
+                ? []
+                : [
+                    { name: 'Braces', category: 'Orthodontics', description: null },
+                    { name: 'Root canal treatment', category: null, description: null },
+                    {
+                      name: 'Teeth whitening',
+                      category: 'Cosmetic',
+                      description: 'In-clinic whitening in one visit.',
+                    },
+                  ],
+          },
+          schedule: { timezone: 'Asia/Kolkata' },
+        },
+      ]),
+    ),
     snapshots,
     auditEvents,
     settings: {
