@@ -34,6 +34,7 @@ import { useMemo } from 'react';
 import { activityText } from '../../app/activity-text';
 import { ClinicPhoto } from '../../app/clinic-photo';
 import { QueryError } from '../../app/page-kit';
+import { STUDIO_FEATURES } from '../../app/release';
 import { clinicsNeedingAttention } from './attention';
 import './dashboard.css';
 import { PlatformDashboard } from './platform-dashboard';
@@ -74,7 +75,8 @@ const MY_CLINICS = { limit: 200 } as const;
 function ClinicWorkDashboard() {
   const session = useCurrentSession();
   const summary = useDashboardSummary();
-  const inbox = useChatInbox();
+  const chat = STUDIO_FEATURES.clientCollaboration;
+  const inbox = useChatInbox({ enabled: chat });
   const clinics = useClinics(MY_CLINICS);
   const firstName = session.user.name.split(' ')[0];
   const data = summary.data;
@@ -115,17 +117,19 @@ function ClinicWorkDashboard() {
             icon={<ListTodo size={20} />}
             iconTone="warning"
           />
-          <MetricCard
-            label="Unread messages"
-            value={unread}
-            hint={
-              inbox.data
-                ? `${inbox.data.unread_threads} ${inbox.data.unread_threads === 1 ? 'conversation' : 'conversations'}`
-                : undefined
-            }
-            icon={<MessageCircle size={20} />}
-            iconTone={unread ? 'danger' : 'info'}
-          />
+          {chat && (
+            <MetricCard
+              label="Unread messages"
+              value={unread}
+              hint={
+                inbox.data
+                  ? `${inbox.data.unread_threads} ${inbox.data.unread_threads === 1 ? 'conversation' : 'conversations'}`
+                  : undefined
+              }
+              icon={<MessageCircle size={20} />}
+              iconTone={unread ? 'danger' : 'info'}
+            />
+          )}
         </div>
       )}
 
@@ -133,14 +137,14 @@ function ClinicWorkDashboard() {
         <ClinicsNeedingAttention
           clinics={clinics.data?.items}
           ids={ids}
-          inbox={inbox.data}
+          inbox={chat ? inbox.data : undefined}
           error={clinics.error}
           onRetry={() => void clinics.refetch()}
         />
         <RecentActivity clinics={clinics.data?.items} ids={ids} />
       </div>
 
-      <RecentConversations inbox={inbox} />
+      {chat && <RecentConversations inbox={inbox} />}
     </div>
   );
 }

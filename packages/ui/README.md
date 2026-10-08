@@ -13,14 +13,14 @@ one shared prop contract. Components receive data and never fetch.
 
 Each layer may use the ones above it, never the ones below.
 
-| Layer              | Where                                       | Examples                                                                   |
-| ------------------ | ------------------------------------------- | -------------------------------------------------------------------------- |
-| Design tokens      | `@radial-pulse/design-tokens`               | colours, spacing, radii, type scale, chart colours                         |
-| Primitives         | this package                                | Button, IconButton, Input, Select, Card, Badge, Avatar                     |
-| Components         | this package                                | Table, Tabs, Modal, MetricCard, ScoreCard, FindingCard, EmptyState, charts |
-| App patterns       | `apps/web/src/app`, `apps/mobile/src/shell` | page kit (QueryError, DefinitionList), clinic photo, assessment kit        |
-| Feature components | `apps/*/src/modules/<feature>`              | clinic header, attention list, assessment view                             |
-| Pages              | `apps/*/src/modules/<feature>`, routes      | clinic overview, dashboard                                                 |
+| Layer              | Where                                                         | Examples                                                                   |
+| ------------------ | ------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Design tokens      | `@radial-pulse/design-tokens`                                 | colours, spacing, radii, type scale, chart colours                         |
+| Primitives         | this package                                                  | Button, IconButton, Input, Select, Card, Badge, Avatar                     |
+| Components         | this package                                                  | Table, Tabs, Modal, MetricCard, ScoreCard, FindingCard, EmptyState, charts |
+| App patterns       | `apps/web/src/app` (Studio), `apps/mobile/src/shell` (Clinic) | page kit (QueryError, DefinitionList), clinic photo, assessment kit        |
+| Feature components | `apps/*/src/modules/<feature>`                                | clinic header, attention list, assessment view                             |
+| Pages              | `apps/*/src/modules/<feature>`, routes                        | clinic overview, dashboard                                                 |
 
 ## Rules
 

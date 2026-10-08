@@ -10,7 +10,7 @@ contracts. Each domain team owns its domain calculations and workflow logic.
 | API client, published contracts, shared types                                   | Finding generation, severity, evidence collection                          |
 | Generic rendering of assessments, sections, findings, evidence, insights        | Digital Presence Intelligence Agent: source discovery and profile building |
 | Work-queue rendering                                                            | Deciding which work items exist and when                                   |
-| Client Collaboration (chat), CI/CD, environments                                | Social metric retrieval through official APIs                              |
+| Client Collaboration (chat, V2), CI/CD, environments                            | Social metric retrieval through official APIs                              |
 
 ## The rule in code
 

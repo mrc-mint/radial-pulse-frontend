@@ -30,12 +30,17 @@ import {
 import { AudioLines, Check, Clock, ImageOff, RotateCcw, X, type LucideIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CardSkeleton, QueryError } from '../../app/page-kit';
+import { STUDIO_FEATURES } from '../../app/release';
 import { MediaReviewDialog } from './media-review';
 import './media.css';
 
 type Asset = Schema<'AssetRead'>;
 type ApprovalState = Schema<'ApprovalState'>;
 type Section = 'all' | 'practitioner' | 'clinic' | 'voice';
+
+/** V1 media is photos only: voice samples (`audio`) are V2 (STUDIO_FEATURES). */
+const VOICE = STUDIO_FEATURES.voiceSamples;
+const KINDS = VOICE ? MEDIA_ASSET_KINDS : MEDIA_ASSET_KINDS.filter((k) => k !== 'audio');
 
 const STATE_ICON: Record<ApprovalState, LucideIcon> = {
   draft: Clock,
@@ -57,7 +62,7 @@ export function ClinicMediaPage() {
   const clinicId = useClinicId();
   const clinic = useClinic(clinicId);
   const taxonomy = useMediaTaxonomy();
-  const assets = useClinicAssets(clinicId, MEDIA_ASSET_KINDS);
+  const assets = useClinicAssets(clinicId, KINDS);
   const [section, setSection] = useState<Section>('all');
   const [state, setState] = useState<ApprovalState | 'all'>('all');
   const [openId, setOpenId] = useState<{ id: string; title: string } | null>(null);
@@ -108,7 +113,9 @@ export function ClinicMediaPage() {
             { value: 'all', label: 'All media', count: current.length },
             { value: 'practitioner', label: 'Practitioner photos', count: counts.practitioner },
             { value: 'clinic', label: 'Hospital photos', count: counts.clinic },
-            { value: 'voice', label: 'Voice samples', count: counts.voice },
+            ...(VOICE
+              ? [{ value: 'voice' as const, label: 'Voice samples', count: counts.voice }]
+              : []),
           ]}
         />
         <div className="rp-media-toolbar__filter">
@@ -136,7 +143,7 @@ export function ClinicMediaPage() {
       {show('clinic') && (
         <HospitalPhotos board={board} filter={filter} clinicId={clinicId} onOpen={onOpen} />
       )}
-      {show('voice') && <VoiceSamples board={board} filter={filter} onOpen={onOpen} />}
+      {VOICE && show('voice') && <VoiceSamples board={board} filter={filter} onOpen={onOpen} />}
 
       {open && openId && (
         <MediaReviewDialog

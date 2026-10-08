@@ -1,21 +1,33 @@
 # Radial Pulse — frontend
 
-Nx monorepo for the two Radial Pulse apps. The Python backend lives in a
-separate repository; this repo talks to it only through the published API
-contract (`contracts/api/`), via API Gateway.
+Nx monorepo for the two Radial Pulse apps, **Studio** and **Clinic**. The
+Python backend lives in a separate repository; this repo talks to it only
+through the published API contract (`contracts/api/`), via API Gateway.
 
-| App           | Who uses it                                     | Built with                                       |
-| ------------- | ----------------------------------------------- | ------------------------------------------------ |
-| `apps/web`    | Platform Administrator, Digital Success Manager | React + Vite, TanStack Router and Query          |
-| `apps/mobile` | Clinic Administrator (one or more clinics)      | Expo (React Native), Expo Router, TanStack Query |
+| Product    | Release                         | Path          | Who uses it                                                         | Built with                                       |
+| ---------- | ------------------------------- | ------------- | ------------------------------------------------------------------- | ------------------------------------------------ |
+| **Studio** | **V1** (the only V1 deployment) | `apps/web`    | Radial Pulse staff: Platform Administrator, Digital Success Manager | React + Vite, TanStack Router and Query          |
+| **Clinic** | **V2** (not deployed in V1)     | `apps/mobile` | Clinic Administrator (one or more clinics)                          | Expo (React Native), Expo Router, TanStack Query |
+
+**V1 = Studio only.** The Clinic app, Client Collaboration (chat) and voice
+samples are V2: their code stays here and keeps passing CI, but they are not
+part of V1 deployment or acceptance. Studio switches its V2 features off in
+`apps/web/src/app/release.ts`, and clinic accounts get a "can't use Studio"
+screen. Media in V1 is photos only. Scope:
+[docs/scope-v1.md](docs/scope-v1.md).
+
+Studio and Clinic are the product names; the technical paths, package names
+(`@radial-pulse/web`, `@radial-pulse/mobile`) and scripts keep `web` / `mobile`.
+Coding agents: start with [AGENTS.md](AGENTS.md).
 
 ## Status
 
 - **Built:** design system, platform shell, API client and contract pipeline,
-  the V1 web portal (dashboards, clinics, clinic details, audit, social media,
-  chat, users, settings) and the Clinic Administrator mobile app (home,
-  insights, social media, reports, profile, chat, connect accounts).
-- **Data:** API contract 0.3.0 (unreleased). While the backend is not
+  Studio (V1: dashboards, clinics, clinic details, assessments, social media,
+  photo review, users, settings; plus V2 code for chat and voice samples) and
+  Clinic for Clinic Administrators (V2: home, insights, social media,
+  assessments, profile, media upload, chat, connect accounts).
+- **Data:** API contract 0.3.1 (unreleased). While the backend is not
   deployed, both apps run on contract-based mock data (never in prod).
 - **Sign-in (Phase 7):** Cognito Managed Login, email and password,
   Authorization Code + PKCE ([docs/phase-7-auth.md](docs/phase-7-auth.md)).
@@ -33,27 +45,27 @@ pnpm affected        # lint, typecheck, test, build for changed projects
 pnpm nx graph        # dependency graph
 ```
 
-The web portal and the mobile app are separate apps and run as separate
-processes; neither needs the other running. Start each in its own terminal:
+Studio and Clinic are separate apps and run as separate processes; neither
+needs the other running. Start each in its own terminal:
 
 ```bash
-pnpm dev:web         # web portal (staff) on http://localhost:4200
-pnpm dev:mobile      # Clinic Administrator app: Expo dev server (Expo Go / device)
-pnpm dev:mobile:web  # Clinic Administrator app in a browser on http://localhost:8081
+pnpm dev:web         # Studio (staff) on http://localhost:4200
+pnpm dev:mobile      # Clinic (V2): Expo dev server (Expo Go / device)
+pnpm dev:mobile:web  # Clinic (V2) in a browser on http://localhost:8081
 ```
 
 With API mocking on (`apps/web/public/config.json`, and `apps/mobile/.env`
 with `EXPO_PUBLIC_API_MOCKING=true`), each app serves its own contract mocks:
-web through a service worker, mobile in-process. Real Cognito sign-in on
-mobile needs a development or store build, because Cognito only redirects to
+Studio through a service worker, Clinic in-process. Real Cognito sign-in in
+Clinic needs a development or store build, because Cognito only redirects to
 the app's registered scheme (Expo Go uses an `exp://` address).
 
 ## How it fits together
 
 ```
-         apps/web (staff)                  apps/mobile (Clinic Administrator)
+      Studio: apps/web (staff)          Clinic: apps/mobile (Clinic Administrator)
    modules: dashboard, clinics,         modules: home, insights, social-media,
-   assessments, social-media, chat,     reports, profile, chat, connect-accounts
+   assessments, social-media, chat,     assessments, profile, chat, connect-accounts
    users, settings
                  \                                  /
                   \        feature modules         /
@@ -88,9 +100,9 @@ Details: [docs/architecture.md](docs/architecture.md),
 
 | I'm adding…                                          | Put it in                                                                                          |
 | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| A screen or feature-specific component               | `apps/<web\|mobile>/src/modules/<feature>/`                                                        |
+| A screen or feature-specific component               | `apps/web/src/modules/<feature>/` (Studio), `apps/mobile/src/modules/<feature>/` (Clinic)          |
 | A new navigation entry or clinic tab                 | that module's `manifest.ts`, registered in the app's `module-registry.ts`                          |
-| Something two modules of one app share               | `apps/web/src/app/` or `apps/mobile/src/shell/` (modules never import each other)                  |
+| Something two modules of one app share               | `apps/web/src/app/` (Studio) or `apps/mobile/src/shell/` (Clinic); modules never import each other |
 | A call to a new API operation                        | `packages/api-client/src/services/<domain>.ts` + a hook in `src/react/<domain>.ts`                 |
 | A mock for that operation (dev/test only)            | `packages/api-client/src/mocks/`, only if the operation is in the contract                         |
 | A generic, reusable component (no feature knowledge) | `packages/ui/src/{shared,web,native}`                                                              |
@@ -105,7 +117,7 @@ Details: [docs/architecture.md](docs/architecture.md),
 Lint fails the build if any of these is broken
 (`eslint.config.mjs`, `@nx/enforce-module-boundaries`):
 
-- Packages never import apps; web code never imports native code and vice versa.
+- Packages never import apps; web (Studio) code never imports native (Clinic) code and vice versa.
 - Feature modules never import each other.
 - `ui` depends only on tokens, types and utils (no feature code).
 - `utils`, `shared-types`, `config` and `design-tokens` import no React.
@@ -117,7 +129,7 @@ Lint fails the build if any of these is broken
 
 | Area                                                             | Owner                                   |
 | ---------------------------------------------------------------- | --------------------------------------- |
-| This repository (web, mobile, shared packages)                   | Frontend (Central Tech)                 |
+| This repository (Studio, Clinic, shared packages)                | Frontend (Central Tech)                 |
 | API contract, auth, permissions, data                            | Backend team                            |
 | Scores, severities, findings, improvement opportunities, metrics | Domain / engine teams (via the backend) |
 | AWS, Cognito, CloudFront, EAS builds                             | DevOps                                  |
@@ -126,6 +138,8 @@ Lint fails the build if any of these is broken
 improvement opportunities or improvement work items.** It shows what the API returns.
 
 ## Read before contributing
+
+Coding agents start with [AGENTS.md](AGENTS.md) (repository map, rules, workflow).
 
 1. [docs/responsibilities.md](docs/responsibilities.md) — what Central Tech owns vs. domain teams.
 2. [docs/scope-v1.md](docs/scope-v1.md) — what is in and explicitly out of V1.

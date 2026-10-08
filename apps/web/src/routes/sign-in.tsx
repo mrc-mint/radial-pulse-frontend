@@ -67,8 +67,8 @@ function SignInPage() {
                 Sign in
               </Button>
               <p className="rp-sign-in__note">
-                You’ll continue on the secure Radial Pulse sign-in page. Clinic Administrators use
-                the Radial Pulse mobile app.
+                You’ll continue on the secure Radial Pulse sign-in page. Studio is for the Radial
+                Pulse team; clinic accounts are not supported yet.
               </p>
             </>
           ) : signInOptions.length > 0 ? (

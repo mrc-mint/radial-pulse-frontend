@@ -41,6 +41,7 @@ jobs:
       - name: Lint, typecheck, test, build (affected)
         run: pnpm nx affected -t lint typecheck test build --parallel=3
 
-# Deploy workflows (web → S3 + CloudFront via GitHub OIDC; mobile → EAS) are
-# added once the dev environment exists. Prod deploys will be gated by a
+# Deploy workflows are added once the dev environment exists. V1 deploys
+# Studio only (apps/web → S3 + CloudFront via GitHub OIDC); Clinic
+# (apps/mobile → EAS) is V2 and only runs lint/typecheck/test in CI. Prod deploys will be gated by a
 # GitHub Environment with required reviewers.

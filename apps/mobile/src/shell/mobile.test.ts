@@ -5,7 +5,7 @@ import { mockConnectBrowser } from './mock-connect-browser';
 import { isTabVisible, TAB_SECTIONS } from './module-registry';
 import { createChunkedSecureStorage } from './secure-token-storage';
 
-// The mobile app's API path (in-process contract mocks behind the client's
+// Clinic's API path (in-process contract mocks behind the client's
 // fetch) is tested with the mocks in packages/api-client (mocks/in-process).
 
 describe('tabs', () => {

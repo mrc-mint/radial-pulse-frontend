@@ -1,14 +1,14 @@
 # @radial-pulse/platform-shell
 
-The application frame shared by web and mobile: who is signed in, which
+The application frame shared by Studio (web) and Clinic (mobile): who is signed in, which
 clinic is in view, what the person may see, and the layout around the
 screens. It is deliberately thin; feature logic lives in the apps' modules.
 
 | Entry     | Contents                                                                                                                                                                                                   |
 | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/core`   | Session (`sessionFromMe`, controller, sign-in providers, `createAppServices`), product experience, clinic context, permissions (`useCan`, `useClinicCan`), module manifests and navigation, config context |
-| `/web`    | Web app shell (sidebar, header), clinic workspace frame, full-page states, brand                                                                                                                           |
-| `/native` | Mobile layout pieces: screen container, chat button, clinic switcher, full-screen states, brand                                                                                                            |
+| `/web`    | Studio app shell (sidebar, header), clinic workspace frame, full-page states, brand                                                                                                                        |
+| `/native` | Clinic layout pieces: screen container, chat button, clinic switcher, full-screen states, brand                                                                                                            |
 
 ## Belongs here
 

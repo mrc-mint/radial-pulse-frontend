@@ -20,8 +20,8 @@ three personas whose permissions mirror the backend RBAC table
 (Platform Administrator, Digital Success Manager, Clinic Administrator).
 `__mock-storage` stands in for pre-signed object-storage URLs.
 
-Web runs the handlers in a service worker (`msw/browser`). React Native has
-none, so the mobile app uses `createMockFetch()`: the API client's fetch asks
+Studio runs the handlers in a service worker (`msw/browser`). React Native has
+none, so the Clinic app uses `createMockFetch()`: the API client's fetch asks
 the handlers first (`getResponse`), in-process.
 
 | Operation                                                                                         | Contract version | Reason                                                                                                                                                                           |

@@ -9,7 +9,7 @@ import { assessmentsModule } from '../modules/assessments/manifest';
 import { socialMediaModule } from '../modules/social-media/manifest';
 
 /**
- * The ONE list of modules the mobile app includes (enforces docs/scope-v1.md).
+ * The ONE list of modules the Clinic app includes (enforces docs/scope-v1.md).
  * Clinic Administrator experience only: no Clinic Team Member modules.
  */
 export const mobileModules: ReadonlyArray<ModuleManifest> = [

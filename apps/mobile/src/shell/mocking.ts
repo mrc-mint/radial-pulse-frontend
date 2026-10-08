@@ -25,7 +25,7 @@ export function startMocking(config: AppConfig): MockServices {
   // player load URLs natively, outside this in-process fetch.
   const fetch = createMockFetch({ baseUrl: config.apiBaseUrl, latencyMs: 300, inlineMedia: true });
   return {
-    // The mobile app is for Clinic Administrators; the other personas stay
+    // Clinic is for Clinic Administrators; the other personas stay
     // available to check the "use the web portal" screen.
     auth: createMockAuth(config, MOCK_PERSONAS, MOCK_TOKEN_PREFIX),
     fetch,
