@@ -30,6 +30,9 @@ const server = setupServer();
 beforeAll(() => {
   // jsdom has no layout; the router's scroll restoration calls scrollTo.
   window.scrollTo = () => {};
+  // jsdom lacks CSS.escape, which React Aria's collections use (browsers have it).
+  globalThis.CSS ??= {} as typeof CSS;
+  CSS.escape ??= (value: string) => value.replace(/([^\w-])/g, '\\$1');
   server.listen({ onUnhandledRequest: 'error' });
 });
 afterEach(() => {
@@ -107,8 +110,11 @@ describe('web app against the contract mocks', () => {
   it('lists clinics by status, with inactive (archived) clinics on their own tab', async () => {
     const user = userEvent.setup();
     await renderApp('/clinics', 'platform-administrator');
-    const tabs = within(await screen.findByRole('tablist', { name: 'Filter by status' }));
-    expect(tabs.getAllByRole('tab').map((t) => t.firstChild?.textContent)).toEqual([
+    // Filter-only tabs are a radio group (no panels to control).
+    const tabs = within(await screen.findByRole('radiogroup', { name: 'Filter by status' }));
+    expect(
+      tabs.getAllByRole('radio').map((r) => r.closest('label')?.childNodes[1]?.textContent),
+    ).toEqual([
       'All client organizations',
       'Active',
       'Prospective clients',
@@ -121,12 +127,11 @@ describe('web app against the contract mocks', () => {
     expect(screen.queryByText('Profile enriched')).toBeNull();
     expect(screen.queryByText('Client discussion')).toBeNull();
 
-    await user.click(tabs.getByRole('tab', { name: /Inactive/ }));
+    await user.click(tabs.getByRole('radio', { name: /Inactive/ }));
     expect(await screen.findByRole('link', { name: 'Lotus Dental Studio' })).toBeTruthy();
     expect(screen.getByText('Showing 1–2 of 2 client organizations')).toBeTruthy();
-    expect((screen.getByRole('combobox', { name: 'Status' }) as HTMLSelectElement).value).toBe(
-      'inactive',
-    );
+    // React Aria select: a button named by its label and current value.
+    expect(screen.getByRole('button', { name: /Status/ }).textContent).toContain('Inactive');
 
     await user.click(screen.getByRole('button', { name: 'Reset' }));
     expect(await screen.findByText('Showing 1–10 of 12 client organizations')).toBeTruthy();
@@ -152,7 +157,7 @@ describe('web app against the contract mocks', () => {
     const highlights = await screen.findByRole('list', { name: 'Key highlights' });
     expect(within(highlights).getByText(/new prospects? added this month/)).toBeTruthy();
     expect(within(highlights).getByText(/% of prospects have a website/)).toBeTruthy();
-    expect(screen.getByRole('combobox', { name: 'Growth measure' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Growth measure/ })).toBeTruthy();
     // Digital Success Manager widgets are not part of this dashboard.
     expect(screen.queryByRole('region', { name: 'Assessments awaiting review' })).toBeNull();
     expect(screen.queryByText('Recent conversations')).toBeNull();
@@ -283,7 +288,7 @@ describe('web app against the contract mocks', () => {
       expect(screen.getByRole('heading', { name: 'Exterior & signage' })).toBeTruthy();
       expect(screen.getByRole('heading', { name: 'Logo & cover photo' })).toBeTruthy();
       expect(screen.getAllByText('90° L').length).toBeGreaterThan(0);
-      expect(screen.getByRole('tab', { name: 'Without apron' })).toBeTruthy();
+      expect(screen.getByRole('radio', { name: 'Without apron' })).toBeTruthy();
 
       // Staff never upload, replace, delete or download here.
       expect(container.querySelector('input[type="file"]')).toBeNull();
@@ -348,7 +353,7 @@ describe('web app against the contract mocks', () => {
     // Media is photos only.
     await user.click(screen.getByRole('link', { name: 'Media' }));
     expect(await screen.findByRole('heading', { name: 'Practitioner photos' })).toBeTruthy();
-    expect(screen.queryByRole('tab', { name: /Voice samples/ })).toBeNull();
+    expect(screen.queryByRole('radio', { name: /Voice samples/ })).toBeNull();
     expect(screen.queryByText(/Voice samples/)).toBeNull();
 
     // No claim that clients connect accounts from an app that is not in V1.

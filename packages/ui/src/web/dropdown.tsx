@@ -1,18 +1,9 @@
-import {
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent,
-  type ReactNode,
-} from 'react';
-import { createPortal } from 'react-dom';
+import type { ReactNode } from 'react';
+import { Menu, MenuItem, MenuTrigger, Popover } from 'react-aria-components';
 import type { ButtonVariant } from '../shared';
 import { Button, IconButton } from './button';
-import './dropdown.css';
-import { ChevronDownIcon, cx, MoreIcon } from './internal';
+import { ChevronDownIcon, MoreIcon } from './internal';
+import { cn } from './lib/utils';
 
 export interface DropdownItem {
   id: string;
@@ -34,11 +25,11 @@ export interface DropdownMenuProps {
   size?: 'sm' | 'md';
 }
 
-const GAP = 4;
-
 /**
- * Action menu (WAI-ARIA menu button). Rendered in a portal with fixed
- * positioning so table scroll containers never clip it.
+ * Action menu (WAI-ARIA menu button) from React Aria: arrow keys, Home/End,
+ * typeahead, Escape and focus return. The popover is portalled and
+ * positioned against the trigger (flips when there is no room), so table
+ * scroll containers never clip it.
  */
 export function DropdownMenu({
   label,
@@ -48,172 +39,57 @@ export function DropdownMenu({
   align = 'end',
   size = 'md',
 }: DropdownMenuProps) {
-  const [open, setOpen] = useState(false);
-  const [style, setStyle] = useState<CSSProperties>({});
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const focusOnOpen = useRef<'first' | 'last'>('first');
-  const menuId = `rp-menu-${useId()}`;
-
-  const itemEls = () =>
-    Array.from(
-      menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not(:disabled)') ??
-        [],
-    );
-
-  function close(restoreFocus = true) {
-    setOpen(false);
-    if (restoreFocus) triggerRef.current?.focus();
-  }
-
-  function openWith(focus: 'first' | 'last') {
-    focusOnOpen.current = focus;
-    setOpen(true);
-  }
-
-  // Position against the trigger, flipping above when there is no room below.
-  useLayoutEffect(() => {
-    if (!open || !triggerRef.current || !menuRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    const menuHeight = menuRef.current.offsetHeight;
-    const below = rect.bottom + GAP;
-    const top =
-      below + menuHeight > window.innerHeight && rect.top - GAP - menuHeight > 0
-        ? rect.top - GAP - menuHeight
-        : below;
-    setStyle(
-      align === 'end'
-        ? { top, right: Math.max(GAP, window.innerWidth - rect.right) }
-        : { top, left: Math.max(GAP, rect.left) },
-    );
-    const els = Array.from(
-      menuRef.current.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not(:disabled)'),
-    );
-    (focusOnOpen.current === 'first' ? els[0] : els[els.length - 1])?.focus();
-  }, [open, align]);
-
-  // Close on outside pointer, scroll or resize.
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (!menuRef.current?.contains(target) && !triggerRef.current?.contains(target)) {
-        setOpen(false);
-      }
-    };
-    const onViewportChange = (e: Event) => {
-      if (e.target instanceof Node && menuRef.current?.contains(e.target)) return;
-      setOpen(false);
-    };
-    document.addEventListener('pointerdown', onPointerDown);
-    window.addEventListener('resize', onViewportChange);
-    window.addEventListener('scroll', onViewportChange, true);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      window.removeEventListener('resize', onViewportChange);
-      window.removeEventListener('scroll', onViewportChange, true);
-    };
-  }, [open]);
-
-  function onTriggerKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-      event.preventDefault();
-      openWith(event.key === 'ArrowDown' ? 'first' : 'last');
-    }
-  }
-
-  function onMenuKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const els = itemEls();
-    const index = els.indexOf(document.activeElement as HTMLButtonElement);
-    const move = (i: number) => els[(i + els.length) % els.length]?.focus();
-    switch (event.key) {
-      case 'ArrowDown':
-        event.preventDefault();
-        move(index + 1);
-        break;
-      case 'ArrowUp':
-        event.preventDefault();
-        move(index - 1);
-        break;
-      case 'Home':
-        event.preventDefault();
-        move(0);
-        break;
-      case 'End':
-        event.preventDefault();
-        move(els.length - 1);
-        break;
-      case 'Escape':
-        event.preventDefault();
-        event.stopPropagation();
-        close();
-        break;
-      case 'Tab':
-        close(false);
-        break;
-    }
-  }
-
-  const triggerProps = {
-    ref: triggerRef,
-    'aria-haspopup': 'menu' as const,
-    'aria-expanded': open,
-    'aria-controls': open ? menuId : undefined,
-    onClick: () => (open ? close(false) : openWith('first')),
-    onKeyDown: onTriggerKeyDown,
-  };
-
+  const byId = new Map(items.map((i) => [i.id, i]));
   return (
-    <>
+    <MenuTrigger>
       {trigger === 'icon' ? (
-        <IconButton
-          {...triggerProps}
-          icon={<MoreIcon />}
-          label={label}
-          variant={triggerVariant}
-          size={size}
-        />
+        <IconButton icon={<MoreIcon />} label={label} variant={triggerVariant} size={size} />
       ) : (
-        <Button
-          {...triggerProps}
-          variant={triggerVariant}
-          size={size}
-          trailingIcon={<ChevronDownIcon />}
-        >
+        <Button variant={triggerVariant} size={size} trailingIcon={<ChevronDownIcon />}>
           {label}
         </Button>
       )}
-      {open &&
-        createPortal(
-          <div
-            ref={menuRef}
-            id={menuId}
-            role="menu"
-            aria-label={label}
-            className="rp-menu"
-            style={style}
-            onKeyDown={onMenuKeyDown}
-          >
-            {items.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                role="menuitem"
-                tabIndex={-1}
-                disabled={item.disabled}
-                className={cx('rp-menu__item', item.tone === 'danger' && 'rp-menu__item--danger')}
-                onClick={() => {
-                  close();
-                  item.onSelect();
-                }}
-              >
-                {item.icon && <span className="rp-menu__icon">{item.icon}</span>}
-                {item.label}
-              </button>
-            ))}
-          </div>,
-          document.body,
+      <Popover
+        placement={align === 'end' ? 'bottom end' : 'bottom start'}
+        offset={4}
+        className={cn(
+          'z-(--rp-z-index-dropdown) min-w-[180px] max-w-[280px] rounded-md border border-border bg-surface p-1 shadow-lg',
+          'outline-none data-[entering]:animate-rp-pop-in motion-reduce:animate-none',
         )}
-    </>
+      >
+        <Menu
+          aria-label={label}
+          disabledKeys={items.filter((i) => i.disabled).map((i) => i.id)}
+          onAction={(key) => byId.get(String(key))?.onSelect()}
+          className="flex flex-col outline-none"
+        >
+          {items.map((item) => (
+            <MenuItem
+              key={item.id}
+              id={item.id}
+              textValue={item.label}
+              className={cn(
+                'group flex min-h-[34px] w-full cursor-pointer items-center gap-2 rounded-sm px-3 text-body-sm outline-none',
+                item.tone === 'danger' ? 'text-danger' : 'text-foreground',
+                'data-[focused]:bg-muted data-[hovered]:bg-muted',
+                'data-[disabled]:cursor-not-allowed data-[disabled]:text-disabled',
+              )}
+            >
+              {item.icon && (
+                <span
+                  className={cn(
+                    'inline-flex',
+                    item.tone === 'danger' ? 'text-inherit' : 'text-muted-foreground',
+                  )}
+                >
+                  {item.icon}
+                </span>
+              )}
+              {item.label}
+            </MenuItem>
+          ))}
+        </Menu>
+      </Popover>
+    </MenuTrigger>
   );
 }
