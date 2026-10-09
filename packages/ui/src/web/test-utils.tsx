@@ -7,6 +7,10 @@ import { createRoot } from 'react-dom/client';
  */
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
+// jsdom lacks CSS.escape, which React Aria's collections use (browsers have it).
+const css = ((globalThis as { CSS?: { escape?: (value: string) => string } }).CSS ??= {});
+css.escape ??= (value: string) => value.replace(/([^\w-])/g, '\\$1');
+
 const mounted = new Set<() => void>();
 
 export function render(ui: ReactNode) {

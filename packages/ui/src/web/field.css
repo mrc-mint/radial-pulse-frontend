@@ -1,3 +1,8 @@
+/*
+ * Field label, hint and error. Kept as CSS (not Tailwind) because app forms
+ * reuse these classes for their own labelled groups. The control boxes are
+ * Tailwind (field.tsx).
+ */
 .rp-field {
   display: flex;
   flex-direction: column;
@@ -30,114 +35,4 @@
 
 .rp-field__error {
   color: var(--rp-color-status-danger-fg);
-}
-
-.rp-control {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--rp-space-2);
-  height: var(--rp-size-control-md);
-  padding: 0 var(--rp-space-3);
-  border: 1px solid var(--rp-color-border-default);
-  border-radius: var(--rp-radius-md);
-  background: var(--rp-color-bg-surface);
-  color: var(--rp-color-text-primary);
-  transition:
-    border-color var(--rp-motion-duration-fast) var(--rp-motion-easing-standard),
-    box-shadow var(--rp-motion-duration-fast) var(--rp-motion-easing-standard);
-}
-
-.rp-control:hover:not([data-disabled]) {
-  border-color: var(--rp-color-border-strong);
-}
-
-.rp-control:focus-within {
-  border-color: var(--rp-color-border-focus);
-  box-shadow: var(--rp-shadow-focus);
-}
-
-.rp-control[data-invalid] {
-  border-color: var(--rp-color-status-danger-solid);
-}
-
-.rp-control[data-disabled] {
-  background: var(--rp-color-bg-muted);
-  color: var(--rp-color-text-disabled);
-}
-
-.rp-control--sm {
-  height: var(--rp-size-control-sm);
-  border-radius: var(--rp-radius-sm);
-}
-
-.rp-control--lg {
-  height: var(--rp-size-control-lg);
-}
-
-.rp-control__input {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  outline: none;
-  background: transparent;
-  color: inherit;
-  font-family: inherit;
-  font-size: var(--rp-text-body-size);
-  line-height: var(--rp-text-body-line-height);
-}
-
-.rp-control__input::placeholder {
-  color: var(--rp-color-text-disabled);
-}
-
-.rp-control__input:disabled {
-  cursor: not-allowed;
-}
-
-/* Hide the browser's own search clear button: SearchInput renders one. */
-.rp-control__input[type='search']::-webkit-search-cancel-button {
-  appearance: none;
-}
-
-.rp-control__adornment {
-  display: inline-flex;
-  flex-shrink: 0;
-  color: var(--rp-color-text-tertiary);
-}
-
-.rp-control--select {
-  padding: 0;
-}
-
-.rp-control--select .rp-control__input {
-  padding: 0 calc(var(--rp-space-3) + 20px) 0 var(--rp-space-3);
-  appearance: none;
-  cursor: pointer;
-}
-
-.rp-control__chevron {
-  position: absolute;
-  right: var(--rp-space-3);
-  pointer-events: none;
-}
-
-.rp-control__clear {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: 0;
-  border-radius: var(--rp-radius-full);
-  background: var(--rp-color-bg-muted);
-  color: var(--rp-color-text-secondary);
-  cursor: pointer;
-}
-
-.rp-control__clear:hover {
-  background: var(--rp-color-border-default);
 }

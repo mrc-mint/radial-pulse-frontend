@@ -2,11 +2,16 @@
  * @radial-pulse/ui/web — DOM implementations. Presentational only: components
  * receive data and never fetch.
  *
- * Styling is plain CSS over the token variables; the app must load
- * `@radial-pulse/design-tokens/css` once at the root. Component styles are
- * imported by each component module (hence `sideEffects: ["*.css"]`).
+ * Styling: interactive components (Button, Select, Modal/Drawer, Tabs,
+ * DropdownMenu, Input) are shadcn-style — React Aria Components for
+ * behaviour, Tailwind classes (tailwind.css, mapped onto the token variables)
+ * for styling. The rest is plain CSS over the token variables. The app must
+ * load `@radial-pulse/design-tokens/css` once at the root and run Tailwind's
+ * Vite plugin. Styles are imported by the modules and by this entry, which
+ * `sideEffects` in package.json marks as side-effectful so bundling keeps them.
  */
 import './base.css';
+import './tailwind.css';
 
 export type * from '../shared';
 export {

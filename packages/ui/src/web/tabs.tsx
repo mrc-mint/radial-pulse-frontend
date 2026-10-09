@@ -1,7 +1,7 @@
-import { useId, useRef, type KeyboardEvent, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { Radio, RadioGroup, Tab, TabList, TabPanel, Tabs as AriaTabs } from 'react-aria-components';
 import type { TabsBaseProps } from '../shared';
-import { cx } from './internal';
-import './tabs.css';
+import { cn } from './lib/utils';
 
 export interface TabsProps<V extends string = string> extends TabsBaseProps<V> {
   /** Content of the selected tab. Omit when the tabs only filter a list below. */
@@ -9,9 +9,36 @@ export interface TabsProps<V extends string = string> extends TabsBaseProps<V> {
   className?: string;
 }
 
+const LIST = 'flex gap-1 overflow-x-auto border-b border-border [scrollbar-width:none]';
+
+/** One look for both patterns; `data-selected` is set by Tab and Radio alike. */
+const TAB = cn(
+  'group relative inline-flex h-10 cursor-pointer items-center gap-2 whitespace-nowrap rounded-t-sm border-0 bg-transparent px-3',
+  'text-label font-medium text-secondary-foreground outline-none [font-family:inherit]',
+  "after:absolute after:inset-x-2 after:-bottom-px after:h-0.5 after:rounded-t-[2px] after:content-['']",
+  'hover:not-data-[disabled]:text-foreground',
+  'data-[selected]:font-semibold data-[selected]:text-link data-[selected]:after:bg-primary',
+  'select-none data-[focus-visible]:shadow-[inset_var(--rp-shadow-focus)]',
+  'data-[disabled]:cursor-not-allowed data-[disabled]:text-disabled',
+);
+
+const COUNT = cn(
+  'inline-flex h-5 items-center rounded-full bg-muted px-1.5 text-caption font-medium text-secondary-foreground',
+  'group-data-[selected]:bg-brand-subtle group-data-[selected]:text-brand',
+);
+
 /**
- * WAI-ARIA tabs with automatic activation: arrow keys move and select,
- * Home/End jump. Only the selected tab is in the tab order.
+ * Two accessible patterns, chosen by whether there is panel content:
+ *
+ * - With `children`: WAI-ARIA tabs (React Aria Tabs). Automatic activation:
+ *   arrow keys move and select, Home/End jump; the panel is labelled by the
+ *   selected tab.
+ * - Without `children` (the tabs only filter content rendered elsewhere): a
+ *   radio group (React Aria RadioGroup), so nothing points at a panel that
+ *   does not exist. One tab stop; arrow keys move and select, disabled
+ *   options are skipped, and the choice is announced as checked.
+ *
+ * Both look the same.
  */
 export function Tabs<V extends string = string>({
   label,
@@ -21,70 +48,52 @@ export function Tabs<V extends string = string>({
   children,
   className,
 }: TabsProps<V>) {
-  const baseId = `rp-tabs-${useId()}`;
-  const refs = useRef(new Map<V, HTMLButtonElement>());
-  const enabled = items.filter((i) => !i.disabled);
-  const tabId = (v: V) => `${baseId}-tab-${v}`;
-  const panelId = `${baseId}-panel`;
+  const content = (item: TabsProps<V>['items'][number]) => (
+    <>
+      {item.label}
+      {item.count !== undefined && <span className={COUNT}>{item.count.toLocaleString()}</span>}
+    </>
+  );
 
-  function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const index = enabled.findIndex((i) => i.value === value);
-    const last = enabled.length - 1;
-    const next = {
-      ArrowRight: index >= last ? 0 : index + 1,
-      ArrowLeft: index <= 0 ? last : index - 1,
-      Home: 0,
-      End: last,
-    }[event.key];
-    if (next === undefined) return;
-    event.preventDefault();
-    const target = enabled[next];
-    if (!target) return;
-    onChange(target.value);
-    refs.current.get(target.value)?.focus();
+  if (children === undefined) {
+    return (
+      <RadioGroup
+        aria-label={label}
+        orientation="horizontal"
+        value={value}
+        onChange={(next) => onChange(next as V)}
+        className={cn(LIST, className)}
+      >
+        {items.map((item) => (
+          <Radio key={item.value} value={item.value} isDisabled={item.disabled} className={TAB}>
+            {content(item)}
+          </Radio>
+        ))}
+      </RadioGroup>
+    );
   }
 
   return (
-    <div className={cx('rp-tabs', className)}>
-      <div role="tablist" aria-label={label} className="rp-tabs__list" onKeyDown={onKeyDown}>
-        {items.map((item) => {
-          const selected = item.value === value;
-          return (
-            <button
-              key={item.value}
-              ref={(el) => {
-                if (el) refs.current.set(item.value, el);
-                else refs.current.delete(item.value);
-              }}
-              type="button"
-              role="tab"
-              id={tabId(item.value)}
-              aria-selected={selected}
-              aria-controls={children !== undefined && selected ? panelId : undefined}
-              tabIndex={selected ? 0 : -1}
-              disabled={item.disabled}
-              className="rp-tabs__tab"
-              onClick={() => onChange(item.value)}
-            >
-              {item.label}
-              {item.count !== undefined && (
-                <span className="rp-tabs__count">{item.count.toLocaleString()}</span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-      {children !== undefined && (
-        <div
-          role="tabpanel"
-          id={panelId}
-          aria-labelledby={tabId(value)}
-          tabIndex={0}
-          className="rp-tabs__panel"
-        >
-          {children}
-        </div>
-      )}
-    </div>
+    <AriaTabs
+      selectedKey={value}
+      onSelectionChange={(key) => onChange(String(key) as V)}
+      disabledKeys={items.filter((i) => i.disabled).map((i) => i.value)}
+      keyboardActivation="automatic"
+      className={className}
+    >
+      <TabList aria-label={label} className={LIST}>
+        {items.map((item) => (
+          <Tab key={item.value} id={item.value} className={TAB}>
+            {content(item)}
+          </Tab>
+        ))}
+      </TabList>
+      <TabPanel
+        id={value}
+        className="pt-5 outline-none data-[focus-visible]:rounded-sm data-[focus-visible]:shadow-focus"
+      >
+        {children}
+      </TabPanel>
+    </AriaTabs>
   );
 }

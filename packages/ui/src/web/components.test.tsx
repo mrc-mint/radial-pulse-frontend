@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
+import { act } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   Button,
+  Drawer,
   DropdownMenu,
   FindingCard,
   Input,
@@ -27,8 +29,9 @@ describe('Button', () => {
     );
     const button = getByRole('button', 'Save changes');
     expect(button.getAttribute('type')).toBe('button');
-    expect(button.getAttribute('aria-busy')).toBe('true');
-    expect((button as HTMLButtonElement).disabled).toBe(true);
+    // React Aria's pending state: still focusable, but presses are ignored.
+    expect(button.getAttribute('aria-disabled')).toBe('true');
+    expect(button.hasAttribute('data-pending')).toBe(true);
     click(button);
     expect(onClick).not.toHaveBeenCalled();
   });
@@ -67,6 +70,56 @@ describe('Select', () => {
     select.value = 'b';
     select.dispatchEvent(new Event('change', { bubbles: true }));
     expect(onChange).toHaveBeenCalledWith('b');
+  });
+
+  it('is keyboard operable: opens on ArrowDown, skips disabled options, closes on Escape', async () => {
+    const onChange = vi.fn();
+    render(
+      <Select
+        label="Status"
+        value="a"
+        onChange={onChange}
+        options={[
+          { value: 'a', label: 'Option A' },
+          { value: 'b', label: 'Option B', disabled: true },
+          { value: 'c', label: 'Option C' },
+        ]}
+      />,
+    );
+    const trigger = document.querySelector<HTMLElement>('button[aria-haspopup="listbox"]')!;
+    const labelledBy = trigger.getAttribute('aria-labelledby')!.split(' ');
+    expect(labelledBy.map((id) => document.getElementById(id)?.textContent)).toContain('Status');
+    expect(trigger.textContent).toContain('Option A');
+    act(() => trigger.focus());
+    keyDown(trigger, 'ArrowDown');
+    const listbox = getByRole('listbox');
+    // Focus lands on the selected option; the disabled one is skipped.
+    expect(document.activeElement?.textContent).toBe('Option A');
+    keyDown(document.activeElement, 'ArrowDown');
+    expect(document.activeElement?.textContent).toBe('Option C');
+    keyDown(document.activeElement, 'Enter');
+    expect(onChange).toHaveBeenCalledWith('c');
+    expect(listbox.isConnected).toBe(false);
+
+    keyDown(trigger, 'ArrowDown');
+    keyDown(document.activeElement, 'Escape');
+    expect(document.querySelector('[role="listbox"]')).toBeNull();
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    expect(document.activeElement).toBe(trigger);
+  });
+});
+
+describe('Drawer', () => {
+  it('closes on outside press and on its close button, with focus in the body', () => {
+    const onClose = vi.fn();
+    render(
+      <Drawer open title="Edit Practitioner Profile" onClose={onClose}>
+        <Input label="Full name" />
+      </Drawer>,
+    );
+    expect(document.activeElement?.tagName).toBe('INPUT');
+    click(getByRole('button', 'Close'));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -133,20 +186,46 @@ describe('Tabs', () => {
     { value: 'prospect', label: 'Prospects', count: 38 },
   ];
 
-  it('moves selection with arrow keys, skipping disabled tabs, with roving focus', () => {
+  it('filter-only: a radio group with one tab stop; arrows select and skip disabled', () => {
     const onChange = vi.fn();
     const { rerender } = render(
       <Tabs label="Clinic status" items={items} value="active" onChange={onChange} />,
     );
+    const group = getByRole('radiogroup');
+    expect(group.getAttribute('aria-label')).toBe('Clinic status');
+    // No tab or panel roles, so nothing points at a panel that does not exist.
+    expect(document.querySelector('[role="tab"], [role="tabpanel"], [aria-controls]')).toBeNull();
+    const radios = () =>
+      Array.from(document.querySelectorAll<HTMLInputElement>('input[type="radio"]'));
+    expect(radios().map((r) => r.checked)).toEqual([false, true, false, false]);
+    expect(radios()[2]?.disabled).toBe(true);
+    expect(radios().filter((r) => !r.disabled && r.tabIndex === 0)).toHaveLength(1);
+
+    act(() => radios()[1]!.focus());
+    keyDown(radios()[1], 'ArrowRight');
+    expect(onChange).toHaveBeenLastCalledWith('prospect');
+
+    rerender(<Tabs label="Clinic status" items={items} value="prospect" onChange={onChange} />);
+    expect(radios().map((r) => r.checked)).toEqual([false, false, false, true]);
+    expect(radios()[3]?.closest('label')?.textContent).toBe('Prospects38');
+  });
+
+  it('with panel content: WAI-ARIA tabs, arrows select, disabled tab skipped', () => {
+    const onChange = vi.fn();
+    render(
+      <Tabs label="Clinic sections" items={items} value="active" onChange={onChange}>
+        <p>Active content</p>
+      </Tabs>,
+    );
+    const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+    // Roving focus: only the selected tab is tabbable; the disabled one never is.
+    expect(tabs.map((t) => t.getAttribute('tabindex'))).toEqual(['-1', '0', null, '-1']);
+    expect(tabs[2]?.getAttribute('aria-disabled')).toBe('true');
     const list = getByRole('tablist');
     keyDown(list, 'ArrowRight');
     expect(onChange).toHaveBeenLastCalledWith('prospect');
     keyDown(list, 'Home');
     expect(onChange).toHaveBeenLastCalledWith('all');
-
-    rerender(<Tabs label="Clinic status" items={items} value="prospect" onChange={onChange} />);
-    const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
-    expect(tabs.map((t) => t.getAttribute('tabindex'))).toEqual(['-1', '-1', '-1', '0']);
   });
 
   it('wires the panel to the selected tab', () => {
@@ -159,11 +238,15 @@ describe('Tabs', () => {
     const tab = document.getElementById(panel.getAttribute('aria-labelledby')!);
     expect(tab?.textContent).toContain('All Clinics');
     expect(tab?.getAttribute('aria-controls')).toBe(panel.id);
+    // Every aria-controls points at an element that exists.
+    for (const el of document.querySelectorAll('[aria-controls]')) {
+      expect(document.getElementById(el.getAttribute('aria-controls')!)).not.toBeNull();
+    }
   });
 });
 
 describe('Modal', () => {
-  it('is a labelled modal dialog that closes on Escape and restores focus', () => {
+  it('is a labelled modal dialog that closes on Escape and restores focus', async () => {
     const opener = document.createElement('button');
     document.body.appendChild(opener);
     opener.focus();
@@ -174,7 +257,10 @@ describe('Modal', () => {
       </Modal>,
     );
     const dialog = getByRole('dialog');
-    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    // Modal: React Aria hides everything outside the dialog from assistive tech.
+    expect(
+      opener.closest('[aria-hidden="true"]') ?? opener.getAttribute('aria-hidden'),
+    ).toBeTruthy();
     expect(document.getElementById(dialog.getAttribute('aria-labelledby')!)?.textContent).toBe(
       'Remove clinic',
     );
@@ -190,12 +276,14 @@ describe('Modal', () => {
       </Modal>,
     );
     expect(document.querySelector('[role="dialog"]')).toBeNull();
+    // React Aria restores focus on the next animation frame.
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
     expect(document.activeElement).toBe(opener);
   });
 });
 
 describe('DropdownMenu', () => {
-  it('opens, supports arrow keys and returns focus on Escape', () => {
+  it('opens, supports arrow keys and returns focus on Escape', async () => {
     const onEdit = vi.fn();
     render(
       <DropdownMenu
@@ -207,18 +295,21 @@ describe('DropdownMenu', () => {
       />,
     );
     const trigger = getByRole('button', 'Actions for Smile Dental Care');
-    click(trigger);
+    // Keyboard open (ArrowDown) focuses the first item.
+    act(() => trigger.focus());
+    keyDown(trigger, 'ArrowDown');
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
     const items = Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]'));
     expect(document.activeElement).toBe(items[0]);
 
-    keyDown(getByRole('menu'), 'ArrowDown');
+    keyDown(document.activeElement, 'ArrowDown');
     expect(document.activeElement).toBe(items[1]);
-    keyDown(getByRole('menu'), 'ArrowDown');
+    keyDown(document.activeElement, 'ArrowDown');
     expect(document.activeElement).toBe(items[0]);
 
-    keyDown(getByRole('menu'), 'Escape');
+    keyDown(document.activeElement, 'Escape');
     expect(document.querySelector('[role="menu"]')).toBeNull();
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
     expect(document.activeElement).toBe(trigger);
 
     click(trigger);

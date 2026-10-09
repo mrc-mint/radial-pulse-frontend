@@ -219,6 +219,12 @@ before a package when only that app needs the code.
 | App-level composition       | `apps/web/src/app` (Studio), `apps/mobile/src/shell` (Clinic) | page kit (QueryError, DefinitionList), shell kit (Callout, ListRow), clinic photo, assessment kit |
 | Feature-specific components | `apps/*/src/modules/<feature>`                                | clinic header, media review, Practitioner Profile screen/card                                     |
 
+Web interactive components in `packages/ui/src/web` are shadcn-style: React
+Aria Components for behaviour, Tailwind (theme mapped onto the tokens) for
+styling; see [packages/ui/README.md](packages/ui/README.md#web-shadcn--react-aria).
+Do not add Radix or another headless library next to React Aria, and do not
+use Tailwind classes in apps or feature modules.
+
 Use design-system components first. Add an app-level component when two
 modules of one app need it. Add to `ui` only when it is generic. Every
 data-showing component has loading, empty and error states (`Skeleton`,

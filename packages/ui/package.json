@@ -5,7 +5,8 @@
   "description": "Presentational components: shared contracts plus separate web and native implementations.",
   "type": "module",
   "sideEffects": [
-    "*.css"
+    "**/*.css",
+    "./src/web/index.ts"
   ],
   "exports": {
     "./shared": "./src/shared/index.ts",
@@ -26,7 +27,11 @@
     "@radial-pulse/design-tokens": "workspace:*",
     "@radial-pulse/shared-types": "workspace:*",
     "@radial-pulse/utils": "workspace:*",
-    "lucide-react": "^1.48.0"
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.48.0",
+    "react-aria-components": "~1.21.1",
+    "tailwind-merge": "^3.7.0"
   },
   "peerDependencies": {
     "react": "19.1.0",
