@@ -1,4 +1,4 @@
-import type { ModuleManifest } from '@radial-pulse/platform-shell/core';
+import type { ModuleManifest } from '@radial-pulse/shell-core';
 
 /**
  * Client Collaboration: each client organization has its own chat, reached

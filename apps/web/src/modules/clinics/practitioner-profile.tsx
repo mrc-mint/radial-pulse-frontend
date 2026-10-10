@@ -1,8 +1,8 @@
 import { isApiError } from '@radial-pulse/api-client';
-import { useClinicProfile, useUpdateClinicProfile } from '@radial-pulse/api-client/react';
-import { useClinicCan } from '@radial-pulse/platform-shell/core';
+import { useClinicProfile, useUpdateClinicProfile } from '@radial-pulse/api-client-react';
+import { useClinicCan } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
-import { Button, Card, Drawer, IconButton, Input } from '@radial-pulse/ui/web';
+import { Button, Card, Drawer, IconButton, Input } from '@radial-pulse/web-ui';
 import {
   emptyService,
   emptyWindow,

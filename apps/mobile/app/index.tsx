@@ -1,5 +1,5 @@
-import { useSession } from '@radial-pulse/platform-shell/core';
-import { FullScreenLoading } from '@radial-pulse/platform-shell/native';
+import { useSession } from '@radial-pulse/shell-core';
+import { FullScreenLoading } from '@radial-pulse/mobile-shell';
 import { Redirect } from 'expo-router';
 
 /** Launch: signed-in people go to Home, everyone else to Welcome. */

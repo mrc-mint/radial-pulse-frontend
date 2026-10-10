@@ -1,7 +1,7 @@
-import { createMockFetch, MOCK_PERSONAS, MOCK_TOKEN_PREFIX } from '@radial-pulse/api-client/mocks';
+import { createMockFetch, MOCK_PERSONAS, MOCK_TOKEN_PREFIX } from '@radial-pulse/api-mocks';
 import type { StorageFetch } from '@radial-pulse/api-client';
 import type { AppConfig } from '@radial-pulse/config';
-import { createMockAuth, type AuthProvider } from '@radial-pulse/platform-shell/core';
+import { createMockAuth, type AuthProvider } from '@radial-pulse/auth';
 import type { ConnectBrowser } from './connect-browser';
 import { mockConnectBrowser } from './mock-connect-browser';
 

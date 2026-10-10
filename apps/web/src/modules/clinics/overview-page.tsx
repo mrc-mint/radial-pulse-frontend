@@ -5,13 +5,8 @@ import {
   useSetClinicAssignment,
   useUsers,
   useWorkItems,
-} from '@radial-pulse/api-client/react';
-import {
-  useCan,
-  useClinicCan,
-  useClinicId,
-  useCurrentSession,
-} from '@radial-pulse/platform-shell/core';
+} from '@radial-pulse/api-client-react';
+import { useCan, useClinicCan, useClinicId, useCurrentSession } from '@radial-pulse/shell-core';
 import {
   Avatar,
   Badge,
@@ -24,7 +19,7 @@ import {
   Select,
   WORK_ITEM_PRIORITY_TONES,
   WORK_ITEM_STATUS_TONES,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import {
   WORK_AREA_LABELS,
   WORK_ITEM_PRIORITY_LABELS,

@@ -1,0 +1,26 @@
+{
+  "name": "@radial-pulse/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The only way the frontend talks to the platform API (via API Gateway): typed transport, error model, request ids and one service per contract operation. No React.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:data-access",
+      "platform:neutral"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/shared-types": "workspace:*",
+    "openapi-fetch": "^0.17.0"
+  }
+}

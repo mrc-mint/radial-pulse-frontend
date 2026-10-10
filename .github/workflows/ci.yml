@@ -38,8 +38,13 @@ jobs:
       - name: API contract in sync
         run: pnpm contract:check
 
-      - name: Lint, typecheck, test, build (affected)
-        run: pnpm nx affected -t lint typecheck test build --parallel=3
+      # Lints known-bad imports/globals through the real ESLint config and checks
+      # declared workspace dependencies against actual imports.
+      - name: Architecture rules enforced
+        run: pnpm architecture:check
+
+      - name: Lint, typecheck, test, build, Studio bundle check (affected)
+        run: pnpm nx affected -t lint typecheck test build verify-bundle --parallel=3
 
 # Deploy workflows are added once the dev environment exists. V1 deploys
 # Studio only (apps/web → S3 + CloudFront via GitHub OIDC); Clinic

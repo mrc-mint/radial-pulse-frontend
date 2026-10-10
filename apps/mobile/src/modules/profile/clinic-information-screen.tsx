@@ -1,9 +1,9 @@
-import { useClinic, useUpdateClinic } from '@radial-pulse/api-client/react';
+import { useClinic, useUpdateClinic } from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
-import { Screen } from '@radial-pulse/platform-shell/native';
+import { useClinicCan, useClinicId } from '@radial-pulse/shell-core';
+import { Screen } from '@radial-pulse/mobile-shell';
 import type { Schema } from '@radial-pulse/shared-types';
-import { Button, Card, Input } from '@radial-pulse/ui/native';
+import { Button, Card, Input } from '@radial-pulse/mobile-ui';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View, type TextInputProps } from 'react-native';

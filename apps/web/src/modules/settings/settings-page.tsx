@@ -1,7 +1,8 @@
-import { usePlatformSettings, useUpdatePlatformSettings } from '@radial-pulse/api-client/react';
-import { roleLabel, useCan, useCurrentSession } from '@radial-pulse/platform-shell/core';
+import { usePlatformSettings, useUpdatePlatformSettings } from '@radial-pulse/api-client-react';
+import { roleLabel } from '@radial-pulse/auth';
+import { useCan, useCurrentSession } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
-import { Avatar, Button, Card, Input, PageHeader, Select } from '@radial-pulse/ui/web';
+import { Avatar, Button, Card, Input, PageHeader, Select } from '@radial-pulse/web-ui';
 import { useState, type FormEvent } from 'react';
 import {
   CardSkeleton,

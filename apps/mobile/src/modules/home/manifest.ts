@@ -1,4 +1,4 @@
-import type { ModuleManifest } from '@radial-pulse/platform-shell/core';
+import type { ModuleManifest } from '@radial-pulse/shell-core';
 
 export const homeModule: ModuleManifest = {
   id: 'home',

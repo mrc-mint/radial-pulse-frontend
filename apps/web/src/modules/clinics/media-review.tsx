@@ -1,4 +1,4 @@
-import { useAssetDownloadUrl, useReviewAsset } from '@radial-pulse/api-client/react';
+import { useAssetDownloadUrl, useReviewAsset } from '@radial-pulse/api-client-react';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   APPROVAL_STATE_TONES,
@@ -9,7 +9,7 @@ import {
   Modal,
   ProtectedAudio,
   ProtectedImage,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import { MEDIA_REVIEW_ACTION_LABELS, mediaActions, mediaReviewLabel } from '@radial-pulse/utils';
 import { ImageOff } from 'lucide-react';
 import { useState } from 'react';

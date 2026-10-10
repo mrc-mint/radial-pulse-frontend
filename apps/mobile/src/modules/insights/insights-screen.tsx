@@ -1,5 +1,5 @@
-import { Screen } from '@radial-pulse/platform-shell/native';
-import { PageHeader } from '@radial-pulse/ui/native';
+import { Screen } from '@radial-pulse/mobile-shell';
+import { PageHeader } from '@radial-pulse/mobile-ui';
 import { useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';
 import { AssessmentView, parseComponent } from './assessment-view';

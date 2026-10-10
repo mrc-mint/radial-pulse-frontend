@@ -1,10 +1,10 @@
 import { isApiError } from '@radial-pulse/api-client';
-import { useClinicProfile, useUpdateClinicProfile } from '@radial-pulse/api-client/react';
+import { useClinicProfile, useUpdateClinicProfile } from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
-import { Screen } from '@radial-pulse/platform-shell/native';
+import { useClinicCan, useClinicId } from '@radial-pulse/shell-core';
+import { Screen } from '@radial-pulse/mobile-shell';
 import type { Schema } from '@radial-pulse/shared-types';
-import { Button, Card, IconButton, Input, fontStyle, textStyle } from '@radial-pulse/ui/native';
+import { Button, Card, IconButton, Input, fontStyle, textStyle } from '@radial-pulse/mobile-ui';
 import {
   emptyService,
   emptyWindow,

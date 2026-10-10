@@ -3,7 +3,7 @@ node_modules
 dist
 .expo
 **/routeTree.gen.ts
-packages/shared-types/src/contract/generated.ts
+packages/shared/types/src/contract/generated.ts
 contracts/api/openapi.json
 # Rewritten by the Expo CLI; committed because typecheck needs it in CI.
 apps/mobile/expo-env.d.ts

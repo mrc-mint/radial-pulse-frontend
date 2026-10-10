@@ -10,7 +10,7 @@
     "typecheck": "nx run-many -t typecheck",
     "test": "nx run-many -t test",
     "build": "nx run-many -t build",
-    "affected": "nx affected -t lint typecheck test build",
+    "affected": "nx affected -t lint typecheck test build verify-bundle",
     "dev:web": "pnpm --filter @radial-pulse/web dev",
     "dev:mobile": "pnpm --filter @radial-pulse/mobile start",
     "dev:mobile:web": "pnpm --filter @radial-pulse/mobile web",
@@ -18,7 +18,8 @@
     "format:check": "prettier --check .",
     "graph": "nx graph",
     "api:sync": "node tools/scripts/api-sync.mjs",
-    "contract:check": "node tools/scripts/contract-check.mjs"
+    "contract:check": "node tools/scripts/contract-check.mjs",
+    "architecture:check": "node tools/scripts/architecture-check.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",

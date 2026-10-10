@@ -1,0 +1,42 @@
+{
+  "name": "@radial-pulse/mobile-shell",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Clinic (mobile) layout pieces: screen container, chat button, clinic switcher, full-screen states, brand.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.tsx"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:shell",
+      "platform:mobile"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/design-tokens": "workspace:*",
+    "@radial-pulse/mobile-ui": "workspace:*",
+    "@radial-pulse/shell-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.1.0",
+    "react-native": "*",
+    "lucide-react-native": "^1.48.0",
+    "react-native-svg": "*",
+    "react-native-safe-area-context": "*"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.10",
+    "lucide-react-native": "^1.48.0",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-svg": "15.12.1"
+  }
+}

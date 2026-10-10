@@ -1,8 +1,8 @@
-import { useChatInbox } from '@radial-pulse/api-client/react';
+import { useChatInbox } from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { useClinicCan, useClinicId, useClinicPermissions } from '@radial-pulse/platform-shell/core';
-import { ChatFab, NAV_ICONS } from '@radial-pulse/platform-shell/native';
-import { fontStyle } from '@radial-pulse/ui/native';
+import { useClinicCan, useClinicId, useClinicPermissions } from '@radial-pulse/shell-core';
+import { ChatFab, NAV_ICONS } from '@radial-pulse/mobile-shell';
+import { fontStyle } from '@radial-pulse/mobile-ui';
 import { Tabs, useRouter } from 'expo-router';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

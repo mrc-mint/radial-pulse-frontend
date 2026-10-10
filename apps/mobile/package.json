@@ -17,17 +17,21 @@
   "nx": {
     "tags": [
       "type:app",
-      "platform:native"
+      "platform:mobile"
     ]
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
     "@radial-pulse/api-client": "workspace:*",
+    "@radial-pulse/api-client-react": "workspace:*",
+    "@radial-pulse/api-mocks": "workspace:*",
+    "@radial-pulse/auth": "workspace:*",
     "@radial-pulse/config": "workspace:*",
     "@radial-pulse/design-tokens": "workspace:*",
-    "@radial-pulse/platform-shell": "workspace:*",
+    "@radial-pulse/mobile-shell": "workspace:*",
+    "@radial-pulse/mobile-ui": "workspace:*",
     "@radial-pulse/shared-types": "workspace:*",
-    "@radial-pulse/ui": "workspace:*",
+    "@radial-pulse/shell-core": "workspace:*",
     "@radial-pulse/utils": "workspace:*",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@tanstack/react-query": "^5.85.0",

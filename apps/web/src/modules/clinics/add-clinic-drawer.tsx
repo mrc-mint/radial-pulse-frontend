@@ -1,6 +1,6 @@
-import { useCreateClinic } from '@radial-pulse/api-client/react';
+import { useCreateClinic } from '@radial-pulse/api-client-react';
 import type { Schema } from '@radial-pulse/shared-types';
-import { Button, Drawer, Input } from '@radial-pulse/ui/web';
+import { Button, Drawer, Input } from '@radial-pulse/web-ui';
 import { useState, type FormEvent } from 'react';
 import { fieldErrors, mutationErrorMessage } from '../../app/page-kit';
 

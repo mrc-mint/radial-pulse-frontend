@@ -1,6 +1,6 @@
 import { isApiError } from '@radial-pulse/api-client';
 import { tokens as t, type StatusTone } from '@radial-pulse/design-tokens';
-import { ErrorState, fontStyle, Skeleton, textStyle } from '@radial-pulse/ui/native';
+import { ErrorState, fontStyle, Skeleton, textStyle } from '@radial-pulse/mobile-ui';
 import { ChevronRight } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';

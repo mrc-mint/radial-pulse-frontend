@@ -7,7 +7,7 @@ import {
   EmptyState,
   ErrorState,
   Skeleton,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import { CLINIC_STATUS_LABELS, clinicStatus } from '@radial-pulse/utils';
 import { Unplug } from 'lucide-react';
 import type { ReactNode } from 'react';

@@ -47,3 +47,6 @@ token, and ends the Managed Login session.
 
 Media delivery is unchanged: private S3 behind CloudFront, reached only
 through the API's short-lived download URLs.
+
+Update (ADR 0009): the provider now lives in `packages/shared/auth`
+(`@radial-pulse/auth`).

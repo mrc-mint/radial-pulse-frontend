@@ -10,7 +10,7 @@ execFileSync('node', ['tools/scripts/generate-contract-types.mjs'], { stdio: 'in
 try {
   execFileSync(
     'git',
-    ['diff', '--exit-code', '--', 'packages/shared-types/src/contract/generated.ts'],
+    ['diff', '--exit-code', '--', 'packages/shared/types/src/contract/generated.ts'],
     {
       stdio: 'inherit',
     },

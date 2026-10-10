@@ -1,6 +1,6 @@
-import { useSetClinicPhoto, useUpdateClinic } from '@radial-pulse/api-client/react';
+import { useSetClinicPhoto, useUpdateClinic } from '@radial-pulse/api-client-react';
 import type { Schema } from '@radial-pulse/shared-types';
-import { Button, Drawer, Input } from '@radial-pulse/ui/web';
+import { Button, Drawer, Input } from '@radial-pulse/web-ui';
 import { ImageUp } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
 import { fieldErrors, mutationErrorMessage } from '../../app/page-kit';

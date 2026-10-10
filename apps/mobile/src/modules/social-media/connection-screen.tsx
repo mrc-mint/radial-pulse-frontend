@@ -1,7 +1,7 @@
-import { useConnection, useDisconnectConnection } from '@radial-pulse/api-client/react';
+import { useConnection, useDisconnectConnection } from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
-import { Screen } from '@radial-pulse/platform-shell/native';
+import { useClinicCan, useClinicId } from '@radial-pulse/shell-core';
+import { Screen } from '@radial-pulse/mobile-shell';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   Badge,
@@ -12,7 +12,7 @@ import {
   formatDate,
   formatRelativeTime,
   textStyle,
-} from '@radial-pulse/ui/native';
+} from '@radial-pulse/mobile-ui';
 import { CONNECTION_STATUS_LABELS } from '@radial-pulse/utils';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';

@@ -1,7 +1,7 @@
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { useConfig, useSession } from '@radial-pulse/platform-shell/core';
-import { BrandLockup } from '@radial-pulse/platform-shell/native';
-import { Badge, Button, textStyle } from '@radial-pulse/ui/native';
+import { useConfig, useSession } from '@radial-pulse/shell-core';
+import { BrandLockup } from '@radial-pulse/mobile-shell';
+import { Badge, Button, textStyle } from '@radial-pulse/mobile-ui';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useState } from 'react';

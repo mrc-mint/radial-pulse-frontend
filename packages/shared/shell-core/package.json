@@ -1,0 +1,39 @@
+{
+  "name": "@radial-pulse/shell-core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Platform-neutral React shell: module manifests, navigation, session and permission hooks, clinic and config context.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:shell",
+      "platform:neutral"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/auth": "workspace:*",
+    "@radial-pulse/config": "workspace:*",
+    "@radial-pulse/shared-types": "workspace:*",
+    "@radial-pulse/utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.1.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "~19.1.10",
+    "@types/react-dom": "~19.1.7",
+    "jsdom": "^26.1.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  }
+}

@@ -1,6 +1,6 @@
 import { isApiError } from '@radial-pulse/api-client';
-import { useCompleteConnection, useStartConnection } from '@radial-pulse/api-client/react';
-import { useClinicId } from '@radial-pulse/platform-shell/core';
+import { useCompleteConnection, useStartConnection } from '@radial-pulse/api-client-react';
+import { useClinicId } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import * as Linking from 'expo-linking';
 import { useState } from 'react';

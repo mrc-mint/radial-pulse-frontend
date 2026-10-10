@@ -1,4 +1,4 @@
-import { useClinics, useDashboardSummary } from '@radial-pulse/api-client/react';
+import { useClinics, useDashboardSummary } from '@radial-pulse/api-client-react';
 import type { StatusTone } from '@radial-pulse/design-tokens';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
@@ -11,7 +11,7 @@ import {
   PageHeader,
   Select,
   Skeleton,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import { Link } from '@tanstack/react-router';
 import {
   ArrowRightLeft,

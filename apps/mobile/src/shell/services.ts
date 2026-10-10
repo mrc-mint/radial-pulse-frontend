@@ -1,11 +1,7 @@
 import type { ApiClient, StorageFetch } from '@radial-pulse/api-client';
-import { createQueryClient } from '@radial-pulse/api-client/react';
+import { createQueryClient } from '@radial-pulse/api-client-react';
 import { isCognitoConfigured, type AppConfig } from '@radial-pulse/config';
-import {
-  createAppServices,
-  unconfiguredAuth,
-  type SessionController,
-} from '@radial-pulse/platform-shell/core';
+import { createAppServices, unconfiguredAuth, type SessionController } from '@radial-pulse/auth';
 import type { QueryClient } from '@tanstack/react-query';
 import { loadConfig } from '../lib/config';
 import { createMobileCognitoAuth } from './cognito';

@@ -2,8 +2,8 @@ import {
   useConnections,
   usePresenceProfiles,
   useUpdatePresenceProfile,
-} from '@radial-pulse/api-client/react';
-import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
+} from '@radial-pulse/api-client-react';
+import { useClinicCan, useClinicId } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   Badge,
@@ -15,7 +15,7 @@ import {
   formatRelativeTime,
   PRESENCE_VERIFICATION_TONES,
   Tabs,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import { PRESENCE_PLATFORM_LABELS, PRESENCE_VERIFICATION_LABELS } from '@radial-pulse/utils';
 import { Check, Link2, X } from 'lucide-react';
 import { useState } from 'react';

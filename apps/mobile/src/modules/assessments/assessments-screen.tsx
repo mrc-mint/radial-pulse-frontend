@@ -1,6 +1,6 @@
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { Screen } from '@radial-pulse/platform-shell/native';
-import { Badge, Card, EmptyState, fontStyle, PageHeader, textStyle } from '@radial-pulse/ui/native';
+import { Screen } from '@radial-pulse/mobile-shell';
+import { Badge, Card, EmptyState, fontStyle, PageHeader, textStyle } from '@radial-pulse/mobile-ui';
 import { formatScore, overallScoreEmptyLabel } from '@radial-pulse/utils';
 import { useRouter } from 'expo-router';
 import { FileText } from 'lucide-react-native';

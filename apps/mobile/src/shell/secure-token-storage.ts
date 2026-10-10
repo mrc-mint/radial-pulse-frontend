@@ -1,4 +1,4 @@
-import type { AuthStorage } from '@radial-pulse/platform-shell/core';
+import type { AuthStorage } from '@radial-pulse/auth';
 
 /**
  * Sign-in tokens in the device keychain / keystore (expo-secure-store), never

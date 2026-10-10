@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { CognitoAuthError, type CognitoAuthProvider } from '@radial-pulse/platform-shell/core';
+import { CognitoAuthError, type CognitoAuthProvider } from '@radial-pulse/auth';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { authErrorMessage, completeWebSignIn, safeReturnPath } from './cognito';
 

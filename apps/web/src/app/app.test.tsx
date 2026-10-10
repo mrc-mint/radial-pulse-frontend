@@ -5,9 +5,9 @@ import {
   MOCK_PERSONAS,
   MOCK_TOKEN_PREFIX,
   type PersonaId,
-} from '@radial-pulse/api-client/mocks';
+} from '@radial-pulse/api-mocks';
 import { createConfig } from '@radial-pulse/config';
-import { createAppServices, createMockAuth } from '@radial-pulse/platform-shell/core';
+import { createAppServices, createMockAuth } from '@radial-pulse/auth';
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from '@tanstack/react-router';
@@ -24,7 +24,7 @@ const config = createConfig({
   apiMocking: true,
 });
 
-// Contract mocks (packages/api-client/src/mocks), fresh data per test.
+// Contract mocks (@radial-pulse/api-mocks), fresh data per test.
 const server = setupServer();
 
 beforeAll(() => {

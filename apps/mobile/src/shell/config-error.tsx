@@ -1,5 +1,5 @@
 import { ConfigError } from '@radial-pulse/config';
-import { FullScreenMessage } from '@radial-pulse/platform-shell/native';
+import { FullScreenMessage } from '@radial-pulse/mobile-shell';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 /** Invalid build configuration: stop with a readable message instead of failing deeper. */

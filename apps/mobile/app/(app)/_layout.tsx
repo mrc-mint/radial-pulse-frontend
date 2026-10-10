@@ -1,5 +1,5 @@
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { fontStyle } from '@radial-pulse/ui/native';
+import { fontStyle } from '@radial-pulse/mobile-ui';
 import { Stack } from 'expo-router';
 import { ClinicAdministratorGate } from '../../src/shell/clinic-administrator-gate';
 

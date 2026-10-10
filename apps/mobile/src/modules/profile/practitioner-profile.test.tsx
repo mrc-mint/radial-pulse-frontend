@@ -1,6 +1,6 @@
 // Test-only, runs in Node: the app has no React Native test renderer, so the
 // screen is rendered to static markup (see `render` below). Never ships.
-// eslint-disable-next-line no-restricted-imports
+// eslint-disable-next-line no-restricted-imports, @nx/enforce-module-boundaries -- test-only server renderer
 import { renderToStaticMarkup } from 'react-dom/server';
 import { PractitionerProfileScreen } from './practitioner-profile-screen';
 
@@ -16,15 +16,15 @@ const mockQuery: { isLoading: boolean; error: unknown; data: unknown } = {
 };
 
 jest.mock('expo-router', () => ({ Stack: { Screen: () => null } }));
-jest.mock('@radial-pulse/platform-shell/native', () => ({
+jest.mock('@radial-pulse/mobile-shell', () => ({
   Screen: ({ children }: { children: unknown }) => children,
 }));
-jest.mock('@radial-pulse/platform-shell/core', () => ({
+jest.mock('@radial-pulse/shell-core', () => ({
   useClinicId: () => 'c1000000-0000-4000-8000-000000000001',
   useClinicCan: (_clinicId: string, permission: string) =>
     permission === 'profile:write' ? mockAccess.canWrite : true,
 }));
-jest.mock('@radial-pulse/api-client/react', () => ({
+jest.mock('@radial-pulse/api-client-react', () => ({
   useClinicProfile: () => ({ ...mockQuery, isRefetching: false, refetch: jest.fn() }),
   useUpdateClinicProfile: () => ({ mutate: jest.fn(), isPending: false, isError: false }),
 }));

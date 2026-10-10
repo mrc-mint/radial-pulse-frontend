@@ -1,5 +1,5 @@
-import { AuthLayout } from '@radial-pulse/platform-shell/web';
-import { Button, Card, EmptyState } from '@radial-pulse/ui/web';
+import { AuthLayout } from '@radial-pulse/web-shell';
+import { Button, Card, EmptyState } from '@radial-pulse/web-ui';
 import { Building2 } from 'lucide-react';
 
 /**

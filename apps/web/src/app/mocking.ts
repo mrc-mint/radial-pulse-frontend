@@ -1,11 +1,7 @@
-import {
-  createMockHandlers,
-  MOCK_PERSONAS,
-  MOCK_TOKEN_PREFIX,
-} from '@radial-pulse/api-client/mocks';
+import { createMockHandlers, MOCK_PERSONAS, MOCK_TOKEN_PREFIX } from '@radial-pulse/api-mocks';
 import type { AppConfig } from '@radial-pulse/config';
 import { setupWorker } from 'msw/browser';
-import { createMockAuth, type AuthProvider } from '@radial-pulse/platform-shell/core';
+import { createMockAuth, type AuthProvider } from '@radial-pulse/auth';
 
 /**
  * DEV ONLY — loaded with a dynamic import when `apiMocking` is on, so neither

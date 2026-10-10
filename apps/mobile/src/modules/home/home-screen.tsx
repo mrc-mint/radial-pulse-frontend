@@ -1,8 +1,8 @@
-import { useConnections } from '@radial-pulse/api-client/react';
+import { useConnections } from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { useClinicCan, useClinicId, useCurrentSession } from '@radial-pulse/platform-shell/core';
-import { ClinicSwitcher, Screen } from '@radial-pulse/platform-shell/native';
-import { Card, EmptyState, sortByPriority, textStyle } from '@radial-pulse/ui/native';
+import { useClinicCan, useClinicId, useCurrentSession } from '@radial-pulse/shell-core';
+import { ClinicSwitcher, Screen } from '@radial-pulse/mobile-shell';
+import { Card, EmptyState, sortByPriority, textStyle } from '@radial-pulse/mobile-ui';
 import { useRouter } from 'expo-router';
 import { FileSearch, Link2 } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';

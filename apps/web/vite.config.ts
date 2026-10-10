@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     react(),
-    // Tailwind for @radial-pulse/ui/web (its tailwind.css limits the sources).
+    // Tailwind for @radial-pulse/web-ui (its tailwind.css limits the sources).
     tailwindcss(),
   ],
   server: { port: 4200 },

@@ -1,4 +1,4 @@
-import type { ModuleManifest } from '@radial-pulse/platform-shell/core';
+import type { ModuleManifest } from '@radial-pulse/shell-core';
 
 /** Platform Administrator only (docs/scope-v1.md): gated on `users:read`. */
 export const usersModule: ModuleManifest = {

@@ -1,5 +1,5 @@
-import type { ClinicSectionEntry, ModuleManifest } from '@radial-pulse/platform-shell/core';
-import { hasClinicPermission, type ClinicPermissionSet } from '@radial-pulse/platform-shell/core';
+import type { ClinicSectionEntry, ModuleManifest } from '@radial-pulse/shell-core';
+import { hasClinicPermission, type ClinicPermissionSet } from '@radial-pulse/shell-core';
 import { chatModule } from '../modules/chat/manifest';
 import { connectAccountsModule } from '../modules/connect-accounts/manifest';
 import { homeModule } from '../modules/home/manifest';

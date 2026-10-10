@@ -33,3 +33,8 @@ everything is gated by permissions.
 Permission values are the contract's `Permission` enum; the frontend defines no
 capability strings of its own. Route protection is a UX boundary; the API
 enforces access.
+
+Update (ADR 0009): `platform-shell/core` was split. The session controller,
+sign-in providers and `createAppServices` are in `@radial-pulse/auth`; the
+React hooks (`useSession`, `useCan`, `useClinicCan`) are in
+`@radial-pulse/shell-core`.

@@ -5,10 +5,9 @@
 
 # Cross-team surfaces: changes here always need Central Tech review.
 /contracts/                @REPLACE-ORG/central-tech
-/packages/platform-shell/  @REPLACE-ORG/central-tech
-/packages/shared-types/    @REPLACE-ORG/central-tech
-/packages/api-client/      @REPLACE-ORG/central-tech
-/packages/design-tokens/   @REPLACE-ORG/central-tech
-/packages/ui/              @REPLACE-ORG/central-tech
+/packages/shared/           @REPLACE-ORG/central-tech
+/packages/web/              @REPLACE-ORG/central-tech
+/packages/mobile/           @REPLACE-ORG/central-tech
+/tools/                     @REPLACE-ORG/central-tech
 /eslint.config.mjs         @REPLACE-ORG/central-tech
 /.github/                  @REPLACE-ORG/central-tech

@@ -2,9 +2,9 @@ import {
   useArchiveClinic,
   useChangeClinicStage,
   useRestoreClinic,
-} from '@radial-pulse/api-client/react';
+} from '@radial-pulse/api-client-react';
 import type { Schema } from '@radial-pulse/shared-types';
-import { Button, DropdownMenu, Input, Modal, Select } from '@radial-pulse/ui/web';
+import { Button, DropdownMenu, Input, Modal, Select } from '@radial-pulse/web-ui';
 import { CLINIC_STAGE_LABELS } from '@radial-pulse/utils';
 import { Archive, ArchiveRestore, ArrowRightLeft } from 'lucide-react';
 import { useState } from 'react';

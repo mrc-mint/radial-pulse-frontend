@@ -1,0 +1,27 @@
+{
+  "name": "@radial-pulse/api-mocks",
+  "version": "0.0.0",
+  "private": true,
+  "description": "DEV/TEST ONLY: MSW contract mocks, in-process mock fetch and development personas. Apps load it only from their mocking module (dynamically in Studio).",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:mocks",
+      "platform:neutral"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/api-client": "workspace:*",
+    "@radial-pulse/shared-types": "workspace:*",
+    "msw": "^2.15.0"
+  }
+}

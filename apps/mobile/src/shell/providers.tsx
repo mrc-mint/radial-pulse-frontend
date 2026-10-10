@@ -1,6 +1,6 @@
-import { ApiClientProvider } from '@radial-pulse/api-client/react';
-import { ConfigProvider, SessionProvider } from '@radial-pulse/platform-shell/core';
-import { NativeAppShell } from '@radial-pulse/platform-shell/native';
+import { ApiClientProvider } from '@radial-pulse/api-client-react';
+import { ConfigProvider, SessionProvider } from '@radial-pulse/shell-core';
+import { NativeAppShell } from '@radial-pulse/mobile-shell';
 import { focusManager, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, type ReactNode } from 'react';
 import { AppState, Platform } from 'react-native';

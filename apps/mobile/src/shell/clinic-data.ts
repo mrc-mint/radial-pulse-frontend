@@ -1,5 +1,5 @@
-import { useAssessment, useAssessments, useClinics } from '@radial-pulse/api-client/react';
-import { useClinicId } from '@radial-pulse/platform-shell/core';
+import { useAssessment, useAssessments, useClinics } from '@radial-pulse/api-client-react';
+import { useClinicId } from '@radial-pulse/shell-core';
 
 /**
  * The clinics list request used for the clinic switcher. The API scopes it to
