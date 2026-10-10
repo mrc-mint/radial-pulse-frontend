@@ -27,6 +27,7 @@ consumed as TypeScript source through its `exports` map (as in ADR 0001):
 | `packages/mobile/` | `mobile-ui`, `mobile-shell`                                                                                                          |
 
 Feature modules stay folders inside the apps (`apps/*/src/modules`).
+(Superseded by [ADR 0010](0010-feature-libraries.md): features are libraries.)
 
 Every project has exactly two tags, in each `package.json` `nx.tags`:
 

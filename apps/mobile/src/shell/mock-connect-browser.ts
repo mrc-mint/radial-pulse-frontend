@@ -1,4 +1,4 @@
-import type { ConnectBrowser } from './connect-browser';
+import type { ConnectBrowser } from '@radial-pulse/clinic-kit';
 
 /**
  * DEV ONLY (API mocking). No platform sign-in page exists in mock mode: hand

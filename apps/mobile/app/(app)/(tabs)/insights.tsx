@@ -1,1 +1,1 @@
-export { InsightsScreen as default } from '../../../src/modules/insights/insights-screen';
+export { InsightsScreen as default } from '@radial-pulse/clinic-insights';

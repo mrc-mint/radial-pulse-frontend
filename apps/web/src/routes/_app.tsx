@@ -3,6 +3,7 @@ import { useConfig, useSession } from '@radial-pulse/shell-core';
 import { FullPageError, FullPageLoading, WebAppShell } from '@radial-pulse/web-shell';
 import { createFileRoute, Outlet, useRouter } from '@tanstack/react-router';
 import { useEffect } from 'react';
+import { NavLabelsProvider } from '@radial-pulse/studio-kit';
 import { ClinicAccountBlocked } from '../app/clinic-account-blocked';
 import { environmentLabel, renderShellLink, useAppNavigation, usePathname } from '../app/shell';
 
@@ -61,7 +62,10 @@ function AuthenticatedLayout() {
       onSignOut={() => void signOut()}
       environmentLabel={environmentLabel(config.appEnv)}
     >
-      <Outlet />
+      {/* Feature pages read nav labels (e.g. "My Client Portfolio") from here. */}
+      <NavLabelsProvider entries={nav}>
+        <Outlet />
+      </NavLabelsProvider>
     </WebAppShell>
   );
 }

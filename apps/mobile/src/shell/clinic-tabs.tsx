@@ -6,7 +6,7 @@ import { fontStyle } from '@radial-pulse/mobile-ui';
 import { Tabs, useRouter } from 'expo-router';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CHAT_PERMISSION } from '../modules/chat/manifest';
+import { CHAT_PERMISSION } from '@radial-pulse/clinic-chat/manifest';
 import { isTabVisible, TAB_SECTIONS } from './module-registry';
 
 const TAB_BAR_HEIGHT = 60;

@@ -1,1 +1,1 @@
-export { PractitionerProfileScreen as default } from '../../src/modules/profile/practitioner-profile-screen';
+export { PractitionerProfileScreen as default } from '@radial-pulse/clinic-profile';

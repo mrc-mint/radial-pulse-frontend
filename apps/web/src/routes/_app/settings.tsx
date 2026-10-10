@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { SettingsPage } from '../../modules/settings/settings-page';
+import { SettingsPage } from '@radial-pulse/studio-settings';
 
 export const Route = createFileRoute('/_app/settings')({
   component: SettingsPage,

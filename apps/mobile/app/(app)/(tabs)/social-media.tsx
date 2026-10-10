@@ -1,1 +1,1 @@
-export { SocialMediaScreen as default } from '../../../src/modules/social-media/social-media-screen';
+export { SocialMediaScreen as default } from '@radial-pulse/clinic-social-media';

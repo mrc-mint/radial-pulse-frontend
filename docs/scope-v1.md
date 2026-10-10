@@ -62,7 +62,7 @@ Product experiences (`productExperience()` in `@radial-pulse/auth`):
   or workflows; no Team management.
 
 In the V1 Studio build, V2 features are switched off by `STUDIO_FEATURES` in
-`apps/web/src/app/release.ts`: no Client Collaboration section, link, widget,
+`packages/web/studio-kit/src/release.ts`: no Client Collaboration section, link, widget,
 row action or unread badge (the `/chat` URL redirects to the Overview), and
 no Voice samples on the Media section. Social Presence Insights does not say
 how accounts get connected (clients connect from the Clinic app, V2).

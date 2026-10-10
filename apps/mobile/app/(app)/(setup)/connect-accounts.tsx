@@ -1,1 +1,1 @@
-export { ConnectAccountsScreen as default } from '../../../src/modules/connect-accounts/connect-accounts-screen';
+export { ConnectAccountsScreen as default } from '@radial-pulse/clinic-connect-accounts';

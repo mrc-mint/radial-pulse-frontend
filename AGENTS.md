@@ -41,7 +41,7 @@ Studio for Platform Administrators and Digital Success Managers. Full list:
 
 - the whole Clinic app (`apps/mobile`), its EAS builds and releases;
 - Client Collaboration (chat) in both apps, including Studio's Client
-  Collaboration section (`apps/web/src/modules/chat`);
+  Collaboration section (`packages/web/studio-chat`);
 - voice samples (recording, upload, review), including the Voice samples part
   of Studio's Media section;
 - other capabilities that need the Clinic app (clinic-side uploads, the clinic
@@ -58,7 +58,7 @@ Rules for agents:
   release notes or deployment steps for them.
 - New V1 work goes into Studio (`apps/web`) and the shared packages.
 - Studio's V2 features are switched off in
-  [`apps/web/src/app/release.ts`](apps/web/src/app/release.ts)
+  [`packages/web/studio-kit/src/release.ts`](packages/web/studio-kit/src/release.ts)
   (`STUDIO_FEATURES`): Client Collaboration (section, `/chat` URL redirects to
   the Overview, dashboard widgets, row action, unread badge) and voice samples
   (Media shows photos only). Do not turn a flag on for V1, and gate any new
@@ -72,19 +72,15 @@ Rules for agents:
 ```
 apps/
   web/                      Studio (staff, browser) — V1
-    src/modules/<feature>/  feature modules: dashboard, clinics, assessments,
-                            social-media, chat, users, settings
-    src/app/                app composition shared by Studio modules: router,
-                            module registry, page kit, providers, sign-in wiring
-    src/routes/             TanStack Router file routes (thin: render module pages)
+    src/app/                bootstrap and composition: router, providers, module
+                            registry, shell wiring, sign-in, mocking
+    src/routes/             TanStack Router file routes (thin: render feature pages)
     src/lib/config.ts       the only Studio file that reads configuration
     public/config.json      runtime config (no build-time env)
   mobile/                   Clinic (clinic side, Expo) — V2, not deployed in V1
-    app/                    Expo Router routes (thin: re-export module screens)
-    src/modules/<feature>/  feature modules: home, insights, social-media,
-                            assessments, profile, chat, connect-accounts, auth
-    src/shell/              app composition shared by Clinic modules: module
-                            registry, providers, gate, shell kit, sign-in wiring
+    app/                    Expo Router routes (thin: re-export feature screens)
+    src/shell/              bootstrap and composition: module registry, providers,
+                            gate, tabs, services, sign-in wiring, mocking
                             (not src/app: Expo Router would treat it as routes)
     src/lib/config.ts       the only Clinic file that reads env (plus app.config.ts)
 packages/                    one Nx project per library, grouped by platform (ADR 0009)
@@ -104,15 +100,23 @@ packages/                    one Nx project per library, grouped by platform (AD
     shell-core/              @radial-pulse/shell-core: manifests, navigation, session and
                              permission hooks, clinic and config context
   web/                       Studio only (platform:web)
+    studio-<feature>/        feature libraries (ADR 0010): dashboard, clinics,
+                             assessments, social-media, users, settings, chat
+    studio-kit/              @radial-pulse/studio-kit: page kit, clinic photo, release
+                             flags, nav labels — shared by Studio features
     ui/                      @radial-pulse/web-ui: DOM design system (React Aria + Tailwind)
     shell/                   @radial-pulse/web-shell: app shell, clinic workspace, states
   mobile/                    Clinic only (platform:mobile)
+    clinic-<feature>/        feature libraries (ADR 0010): home, insights, assessments,
+                             social-media, profile, chat, connect-accounts, auth
+    clinic-kit/              @radial-pulse/clinic-kit: shell kit, assessment kit, clinic
+                             data, connections, icons — shared by Clinic features
     ui/                      @radial-pulse/mobile-ui: React Native design system
     shell/                   @radial-pulse/mobile-shell: screen, chat button, clinic switcher
 contracts/api/     pinned OpenAPI snapshot (openapi.json) and VERSION
 tools/scripts/     contract tooling (api-sync, contract-check, type generation) and
                    architecture-check
-tools/eslint/      local ESLint rule: feature folders never import each other
+tools/eslint/      local ESLint rule: legacy guard against feature folders inside apps
 docs/              architecture, ADRs, glossary, scope, responsibilities, phase notes
 ```
 
@@ -121,16 +125,19 @@ for example [ui-shared](packages/shared/ui/README.md),
 [web-ui](packages/web/ui/README.md), [shell-core](packages/shared/shell-core/README.md),
 [auth](packages/shared/auth/README.md), [api-client](packages/shared/api-client/README.md)
 and [api-mocks](packages/shared/api-mocks/README.md). Structure decision:
-[ADR 0009](docs/adr/0009-library-structure.md).
+[ADR 0009](docs/adr/0009-library-structure.md) and
+[ADR 0010](docs/adr/0010-feature-libraries.md) (feature libraries).
 
 ## Architecture and dependency direction
 
 ```
 Routes (apps/web/src/routes, apps/mobile/app)      thin entry points
     ↓
-Feature modules (apps/*/src/modules/<feature>)     screens, feature components
-    ↓
 App composition (apps/web/src/app, apps/mobile/src/shell)
+    ↓
+Feature libraries (packages/web/studio-*, packages/mobile/clinic-*)
+    ↓                                              pages, screens, feature components
+Feature kits (studio-kit, clinic-kit)
     ↓
 Platform libraries: web-shell + web-ui (Studio), mobile-shell + mobile-ui (Clinic)
     ↓
@@ -143,25 +150,29 @@ API Gateway → backend
 Every project has one `type:*` and one `platform:*` tag (its `package.json` →
 `nx.tags`). `@nx/enforce-module-boundaries` in `eslint.config.mjs` enforces:
 
-| Tag                | May depend on                                 | Projects                            |
-| ------------------ | --------------------------------------------- | ----------------------------------- |
-| `type:app`         | everything except another app                 | web, mobile                         |
-| `type:shell`       | `shell`, `ui`, `data-access`, `util`, `types` | shell-core, web-shell, mobile-shell |
-| `type:ui`          | `ui`, `util`, `types`                         | ui-shared, web-ui, mobile-ui        |
-| `type:data-access` | `data-access`, `util`, `types`                | api-client, api-client-react, auth  |
-| `type:mocks`       | `data-access`, `util`, `types` (apps only)    | api-mocks                           |
-| `type:util`        | `util`, `types`                               | utils, config, design-tokens        |
-| `type:types`       | nothing                                       | shared-types                        |
-| `platform:web`     | `web`, `neutral`                              | web, web-ui, web-shell              |
-| `platform:mobile`  | `mobile`, `neutral`                           | mobile, mobile-ui, mobile-shell     |
-| `platform:neutral` | `neutral`                                     | everything under `packages/shared`  |
+| Tag                | May depend on                                                                        | Projects                                      |
+| ------------------ | ------------------------------------------------------------------------------------ | --------------------------------------------- |
+| `type:app`         | everything except another app                                                        | web, mobile                                   |
+| `type:feature`     | `feature-kit`, `shell`, `ui`, `data-access`, `util`, `types` (never another feature) | `studio-*`, `clinic-*` features               |
+| `type:feature-kit` | `shell`, `ui`, `data-access`, `util`, `types`                                        | studio-kit, clinic-kit                        |
+| `type:shell`       | `shell`, `ui`, `data-access`, `util`, `types`                                        | shell-core, web-shell, mobile-shell           |
+| `type:ui`          | `ui`, `util`, `types`                                                                | ui-shared, web-ui, mobile-ui                  |
+| `type:data-access` | `data-access`, `util`, `types`                                                       | api-client, api-client-react, auth            |
+| `type:mocks`       | `data-access`, `util`, `types` (apps only)                                           | api-mocks                                     |
+| `type:util`        | `util`, `types`                                                                      | utils, config, design-tokens                  |
+| `type:types`       | nothing                                                                              | shared-types                                  |
+| `platform:web`     | `web`, `neutral`                                                                     | web and everything under `packages/web`       |
+| `platform:mobile`  | `mobile`, `neutral`                                                                  | mobile and everything under `packages/mobile` |
+| `platform:neutral` | `neutral`                                                                            | everything under `packages/shared`            |
 
 Rules (all lint errors; `pnpm architecture:check` proves they reject violations):
 
-- **Feature modules never import other feature modules**, in any form
-  (relative path, dynamic import, re-export, `require`, `vi.mock`). Share
-  through the app's composition folder (`src/app` / `src/shell`) or a library.
-  Rule: `local/feature-boundaries` (`tools/eslint/feature-boundaries.mjs`).
+- **Features never import other features.** Each feature is a library
+  (`type:feature`); Nx rejects a dependency on another feature, by package
+  name, relative path, dynamic import or re-export. Share through the app's
+  feature kit (`studio-kit`, `clinic-kit`) or a lower library. Apps import a
+  feature only through its entry points (`@radial-pulse/<feature>` and
+  `@radial-pulse/<feature>/manifest`).
 - **Libraries never import apps**, and no project reaches into another
   project by a relative or absolute path. Circular project dependencies fail.
 - **Web and mobile never meet.** Studio and `packages/web/*` cannot import
@@ -179,7 +190,7 @@ Rules (all lint errors; `pnpm architecture:check` proves they reject violations)
 - **API access goes through `@radial-pulse/api-client`.** Screens use resource
   hooks from `@radial-pulse/api-client-react`. Apps never import
   `openapi-fetch`, `createApiClient` or `useApiClient`, and screens (feature
-  modules and route files) never call `fetch` (lint). The only exceptions are
+  libraries, kits and route files) never call `fetch` (lint). The only exceptions are
   commented one-liners that read a local file URI, never the API. The client is built once by `createAppServices`
   (`@radial-pulse/auth`).
 - **Mocks are dev/test only.** Only apps may depend on `@radial-pulse/api-mocks`,
@@ -197,30 +208,31 @@ Rules (all lint errors; `pnpm architecture:check` proves they reject violations)
 - Libraries expose only their `exports` entry points; deep imports fail to
   resolve.
 - **Shell libraries are infrastructure,** not a home for feature logic. If a
-  change there needs a feature name in code, it belongs in an app module.
+  change there needs a feature name in code, it belongs in a feature library.
 
 ## Where to put new code
 
-| I'm adding…                                                             | Put it in                                                                                                                                  |
-| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| A Clinic feature (screen, feature component), V2                        | `apps/mobile/src/modules/<feature>/`, route file in `apps/mobile/app/`                                                                     |
-| A Studio feature (page, feature component)                              | `apps/web/src/modules/<feature>/`, route file in `apps/web/src/routes/`                                                                    |
-| A navigation entry or clinic tab/section                                | the module's `manifest.ts`, registered in the app's `module-registry.ts`                                                                   |
-| Something two modules of one app share                                  | `apps/web/src/app/` (Studio) or `apps/mobile/src/shell/` (Clinic)                                                                          |
-| A reusable Button / Card / Input / Badge / chart (no feature knowledge) | prop contract in `packages/shared/ui`, implementations in `packages/web/ui` and `packages/mobile/ui`                                       |
-| A label or tone for a contract enum value                               | `packages/shared/utils/src/labels.ts`, `packages/shared/ui/src/tones.ts`                                                                   |
-| Platform-independent logic used by both apps or several features        | `packages/shared/utils` (pure TypeScript, no React)                                                                                        |
-| A call to an API operation                                              | service in `packages/shared/api-client/src/services/<domain>.ts` + hook in `packages/shared/api-client-react/src/<domain>.ts`              |
-| A mock for that operation (dev/test only)                               | `packages/shared/api-mocks/src/`, only if the operation is in the contract                                                                 |
-| A colour, spacing or type value                                         | `packages/shared/design-tokens/src/tokens.ts`, then `pnpm --filter @radial-pulse/design-tokens generate`                                   |
-| Sign-in, session controller, app services                               | `packages/shared/auth`                                                                                                                     |
-| Permissions hooks, clinic context, navigation, manifests                | `packages/shared/shell-core`                                                                                                               |
-| App shell / layout frame                                                | `packages/web/shell` (Studio), `packages/mobile/shell` (Clinic)                                                                            |
-| A new library                                                           | a folder under `packages/{shared,web,mobile}/` with one `type:*` and one `platform:*` tag ([ADR 0009](docs/adr/0009-library-structure.md)) |
-| A domain type                                                           | nowhere: use `Schema<'Name'>`                                                                                                              |
-| A new contract version                                                  | `pnpm api:sync --version <x.y.z>` (see [contracts/api/README.md](contracts/api/README.md))                                                 |
+| I'm adding…                                                             | Put it in                                                                                                                                                      |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A Clinic feature (screen, feature component), V2                        | its library `packages/mobile/clinic-<feature>/`, route file in `apps/mobile/app/`                                                                              |
+| A Studio feature (page, feature component)                              | its library `packages/web/studio-<feature>/`, route file in `apps/web/src/routes/`                                                                             |
+| A navigation entry or clinic tab/section                                | the feature's `src/manifest.ts` (entry `/manifest`), registered in the app's `module-registry.ts`                                                              |
+| Something two features of one app share                                 | the app's feature kit: `packages/web/studio-kit` or `packages/mobile/clinic-kit`                                                                               |
+| A new feature                                                           | a new `studio-<feature>` / `clinic-<feature>` library (tags `type:feature` + platform), registered in the app ([ADR 0010](docs/adr/0010-feature-libraries.md)) |
+| A reusable Button / Card / Input / Badge / chart (no feature knowledge) | prop contract in `packages/shared/ui`, implementations in `packages/web/ui` and `packages/mobile/ui`                                                           |
+| A label or tone for a contract enum value                               | `packages/shared/utils/src/labels.ts`, `packages/shared/ui/src/tones.ts`                                                                                       |
+| Platform-independent logic used by both apps or several features        | `packages/shared/utils` (pure TypeScript, no React)                                                                                                            |
+| A call to an API operation                                              | service in `packages/shared/api-client/src/services/<domain>.ts` + hook in `packages/shared/api-client-react/src/<domain>.ts`                                  |
+| A mock for that operation (dev/test only)                               | `packages/shared/api-mocks/src/`, only if the operation is in the contract                                                                                     |
+| A colour, spacing or type value                                         | `packages/shared/design-tokens/src/tokens.ts`, then `pnpm --filter @radial-pulse/design-tokens generate`                                                       |
+| Sign-in, session controller, app services                               | `packages/shared/auth`                                                                                                                                         |
+| Permissions hooks, clinic context, navigation, manifests                | `packages/shared/shell-core`                                                                                                                                   |
+| App shell / layout frame                                                | `packages/web/shell` (Studio), `packages/mobile/shell` (Clinic)                                                                                                |
+| A new library                                                           | a folder under `packages/{shared,web,mobile}/` with one `type:*` and one `platform:*` tag ([ADR 0009](docs/adr/0009-library-structure.md))                     |
+| A domain type                                                           | nowhere: use `Schema<'Name'>`                                                                                                                                  |
+| A new contract version                                                  | `pnpm api:sync --version <x.y.z>` (see [contracts/api/README.md](contracts/api/README.md))                                                                     |
 
-Code needed by only one feature stays in that feature's module. Do not move
+Code needed by only one feature stays in that feature's library. Do not move
 it into a package "in case" something else needs it later.
 
 ## When to promote code into a package
@@ -242,25 +254,25 @@ Keep packages from becoming dumping grounds:
 - `ui-shared`, `web-ui`, `mobile-ui`: generic presentational components that
   receive data and never fetch. No feature names, no API hooks.
 
-Inside an app, prefer the app composition folder (`src/app` / `src/shell`)
-before a package when only that app needs the code.
+Code shared by features of one app goes in that app's feature kit, not in a
+shared library and not in the app (features cannot import the app).
 
 ## Components: three levels
 
-| Level                       | Where                                                         | Examples                                                                                          |
-| --------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Design-system components    | `web-ui`, `mobile-ui` (contracts in `ui-shared`)              | Button, Input, Card, Badge, Tabs, Modal/Drawer, MetricCard, charts                                |
-| App-level composition       | `apps/web/src/app` (Studio), `apps/mobile/src/shell` (Clinic) | page kit (QueryError, DefinitionList), shell kit (Callout, ListRow), clinic photo, assessment kit |
-| Feature-specific components | `apps/*/src/modules/<feature>`                                | clinic header, media review, Practitioner Profile screen/card                                     |
+| Level                       | Where                                            | Examples                                                                                          |
+| --------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Design-system components    | `web-ui`, `mobile-ui` (contracts in `ui-shared`) | Button, Input, Card, Badge, Tabs, Modal/Drawer, MetricCard, charts                                |
+| Feature kits                | `studio-kit` (Studio), `clinic-kit` (Clinic)     | page kit (QueryError, DefinitionList), shell kit (Callout, ListRow), clinic photo, assessment kit |
+| Feature-specific components | `packages/{web,mobile}/<app>-<feature>`          | clinic header, media review, Practitioner Profile screen/card                                     |
 
 Web interactive components in `packages/web/ui` are shadcn-style: React
 Aria Components for behaviour, Tailwind (theme mapped onto the tokens) for
 styling; see [packages/web/ui/README.md](packages/web/ui/README.md#web-shadcn--react-aria).
 Do not add Radix or another headless library next to React Aria, and do not
-use Tailwind classes in apps or feature modules.
+use Tailwind classes in apps or feature libraries.
 
-Use design-system components first. Add an app-level component when two
-modules of one app need it. Add to `web-ui` / `mobile-ui` only when it is generic. Every
+Use design-system components first. Add a feature-kit component when two
+features of one app need it. Add to `web-ui` / `mobile-ui` only when it is generic. Every
 data-showing component has loading, empty and error states (`Skeleton`,
 `EmptyState`, `ErrorState`). Missing values from the API are shown as missing
 ("Not Available"), never as 0.

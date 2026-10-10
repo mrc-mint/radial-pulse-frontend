@@ -1,0 +1,57 @@
+{
+  "name": "@radial-pulse/clinic-home",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Clinic (mobile, V2) feature: home. Pages/screens and navigation manifest; routes stay in the app.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "jest --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:feature",
+      "platform:mobile"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/api-client-react": "workspace:*",
+    "@radial-pulse/clinic-kit": "workspace:*",
+    "@radial-pulse/design-tokens": "workspace:*",
+    "@radial-pulse/mobile-shell": "workspace:*",
+    "@radial-pulse/mobile-ui": "workspace:*",
+    "@radial-pulse/shell-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "expo-router": "~6.0.0",
+    "lucide-react-native": "^1.48.0",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/react": "~19.1.10",
+    "expo-router": "~6.0.0",
+    "jest": "~29.7.0",
+    "jest-expo": "~54.0.0",
+    "lucide-react-native": "^1.48.0",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@radial-pulse/.*|zod)"
+    ],
+    "moduleNameMapper": {
+      "^lucide-react-native$": "<rootDir>/../../../node_modules/lucide-react-native/dist/cjs/lucide-react-native.js",
+      "^@react-native-async-storage/async-storage$": "<rootDir>/../../../node_modules/@react-native-async-storage/async-storage/jest/async-storage-mock.js"
+    }
+  }
+}

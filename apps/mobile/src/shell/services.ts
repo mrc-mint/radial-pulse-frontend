@@ -5,7 +5,7 @@ import { createAppServices, unconfiguredAuth, type SessionController } from '@ra
 import type { QueryClient } from '@tanstack/react-query';
 import { loadConfig } from '../lib/config';
 import { createMobileCognitoAuth } from './cognito';
-import { systemConnectBrowser, type ConnectBrowser } from './connect-browser';
+import { systemConnectBrowser, type ConnectBrowser } from '@radial-pulse/clinic-kit';
 import type * as Mocking from './mocking';
 
 export interface MobileServices {

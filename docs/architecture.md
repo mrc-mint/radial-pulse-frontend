@@ -9,12 +9,13 @@ See [responsibilities.md](responsibilities.md).
 
 ## §2 Structure
 
-Two apps and fourteen libraries, grouped by platform under
+Two apps and thirty-one libraries, grouped by platform under
 `packages/shared` (platform-neutral), `packages/web` (Studio only) and
 `packages/mobile` (Clinic only); see [ADR 0009](adr/0009-library-structure.md)
-and the tree in [AGENTS.md](../AGENTS.md#repository-structure). Feature
-modules live inside the apps and are promoted to libraries only when genuinely
-shared.
+and [ADR 0010](adr/0010-feature-libraries.md)
+and the tree in [AGENTS.md](../AGENTS.md#repository-structure). Features
+are libraries too (`studio-*`, `clinic-*`, ADR 0010); the apps keep
+bootstrap, routing, providers, configuration and composition.
 
 | Product | Release                 | Path          | Package                | Platform               |
 | ------- | ----------------------- | ------------- | ---------------------- | ---------------------- |
@@ -43,7 +44,7 @@ Enforcement, all lint errors in CI (`eslint.config.mjs`):
 | Rule                                    | Enforces                                                                                                                          |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `@nx/enforce-module-boundaries`         | tag constraints, banned external packages per tag, no relative/absolute imports into another project, no cycles                   |
-| `local/feature-boundaries`              | feature folders inside an app never import each other, whatever the import form                                                   |
+| `local/feature-boundaries`              | legacy guard: feature folders inside an app never import each other (features are libraries, ADR 0010)                            |
 | `no-restricted-imports` (apps)          | no raw HTTP client in apps; mocks and MSW only in the app mocking module and tests                                                |
 | `no-restricted-globals` / `-properties` | no browser or Node globals in `packages/shared/*/src`; no `document` or web storage in mobile code; no raw `fetch` in app screens |
 | `no-restricted-syntax`                  | only the app config modules read env                                                                                              |

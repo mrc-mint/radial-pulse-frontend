@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { STUDIO_FEATURES } from '../../../../app/release';
-import { ChatPage } from '../../../../modules/chat/chat-page';
+import { STUDIO_FEATURES } from '@radial-pulse/studio-kit';
+import { ChatPage } from '@radial-pulse/studio-chat';
 
 /** Client Collaboration is V2: until it ships, the URL goes to the clinic's Overview. */
 export const Route = createFileRoute('/_app/clinics/$clinicId/chat')({

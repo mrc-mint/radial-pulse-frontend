@@ -1,12 +1,12 @@
 import type { ModuleManifest } from '@radial-pulse/shell-core';
-import { assessmentsModule } from '../modules/assessments/manifest';
-import { chatModule } from '../modules/chat/manifest';
-import { clinicsModule } from '../modules/clinics/manifest';
-import { dashboardModule } from '../modules/dashboard/manifest';
-import { settingsModule } from '../modules/settings/manifest';
-import { socialMediaModule } from '../modules/social-media/manifest';
-import { usersModule } from '../modules/users/manifest';
-import { STUDIO_FEATURES } from './release';
+import { assessmentsModule } from '@radial-pulse/studio-assessments/manifest';
+import { chatModule } from '@radial-pulse/studio-chat/manifest';
+import { clinicsModule } from '@radial-pulse/studio-clinics/manifest';
+import { dashboardModule } from '@radial-pulse/studio-dashboard/manifest';
+import { settingsModule } from '@radial-pulse/studio-settings/manifest';
+import { socialMediaModule } from '@radial-pulse/studio-social-media/manifest';
+import { usersModule } from '@radial-pulse/studio-users/manifest';
+import { STUDIO_FEATURES } from '@radial-pulse/studio-kit';
 
 /**
  * The ONE list of modules this app includes. If a feature is not registered

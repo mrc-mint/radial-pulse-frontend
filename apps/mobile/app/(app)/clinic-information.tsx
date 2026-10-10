@@ -1,1 +1,1 @@
-export { ClinicInformationScreen as default } from '../../src/modules/profile/clinic-information-screen';
+export { ClinicInformationScreen as default } from '@radial-pulse/clinic-profile';

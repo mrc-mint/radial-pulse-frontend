@@ -1,12 +1,12 @@
 import type { ClinicSectionEntry, ModuleManifest } from '@radial-pulse/shell-core';
 import { hasClinicPermission, type ClinicPermissionSet } from '@radial-pulse/shell-core';
-import { chatModule } from '../modules/chat/manifest';
-import { connectAccountsModule } from '../modules/connect-accounts/manifest';
-import { homeModule } from '../modules/home/manifest';
-import { insightsModule } from '../modules/insights/manifest';
-import { profileModule } from '../modules/profile/manifest';
-import { assessmentsModule } from '../modules/assessments/manifest';
-import { socialMediaModule } from '../modules/social-media/manifest';
+import { chatModule } from '@radial-pulse/clinic-chat/manifest';
+import { connectAccountsModule } from '@radial-pulse/clinic-connect-accounts/manifest';
+import { homeModule } from '@radial-pulse/clinic-home/manifest';
+import { insightsModule } from '@radial-pulse/clinic-insights/manifest';
+import { profileModule } from '@radial-pulse/clinic-profile/manifest';
+import { assessmentsModule } from '@radial-pulse/clinic-assessments/manifest';
+import { socialMediaModule } from '@radial-pulse/clinic-social-media/manifest';
 
 /**
  * The ONE list of modules the Clinic app includes (enforces docs/scope-v1.md).

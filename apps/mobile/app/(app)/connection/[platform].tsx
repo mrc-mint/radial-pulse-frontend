@@ -1,1 +1,1 @@
-export { ConnectionScreen as default } from '../../../src/modules/social-media/connection-screen';
+export { ConnectionScreen as default } from '@radial-pulse/clinic-social-media';

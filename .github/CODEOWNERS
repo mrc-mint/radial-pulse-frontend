@@ -9,5 +9,24 @@
 /packages/web/              @REPLACE-ORG/central-tech
 /packages/mobile/           @REPLACE-ORG/central-tech
 /tools/                     @REPLACE-ORG/central-tech
+# Feature libraries (ADR 0010): one line per feature so each business domain
+# can get its own owner. PLACEHOLDER team handle — replace per feature.
+/packages/web/studio-assessments/         @REPLACE-ORG/central-tech
+/packages/web/studio-chat/                @REPLACE-ORG/central-tech
+/packages/web/studio-clinics/             @REPLACE-ORG/central-tech
+/packages/web/studio-dashboard/           @REPLACE-ORG/central-tech
+/packages/web/studio-kit/                 @REPLACE-ORG/central-tech
+/packages/web/studio-settings/            @REPLACE-ORG/central-tech
+/packages/web/studio-social-media/        @REPLACE-ORG/central-tech
+/packages/web/studio-users/               @REPLACE-ORG/central-tech
+/packages/mobile/clinic-assessments/      @REPLACE-ORG/central-tech
+/packages/mobile/clinic-auth/             @REPLACE-ORG/central-tech
+/packages/mobile/clinic-chat/             @REPLACE-ORG/central-tech
+/packages/mobile/clinic-connect-accounts/ @REPLACE-ORG/central-tech
+/packages/mobile/clinic-home/             @REPLACE-ORG/central-tech
+/packages/mobile/clinic-insights/         @REPLACE-ORG/central-tech
+/packages/mobile/clinic-kit/              @REPLACE-ORG/central-tech
+/packages/mobile/clinic-profile/          @REPLACE-ORG/central-tech
+/packages/mobile/clinic-social-media/     @REPLACE-ORG/central-tech
 /eslint.config.mjs         @REPLACE-ORG/central-tech
 /.github/                  @REPLACE-ORG/central-tech

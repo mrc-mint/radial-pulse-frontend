@@ -9,9 +9,11 @@ import { FullScreenLoading, FullScreenMessage } from '@radial-pulse/mobile-shell
 import { Button } from '@radial-pulse/mobile-ui';
 import { Redirect } from 'expo-router';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useAccessibleClinics } from './clinic-data';
-import { deviceStorage } from './device-storage';
-import { mutationErrorMessage } from './kit';
+import {
+  useAccessibleClinics,
+  mutationErrorMessage,
+  deviceStorage,
+} from '@radial-pulse/clinic-kit';
 
 /**
  * Entry to the signed-in app. Route protection is a UX boundary only: the API

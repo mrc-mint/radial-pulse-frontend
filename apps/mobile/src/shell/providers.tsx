@@ -5,7 +5,7 @@ import { focusManager, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, type ReactNode } from 'react';
 import { AppState, Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ConnectBrowserProvider } from './connect-browser';
+import { ConnectBrowserProvider } from '@radial-pulse/clinic-kit';
 import type { MobileServices } from './services';
 
 /**
