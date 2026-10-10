@@ -129,6 +129,21 @@ const MOBILE_SOURCE = [
   'apps/mobile/app/**/*.{ts,tsx}',
 ];
 const MOBILE_BANNED = ['document', 'localStorage', 'sessionStorage', 'indexedDB'];
+/**
+ * App screens (feature modules and route files) never call the network
+ * themselves: API data comes from the resource hooks in
+ * @radial-pulse/api-client-react, built on the one API client (ADR 0009).
+ */
+const WEB_SCREENS = ['apps/web/src/modules/**/*.{ts,tsx}', 'apps/web/src/routes/**/*.{ts,tsx}'];
+const MOBILE_SCREENS = ['apps/mobile/src/modules/**/*.{ts,tsx}', 'apps/mobile/app/**/*.{ts,tsx}'];
+const FETCH_MESSAGE =
+  'Screens never call fetch: use the resource hooks from @radial-pulse/api-client-react.';
+const NO_FETCH_GLOBAL = [{ name: 'fetch', message: FETCH_MESSAGE }];
+const NO_FETCH_PROPERTY = ['globalThis', 'window', 'self'].map((object) => ({
+  object,
+  property: 'fetch',
+  message: FETCH_MESSAGE,
+}));
 
 // ── File-level import rules inside apps ──────────────────────────────────────
 /**
@@ -338,10 +353,37 @@ export default tseslint.config(
   },
   {
     files: MOBILE_SOURCE,
-    ignores: TESTS,
+    ignores: [...TESTS, ...MOBILE_SCREENS],
     rules: {
       'no-restricted-globals': ['error', ...restrictedGlobals(MOBILE_BANNED, 'mobile code')],
       'no-restricted-properties': ['error', ...viaGlobalThis(MOBILE_BANNED, 'mobile code')],
+    },
+  },
+
+  // ── No raw fetch in app screens ────────────────────────────────────────────
+  // Mobile screens keep the mobile bans above (one rule value per file).
+  {
+    files: MOBILE_SCREENS,
+    ignores: TESTS,
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        ...restrictedGlobals(MOBILE_BANNED, 'mobile code'),
+        ...NO_FETCH_GLOBAL,
+      ],
+      'no-restricted-properties': [
+        'error',
+        ...viaGlobalThis(MOBILE_BANNED, 'mobile code'),
+        ...NO_FETCH_PROPERTY,
+      ],
+    },
+  },
+  {
+    files: WEB_SCREENS,
+    ignores: TESTS,
+    rules: {
+      'no-restricted-globals': ['error', ...NO_FETCH_GLOBAL],
+      'no-restricted-properties': ['error', ...NO_FETCH_PROPERTY],
     },
   },
 );

@@ -10,6 +10,7 @@ import * as ImagePicker from 'expo-image-picker';
 async function blobFrom(uri: string, file: File | undefined, type: string | null | undefined) {
   // Web builds hand over a File; native builds a local URI to read.
   if (file) return file;
+  // eslint-disable-next-line no-restricted-globals -- reads a local file URI from the picker, not an API call
   const blob = await (await fetch(uri)).blob();
   return type && !blob.type ? new Blob([blob], { type }) : blob;
 }

@@ -13,7 +13,7 @@
     },
     "prod": {
       "autoIncrement": true,
-      "env": { "APP_ENV": "prod" },
+      "env": { "APP_ENV": "prod", "EXPO_PUBLIC_APP_ENV": "prod" },
       "channel": "prod"
     }
   },
