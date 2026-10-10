@@ -4,9 +4,9 @@ import {
   useMarkChatRead,
   useSendChatMessage,
   type ChatAttachment,
-} from '@radial-pulse/api-client/react';
+} from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
+import { useClinicCan, useClinicId } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   Avatar,
@@ -16,7 +16,7 @@ import {
   IconButton,
   LoadingState,
   textStyle,
-} from '@radial-pulse/ui/native';
+} from '@radial-pulse/mobile-ui';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';

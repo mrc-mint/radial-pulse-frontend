@@ -1,7 +1,7 @@
-import { useAssetDownloadUrl } from '@radial-pulse/api-client/react';
+import { useAssetDownloadUrl } from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
 import type { Schema } from '@radial-pulse/shared-types';
-import { APPROVAL_STATE_TONES, Card, ProtectedImage, textStyle } from '@radial-pulse/ui/native';
+import { APPROVAL_STATE_TONES, Card, ProtectedImage, textStyle } from '@radial-pulse/mobile-ui';
 import { mediaReviewLabel } from '@radial-pulse/utils';
 import {
   Check,

@@ -1,4 +1,4 @@
-import { useSession } from '@radial-pulse/platform-shell/core';
+import { useSession } from '@radial-pulse/shell-core';
 import { Redirect, Stack } from 'expo-router';
 
 /** Welcome and Sign in. A signed-in person never lands here. */

@@ -1,0 +1,35 @@
+{
+  "name": "@radial-pulse/api-client-react",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TanStack Query integration over @radial-pulse/api-client: client provider, QueryClient defaults, query keys, invalidation and resource hooks. Shared by web and mobile.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:data-access",
+      "platform:neutral"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/api-client": "workspace:*",
+    "@radial-pulse/shared-types": "workspace:*"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.85.0",
+    "react": "19.1.0"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.85.0",
+    "@types/react": "~19.1.10",
+    "react": "19.1.0"
+  }
+}

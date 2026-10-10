@@ -1,6 +1,6 @@
 import { tokens as t } from '@radial-pulse/design-tokens';
 import type { Schema } from '@radial-pulse/shared-types';
-import { Badge, CONNECTION_STATUS_TONES, formatRelativeTime } from '@radial-pulse/ui/native';
+import { Badge, CONNECTION_STATUS_TONES, formatRelativeTime } from '@radial-pulse/mobile-ui';
 import { CONNECTION_STATUS_LABELS } from '@radial-pulse/utils';
 import type { ReactNode } from 'react';
 import { PLATFORM_ICONS } from './icons';

@@ -1,4 +1,4 @@
-import { useAssetDownloadUrl } from '@radial-pulse/api-client/react';
+import { useAssetDownloadUrl } from '@radial-pulse/api-client-react';
 import { Building2 } from 'lucide-react';
 import { useState } from 'react';
 import './clinic-photo.css';

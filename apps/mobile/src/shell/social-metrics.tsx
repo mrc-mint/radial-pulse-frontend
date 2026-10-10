@@ -1,6 +1,6 @@
-import { useLatestSnapshots } from '@radial-pulse/api-client/react';
+import { useLatestSnapshots } from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
+import { useClinicCan, useClinicId } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   Card,
@@ -8,7 +8,7 @@ import {
   formatRelativeTime,
   MetricCard,
   textStyle,
-} from '@radial-pulse/ui/native';
+} from '@radial-pulse/mobile-ui';
 import {
   formatMetric,
   metricLabel,

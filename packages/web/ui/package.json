@@ -1,0 +1,47 @@
+{
+  "name": "@radial-pulse/web-ui",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Studio (web) design-system components: React Aria + Tailwind (shadcn-style) and plain CSS over the token variables.",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css",
+    "./src/index.ts"
+  ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:ui",
+      "platform:web"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/ui-shared": "workspace:*",
+    "@radial-pulse/utils": "workspace:*",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.48.0",
+    "react-aria-components": "~1.21.1",
+    "tailwind-merge": "^3.7.0"
+  },
+  "peerDependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@radial-pulse/design-tokens": "workspace:*",
+    "@types/node": "^26.6.3",
+    "@types/react": "~19.1.10",
+    "@types/react-dom": "~19.1.7",
+    "jsdom": "^26.1.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  }
+}

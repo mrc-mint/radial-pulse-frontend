@@ -1,0 +1,11 @@
+{
+  // Source compiles without DOM or Node types: this library is platform-neutral.
+  // Tests and Node scripts are checked by tsconfig.spec.json.
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": []
+  },
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.test.ts"]
+}

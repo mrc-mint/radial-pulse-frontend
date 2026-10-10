@@ -1,9 +1,5 @@
 import type { AppConfig } from '@radial-pulse/config';
-import {
-  CognitoAuthError,
-  createCognitoAuth,
-  type CognitoAuthProvider,
-} from '@radial-pulse/platform-shell/core';
+import { CognitoAuthError, createCognitoAuth, type CognitoAuthProvider } from '@radial-pulse/auth';
 
 /**
  * Cognito Managed Login for Studio (Authorization Code + PKCE, ADR

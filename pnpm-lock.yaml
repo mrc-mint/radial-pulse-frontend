@@ -53,25 +53,37 @@ importers:
         version: 0.4.2
       '@radial-pulse/api-client':
         specifier: workspace:*
-        version: link:../../packages/api-client
+        version: link:../../packages/shared/api-client
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../packages/shared/api-client-react
+      '@radial-pulse/api-mocks':
+        specifier: workspace:*
+        version: link:../../packages/shared/api-mocks
+      '@radial-pulse/auth':
+        specifier: workspace:*
+        version: link:../../packages/shared/auth
       '@radial-pulse/config':
         specifier: workspace:*
-        version: link:../../packages/config
+        version: link:../../packages/shared/config
       '@radial-pulse/design-tokens':
         specifier: workspace:*
-        version: link:../../packages/design-tokens
-      '@radial-pulse/platform-shell':
+        version: link:../../packages/shared/design-tokens
+      '@radial-pulse/mobile-shell':
         specifier: workspace:*
-        version: link:../../packages/platform-shell
+        version: link:../../packages/mobile/shell
+      '@radial-pulse/mobile-ui':
+        specifier: workspace:*
+        version: link:../../packages/mobile/ui
       '@radial-pulse/shared-types':
         specifier: workspace:*
-        version: link:../../packages/shared-types
-      '@radial-pulse/ui':
+        version: link:../../packages/shared/types
+      '@radial-pulse/shell-core':
         specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../../packages/shared/shell-core
       '@radial-pulse/utils':
         specifier: workspace:*
-        version: link:../../packages/utils
+        version: link:../../packages/shared/utils
       '@react-native-async-storage/async-storage':
         specifier: 2.2.0
         version: 2.2.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))
@@ -162,25 +174,37 @@ importers:
         version: 5.3.0
       '@radial-pulse/api-client':
         specifier: workspace:*
-        version: link:../../packages/api-client
+        version: link:../../packages/shared/api-client
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../packages/shared/api-client-react
+      '@radial-pulse/api-mocks':
+        specifier: workspace:*
+        version: link:../../packages/shared/api-mocks
+      '@radial-pulse/auth':
+        specifier: workspace:*
+        version: link:../../packages/shared/auth
       '@radial-pulse/config':
         specifier: workspace:*
-        version: link:../../packages/config
+        version: link:../../packages/shared/config
       '@radial-pulse/design-tokens':
         specifier: workspace:*
-        version: link:../../packages/design-tokens
-      '@radial-pulse/platform-shell':
-        specifier: workspace:*
-        version: link:../../packages/platform-shell
+        version: link:../../packages/shared/design-tokens
       '@radial-pulse/shared-types':
         specifier: workspace:*
-        version: link:../../packages/shared-types
-      '@radial-pulse/ui':
+        version: link:../../packages/shared/types
+      '@radial-pulse/shell-core':
         specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../../packages/shared/shell-core
       '@radial-pulse/utils':
         specifier: workspace:*
-        version: link:../../packages/utils
+        version: link:../../packages/shared/utils
+      '@radial-pulse/web-shell':
+        specifier: workspace:*
+        version: link:../../packages/web/shell
+      '@radial-pulse/web-ui':
+        specifier: workspace:*
+        version: link:../../packages/web/ui
       '@tanstack/react-query':
         specifier: ^5.85.0
         version: 5.104.0(react@19.1.0)
@@ -237,23 +261,79 @@ importers:
         specifier: ^7.1.0
         version: 7.3.6(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.33.0)(terser@5.51.2)(yaml@2.9.1)
 
-  packages/api-client:
+  packages/mobile/shell:
     dependencies:
-      '@radial-pulse/config':
+      '@radial-pulse/design-tokens':
         specifier: workspace:*
-        version: link:../config
-      '@radial-pulse/shared-types':
+        version: link:../../shared/design-tokens
+      '@radial-pulse/mobile-ui':
         specifier: workspace:*
-        version: link:../shared-types
+        version: link:../ui
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+    devDependencies:
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      lucide-react-native:
+        specifier: ^1.48.0
+        version: 1.48.0(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-native:
+        specifier: 0.81.5
+        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
+      react-native-safe-area-context:
+        specifier: ~5.6.0
+        version: 5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react-native-svg:
+        specifier: 15.12.1
+        version: 15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+
+  packages/mobile/ui:
+    dependencies:
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
+      '@radial-pulse/ui-shared':
+        specifier: workspace:*
+        version: link:../../shared/ui
       '@radial-pulse/utils':
         specifier: workspace:*
-        version: link:../utils
-      msw:
-        specifier: ^2.15.0
-        version: 2.15.0(@types/node@26.6.3)(typescript@5.9.3)
+        version: link:../../shared/utils
+    devDependencies:
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-native:
+        specifier: 0.81.5
+        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
+      react-native-svg:
+        specifier: 15.12.1
+        version: 15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+
+  packages/shared/api-client:
+    dependencies:
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../types
       openapi-fetch:
         specifier: ^0.17.0
         version: 0.17.0
+
+  packages/shared/api-client-react:
+    dependencies:
+      '@radial-pulse/api-client':
+        specifier: workspace:*
+        version: link:../api-client
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../types
     devDependencies:
       '@tanstack/react-query':
         specifier: ^5.85.0
@@ -265,16 +345,40 @@ importers:
         specifier: 19.1.0
         version: 19.1.0
 
-  packages/config:
+  packages/shared/api-mocks:
     dependencies:
+      '@radial-pulse/api-client':
+        specifier: workspace:*
+        version: link:../api-client
       '@radial-pulse/shared-types':
         specifier: workspace:*
-        version: link:../shared-types
+        version: link:../types
+      msw:
+        specifier: ^2.15.0
+        version: 2.15.0(@types/node@26.6.3)(typescript@5.9.3)
+
+  packages/shared/auth:
+    dependencies:
+      '@radial-pulse/api-client':
+        specifier: workspace:*
+        version: link:../api-client
+      '@radial-pulse/config':
+        specifier: workspace:*
+        version: link:../config
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../types
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../utils
+
+  packages/shared/config:
+    dependencies:
       zod:
         specifier: ^4.1.0
         version: 4.6.5
 
-  packages/design-tokens:
+  packages/shared/design-tokens:
     devDependencies:
       '@types/node':
         specifier: ^26.6.3
@@ -283,30 +387,85 @@ importers:
         specifier: ^3.6.0
         version: 3.9.9
 
-  packages/platform-shell:
+  packages/shared/shell-core:
     dependencies:
-      '@radial-pulse/api-client':
+      '@radial-pulse/auth':
         specifier: workspace:*
-        version: link:../api-client
+        version: link:../auth
       '@radial-pulse/config':
         specifier: workspace:*
         version: link:../config
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../types
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../utils
+    devDependencies:
+      '@testing-library/react':
+        specifier: ^16.3.3
+        version: 16.3.3(@testing-library/dom@10.4.2)(@types/react-dom@19.1.11(@types/react@19.1.17))(@types/react@19.1.17)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      '@types/react-dom':
+        specifier: ~19.1.7
+        version: 19.1.11(@types/react@19.1.17)
+      jsdom:
+        specifier: ^26.1.0
+        version: 26.1.0
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: 19.1.0
+        version: 19.1.0(react@19.1.0)
+
+  packages/shared/types: {}
+
+  packages/shared/ui:
+    dependencies:
       '@radial-pulse/design-tokens':
         specifier: workspace:*
         version: link:../design-tokens
       '@radial-pulse/shared-types':
         specifier: workspace:*
-        version: link:../shared-types
-      '@radial-pulse/ui':
-        specifier: workspace:*
-        version: link:../ui
+        version: link:../types
       '@radial-pulse/utils':
         specifier: workspace:*
         version: link:../utils
+    devDependencies:
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+
+  packages/shared/utils:
+    dependencies:
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../types
+
+  packages/web/shell:
+    dependencies:
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/web-ui':
+        specifier: workspace:*
+        version: link:../ui
       lucide-react:
         specifier: ^1.48.0
         version: 1.48.0(react@19.1.0)
     devDependencies:
+      '@radial-pulse/auth':
+        specifier: workspace:*
+        version: link:../../shared/auth
       '@testing-library/dom':
         specifier: ^10.4.2
         version: 10.4.2
@@ -325,38 +484,21 @@ importers:
       jsdom:
         specifier: ^26.1.0
         version: 26.1.0
-      lucide-react-native:
-        specifier: ^1.48.0
-        version: 1.48.0(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react:
         specifier: 19.1.0
         version: 19.1.0
       react-dom:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
-      react-native:
-        specifier: 0.81.5
-        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
-      react-native-safe-area-context:
-        specifier: ~5.6.0
-        version: 5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
-      react-native-svg:
-        specifier: 15.12.1
-        version: 15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
 
-  packages/shared-types: {}
-
-  packages/ui:
+  packages/web/ui:
     dependencies:
-      '@radial-pulse/design-tokens':
+      '@radial-pulse/ui-shared':
         specifier: workspace:*
-        version: link:../design-tokens
-      '@radial-pulse/shared-types':
-        specifier: workspace:*
-        version: link:../shared-types
+        version: link:../../shared/ui
       '@radial-pulse/utils':
         specifier: workspace:*
-        version: link:../utils
+        version: link:../../shared/utils
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -373,6 +515,9 @@ importers:
         specifier: ^3.7.0
         version: 3.7.0
     devDependencies:
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
       '@types/node':
         specifier: ^26.6.3
         version: 26.6.3
@@ -391,18 +536,6 @@ importers:
       react-dom:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
-      react-native:
-        specifier: 0.81.5
-        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
-      react-native-svg:
-        specifier: 15.12.1
-        version: 15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
-
-  packages/utils:
-    dependencies:
-      '@radial-pulse/shared-types':
-        specifier: workspace:*
-        version: link:../shared-types
 
 packages:
 

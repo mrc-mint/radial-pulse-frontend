@@ -3,8 +3,8 @@ import {
   useClinic,
   useClinicAssets,
   useMediaTaxonomy,
-} from '@radial-pulse/api-client/react';
-import { useClinicId } from '@radial-pulse/platform-shell/core';
+} from '@radial-pulse/api-client-react';
+import { useClinicId } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   APPROVAL_STATE_TONES,
@@ -15,7 +15,7 @@ import {
   ProtectedImage,
   Select,
   Tabs,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import {
   buildMediaBoard,
   CLINIC_PHOTO_TARGET,

@@ -1,4 +1,4 @@
-import { buttonClassName, PageHeader } from '@radial-pulse/ui/web';
+import { buttonClassName, PageHeader } from '@radial-pulse/web-ui';
 import { Link } from '@tanstack/react-router';
 import { ContractGap } from '../../app/page-kit';
 import { useNavLabel } from '../../app/shell';

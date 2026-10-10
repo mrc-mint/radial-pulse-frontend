@@ -67,17 +67,16 @@ the app's registered scheme (Expo Go uses an `exp://` address).
    modules: dashboard, clinics,         modules: home, insights, social-media,
    assessments, social-media, chat,     assessments, profile, chat, connect-accounts
    users, settings
-                 \                                  /
-                  \        feature modules         /
-                   ----------------+---------------
-                                   |
-   platform-shell   session and sign-in wiring, product experience,
-                    clinic context, permissions, navigation, app shells
-                                   |
-   api-client       services (one per contract operation), React Query
-                    hooks, error model, request ids, contract mocks
-                                   |
-   shared-types     types generated from contracts/api/openapi.json
+            |                                         |
+   packages/web: web-shell, web-ui      packages/mobile: mobile-shell, mobile-ui
+             \                                       /
+              \                                     /
+   packages/shared (platform-neutral)
+     shell-core      navigation, permissions, clinic context (React)
+     auth            sign-in, session from GET /me, createAppServices
+     api-client-react, api-client     React Query hooks; services, errors, request ids
+     ui-shared, utils, config, design-tokens, shared-types
+     api-mocks       contract mocks, dev/test only
                                    |
                      API Gateway  ->  backend  ->  domain / engine teams
 ```
@@ -88,41 +87,48 @@ UI is layered the same way on both platforms:
 design-tokens  ->  ui primitives  ->  ui components  ->  app patterns  ->  feature pages
 (colours,         (Button, Input,    (MetricCard,        (page-kit,         (modules/*)
  spacing, type)    Card, Badge)       FindingCard,        shell kit)
-                                      charts)
+                   web-ui /           charts)
+                   mobile-ui
 ```
 
 Details: [docs/architecture.md](docs/architecture.md),
-[packages/ui/README.md](packages/ui/README.md),
-[packages/platform-shell/README.md](packages/platform-shell/README.md),
-[packages/api-client/README.md](packages/api-client/README.md).
+[ADR 0009](docs/adr/0009-library-structure.md) and each library's README under
+`packages/{shared,web,mobile}/*/`.
 
 ## Where do I put this?
 
-| I'm adding…                                          | Put it in                                                                                          |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| A screen or feature-specific component               | `apps/web/src/modules/<feature>/` (Studio), `apps/mobile/src/modules/<feature>/` (Clinic)          |
-| A new navigation entry or clinic tab                 | that module's `manifest.ts`, registered in the app's `module-registry.ts`                          |
-| Something two modules of one app share               | `apps/web/src/app/` (Studio) or `apps/mobile/src/shell/` (Clinic); modules never import each other |
-| A call to a new API operation                        | `packages/api-client/src/services/<domain>.ts` + a hook in `src/react/<domain>.ts`                 |
-| A mock for that operation (dev/test only)            | `packages/api-client/src/mocks/`, only if the operation is in the contract                         |
-| A generic, reusable component (no feature knowledge) | `packages/ui/src/{shared,web,native}`                                                              |
-| A label or colour for a contract enum value          | `packages/utils/src/labels.ts`, `packages/ui/src/shared/tones.ts`                                  |
-| A colour, spacing or type value                      | `packages/design-tokens/src/tokens.ts` (then `pnpm --filter @radial-pulse/design-tokens generate`) |
-| Session, permissions, clinic context, app shell      | `packages/platform-shell`                                                                          |
-| A pure helper (no React)                             | `packages/utils`                                                                                   |
-| A domain type                                        | nowhere: use `Schema<'Name'>` from `@radial-pulse/shared-types`                                    |
+| I'm adding…                                          | Put it in                                                                                                            |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| A screen or feature-specific component               | `apps/web/src/modules/<feature>/` (Studio), `apps/mobile/src/modules/<feature>/` (Clinic)                            |
+| A new navigation entry or clinic tab                 | that module's `manifest.ts`, registered in the app's `module-registry.ts`                                            |
+| Something two modules of one app share               | `apps/web/src/app/` (Studio) or `apps/mobile/src/shell/` (Clinic); modules never import each other                   |
+| A call to a new API operation                        | `packages/shared/api-client/src/services/<domain>.ts` + a hook in `packages/shared/api-client-react/src/<domain>.ts` |
+| A mock for that operation (dev/test only)            | `packages/shared/api-mocks/src/`, only if the operation is in the contract                                           |
+| A generic, reusable component (no feature knowledge) | contract in `packages/shared/ui`, components in `packages/web/ui` / `packages/mobile/ui`                             |
+| A label or colour for a contract enum value          | `packages/shared/utils/src/labels.ts`, `packages/shared/ui/src/tones.ts`                                             |
+| A colour, spacing or type value                      | `packages/shared/design-tokens/src/tokens.ts` (then `pnpm --filter @radial-pulse/design-tokens generate`)            |
+| Session, permissions, clinic context, app shell      | `packages/shared/auth`, `packages/shared/shell-core`, `packages/{web,mobile}/shell`                                  |
+| A pure helper (no React)                             | `packages/shared/utils`                                                                                              |
+| A domain type                                        | nowhere: use `Schema<'Name'>` from `@radial-pulse/shared-types`                                                      |
 
 ## Rules enforced in CI
 
-Lint fails the build if any of these is broken
-(`eslint.config.mjs`, `@nx/enforce-module-boundaries`):
+Lint fails the build if any of these is broken (`eslint.config.mjs`), and
+`pnpm architecture:check` fails if a rule stops rejecting a known violation:
 
-- Packages never import apps; web (Studio) code never imports native (Clinic) code and vice versa.
-- Feature modules never import each other.
-- `ui` depends only on tokens, types and utils (no feature code).
-- `utils`, `shared-types`, `config` and `design-tokens` import no React.
+- Every project has a `type:*` and a `platform:*` tag; dependencies follow
+  them ([ADR 0009](docs/adr/0009-library-structure.md)). Utilities and types
+  depend only on utilities and types.
+- Web (Studio) and mobile (Clinic) projects never depend on each other;
+  platform-neutral libraries depend on neither and use no browser or Node
+  globals.
+- Feature modules never import each other, including by relative path.
+- Libraries never import apps, never reach into another project by path, and
+  never form cycles.
 - Apps never talk HTTP themselves: no `openapi-fetch`, `createApiClient` or
   `useApiClient` in apps; screens use resource hooks.
+- Contract mocks and MSW are used only by an app's mocking module and tests;
+  Studio's `verify-bundle` keeps them off the startup path.
 - Only the app config modules read environment variables.
 
 ## Who owns what

@@ -12,7 +12,8 @@
     "sharedGlobals": [
       "{workspaceRoot}/tsconfig.base.json",
       "{workspaceRoot}/eslint.config.mjs",
-      "{workspaceRoot}/contracts/api/openapi.json"
+      "{workspaceRoot}/contracts/api/openapi.json",
+      "{workspaceRoot}/tools/eslint/**/*"
     ]
   },
   "targetDefaults": {

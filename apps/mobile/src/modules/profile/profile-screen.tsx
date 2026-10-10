@@ -1,13 +1,8 @@
-import { usePractitioners } from '@radial-pulse/api-client/react';
+import { usePractitioners } from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
-import {
-  useClinicCan,
-  useClinicId,
-  useCurrentSession,
-  useSession,
-} from '@radial-pulse/platform-shell/core';
-import { Screen } from '@radial-pulse/platform-shell/native';
-import { Avatar, Badge, Button, Card, PageHeader, Tabs, textStyle } from '@radial-pulse/ui/native';
+import { useClinicCan, useClinicId, useCurrentSession, useSession } from '@radial-pulse/shell-core';
+import { Screen } from '@radial-pulse/mobile-shell';
+import { Avatar, Badge, Button, Card, PageHeader, Tabs, textStyle } from '@radial-pulse/mobile-ui';
 import { CLINIC_ROLE_LABELS } from '@radial-pulse/utils';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';

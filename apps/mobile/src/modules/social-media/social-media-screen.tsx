@@ -1,7 +1,7 @@
-import { useConnections } from '@radial-pulse/api-client/react';
+import { useConnections } from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
-import { Screen } from '@radial-pulse/platform-shell/native';
+import { useClinicCan, useClinicId } from '@radial-pulse/shell-core';
+import { Screen } from '@radial-pulse/mobile-shell';
 import {
   Button,
   Card,
@@ -9,7 +9,7 @@ import {
   EmptyState,
   PageHeader,
   ScoreCard,
-} from '@radial-pulse/ui/native';
+} from '@radial-pulse/mobile-ui';
 import { formatComponentScore } from '@radial-pulse/utils';
 import { useRouter } from 'expo-router';
 import { Link2 } from 'lucide-react-native';

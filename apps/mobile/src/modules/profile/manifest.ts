@@ -1,4 +1,4 @@
-import type { ModuleManifest } from '@radial-pulse/platform-shell/core';
+import type { ModuleManifest } from '@radial-pulse/shell-core';
 
 /** The person, their clinic's details, connected accounts and sign-out. No Team in V1. */
 export const profileModule: ModuleManifest = {

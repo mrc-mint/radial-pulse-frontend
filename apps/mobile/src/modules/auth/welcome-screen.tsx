@@ -1,6 +1,6 @@
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { BrandLockup } from '@radial-pulse/platform-shell/native';
-import { Button, fontStyle, textStyle } from '@radial-pulse/ui/native';
+import { BrandLockup } from '@radial-pulse/mobile-shell';
+import { Button, fontStyle, textStyle } from '@radial-pulse/mobile-ui';
 import { useRouter } from 'expo-router';
 import { ChartColumn, FileText, MessageCircle, type LucideIcon } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';

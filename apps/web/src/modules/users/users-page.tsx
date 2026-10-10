@@ -1,5 +1,5 @@
-import { useCreateUser, useResendInvite, useUsers } from '@radial-pulse/api-client/react';
-import { useCan } from '@radial-pulse/platform-shell/core';
+import { useCreateUser, useResendInvite, useUsers } from '@radial-pulse/api-client-react';
+import { useCan } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   Avatar,
@@ -17,7 +17,7 @@ import {
   Table,
   USER_STATUS_TONES,
   type TableColumn,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import { PLATFORM_ROLE_LABELS, USER_STATUS_LABELS } from '@radial-pulse/utils';
 import { UserPlus } from 'lucide-react';
 import { useDeferredValue, useState, type FormEvent } from 'react';

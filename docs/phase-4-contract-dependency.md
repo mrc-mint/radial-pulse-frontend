@@ -6,7 +6,7 @@ Contract in use: **0.3.0, unreleased local import** (`contracts/api/VERSION` is
 `pnpm api:sync --version 0.3.0` once the backend tags `v0.3.0`.
 
 Domain and entity types come **only** from the generated contract
-(`packages/shared-types`: `Schema<'ClinicRead'>`, `Permission`, `PlatformRole`,
+(`packages/shared/types`: `Schema<'ClinicRead'>`, `Permission`, `PlatformRole`,
 …). The frontend does not hand-write them. Where a screen needs something the
 contract lacks, the screen shows a clear "not available yet" state and the gap
 is listed below — nothing is invented.
@@ -38,7 +38,7 @@ Contract conventions applied: problem+json errors (`errors[]`, `request_id`,
 (`@radial-pulse/utils` labels, typed `Record<ContractEnum, string>`).
 
 All of the above run against contract-based MSW mocks
-(`packages/api-client/src/mocks`, `apiMocking: true` in local config).
+(`packages/shared/api-mocks`, `apiMocking: true` in local config).
 
 ## Built on the contract (Phase 6, mobile — Clinic Administrator)
 

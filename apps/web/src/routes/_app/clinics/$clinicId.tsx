@@ -3,10 +3,10 @@ import {
   resolveClinicSections,
   useClinicPermissions,
   useCurrentSession,
-} from '@radial-pulse/platform-shell/core';
-import { ClinicWorkspace } from '@radial-pulse/platform-shell/web';
-import { useChatInbox } from '@radial-pulse/api-client/react';
-import { buttonClassName } from '@radial-pulse/ui/web';
+} from '@radial-pulse/shell-core';
+import { ClinicWorkspace } from '@radial-pulse/web-shell';
+import { useChatInbox } from '@radial-pulse/api-client-react';
+import { buttonClassName } from '@radial-pulse/web-ui';
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
 import { useMemo } from 'react';

@@ -6,7 +6,7 @@ import { isTabVisible, TAB_SECTIONS } from './module-registry';
 import { createChunkedSecureStorage } from './secure-token-storage';
 
 // Clinic's API path (in-process contract mocks behind the client's
-// fetch) is tested with the mocks in packages/api-client (mocks/in-process).
+// fetch) is tested with the mocks in @radial-pulse/api-mocks (in-process).
 
 describe('tabs', () => {
   it('are Home, Insights, Social Presence, Assessments and Profile — chat is not a tab', () => {

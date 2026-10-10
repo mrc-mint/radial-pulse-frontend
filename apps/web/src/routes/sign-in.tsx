@@ -1,6 +1,6 @@
-import { useConfig, useSession } from '@radial-pulse/platform-shell/core';
-import { AuthLayout, FullPageLoading } from '@radial-pulse/platform-shell/web';
-import { Badge, Button, Card, ErrorState } from '@radial-pulse/ui/web';
+import { useConfig, useSession } from '@radial-pulse/shell-core';
+import { AuthLayout, FullPageLoading } from '@radial-pulse/web-shell';
+import { Badge, Button, Card, ErrorState } from '@radial-pulse/web-ui';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { ChevronRight, LogIn } from 'lucide-react';
 import { useEffect } from 'react';

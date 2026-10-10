@@ -36,7 +36,7 @@ Terminology: [glossary.md](glossary.md).
 and the client organization Overview; kinds: assessment awaiting review,
 unverified profile to confirm), environments DEV + PROD.
 
-Product experiences (`productExperience()` in platform-shell):
+Product experiences (`productExperience()` in `@radial-pulse/auth`):
 
 | Account (contract)                                  | V1                                                                                                                                                                     |
 | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

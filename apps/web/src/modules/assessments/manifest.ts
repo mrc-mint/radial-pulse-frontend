@@ -1,4 +1,4 @@
-import type { ModuleManifest } from '@radial-pulse/platform-shell/core';
+import type { ModuleManifest } from '@radial-pulse/shell-core';
 
 /**
  * The one Digital Presence Assessment per client organization (contract

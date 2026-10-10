@@ -1,6 +1,6 @@
 import type { AppEnv } from '@radial-pulse/config';
-import { resolveNavigation, useSession } from '@radial-pulse/platform-shell/core';
-import type { RenderLink } from '@radial-pulse/platform-shell/web';
+import { resolveNavigation, useSession } from '@radial-pulse/shell-core';
+import type { RenderLink } from '@radial-pulse/web-shell';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import { webModules } from './module-registry';

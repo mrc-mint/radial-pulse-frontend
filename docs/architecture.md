@@ -9,8 +9,11 @@ See [responsibilities.md](responsibilities.md).
 
 ## §2 Structure
 
-Two apps, seven packages (see README and [AGENTS.md](../AGENTS.md)). Feature
-modules live inside the apps and are promoted to packages only when genuinely
+Two apps and fourteen libraries, grouped by platform under
+`packages/shared` (platform-neutral), `packages/web` (Studio only) and
+`packages/mobile` (Clinic only); see [ADR 0009](adr/0009-library-structure.md)
+and the tree in [AGENTS.md](../AGENTS.md#repository-structure). Feature
+modules live inside the apps and are promoted to libraries only when genuinely
 shared.
 
 | Product | Release                 | Path          | Package                | Platform               |
@@ -21,42 +24,49 @@ shared.
 V1 scope: [scope-v1.md](scope-v1.md). V2 code (Clinic, chat, voice samples)
 stays in the repository and keeps passing CI.
 
-"Studio" and "Clinic" name the products; `web` and `native` name platforms
-(package entry points such as `ui/web`, `ui/native`) and stay in technical
-identifiers.
+"Studio" and "Clinic" name the products; `web` and `mobile` name platforms
+in library names and tags (`web-ui`, `mobile-shell`, `platform:mobile`).
 
 ## §3 Dependency rules
 
-Enforced by `@nx/enforce-module-boundaries` (tags in each `package.json`) and
-`no-restricted-imports` in `eslint.config.mjs`.
+Every project carries one `type:*` tag (`app`, `shell`, `ui`, `data-access`,
+`mocks`, `util`, `types`) and one `platform:*` tag (`web`, `mobile`,
+`neutral`). The allowed directions are in
+[ADR 0009](adr/0009-library-structure.md) and
+[AGENTS.md](../AGENTS.md#architecture-and-dependency-direction). In short:
+utilities and types depend only on utilities and types; web and mobile
+projects never depend on each other; neutral projects depend only on neutral
+ones; mocks are used only by apps.
 
-| Tag                         | May depend on                                |
-| --------------------------- | -------------------------------------------- |
-| `type:app`                  | everything below                             |
-| `type:shell`                | ui, data-access, config, util, types, tokens |
-| `type:ui`                   | tokens, types, util                          |
-| `type:data-access`          | types, config, util                          |
-| `type:config`, `type:util`  | types                                        |
-| `type:types`, `type:tokens` | nothing                                      |
+Enforcement, all lint errors in CI (`eslint.config.mjs`):
 
-Also enforced: web (Studio) code never imports native (Clinic) code and vice versa; platform-neutral
-packages import neither DOM nor React Native; packages never import apps;
-modules never import each other; only the app config modules read env;
-pure packages (`utils`, `shared-types`, `config`, `design-tokens`) import no
-React; apps never import the raw HTTP client (`openapi-fetch`,
-`createApiClient`, `useApiClient`) and use resource hooks instead.
-Packages expose only their entry points via `exports`, so deep imports fail.
-Package boundaries in prose: `packages/*/README.md`.
+| Rule                                    | Enforces                                                                                                        |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `@nx/enforce-module-boundaries`         | tag constraints, banned external packages per tag, no relative/absolute imports into another project, no cycles |
+| `local/feature-boundaries`              | feature folders inside an app never import each other, whatever the import form                                 |
+| `no-restricted-imports` (apps)          | no raw HTTP client in apps; mocks and MSW only in the app mocking module and tests                              |
+| `no-restricted-globals` / `-properties` | no browser or Node globals in `packages/shared/*/src`; no `document` or web storage in mobile code              |
+| `no-restricted-syntax`                  | only the app config modules read env                                                                            |
+
+`pnpm architecture:check` lints known-bad and known-good snippets through the
+real config and compares declared workspace dependencies with actual imports,
+so a rule that stops rejecting violations fails CI. `shared-types`, `utils`,
+`config` and `design-tokens` also compile their source without DOM or Node
+types. Libraries expose only their `exports` entry points, so deep imports
+fail to resolve. Library boundaries in prose: `packages/*/*/README.md`.
 
 ## §4 Platform shell
 
-`platform-shell/core` holds the `ModuleManifest` contract (nav entries and
-clinic sections), `resolveNavigation()` / `resolveClinicSections()`
-(capabilities from `GET /me`, never role-name checks), the session boundary
-(ADR 0008), config context and clinic context (`useClinicId()`; route-driven
-in Studio, `ClinicSelectionProvider` in Clinic). `/web` holds the router-agnostic
-Studio app shell (sidebar ≥1024px, icon rail 768–1023px, drawer below), the clinic
-workspace frame and shell states; `/native` the Clinic layouts. Composition is
+`@radial-pulse/auth` holds the session boundary (ADR 0008): sign-in providers,
+the framework-free `SessionController` built from `GET /me`, and
+`createAppServices`. `@radial-pulse/shell-core` holds the `ModuleManifest`
+contract (nav entries and clinic sections), `resolveNavigation()` /
+`resolveClinicSections()` (capabilities from `GET /me`, never role-name
+checks), the session and permission hooks, config context and clinic context
+(`useClinicId()`; route-driven in Studio, `ClinicSelectionProvider` in Clinic).
+`@radial-pulse/web-shell` holds the router-agnostic Studio app shell (sidebar
+≥1024px, icon rail 768–1023px, drawer below), the clinic workspace frame and
+shell states; `@radial-pulse/mobile-shell` the Clinic layouts. Composition is
 compile-time; no micro-frontends.
 
 ## §5 Work queue
@@ -87,7 +97,11 @@ sends `x-request-id` on every request.
 
 local, dev, prod. Studio: build once, runtime `/config.json` per environment.
 Clinic (V2, not deployed in V1): EAS profiles `development`, `dev`, `prod` set `APP_ENV`.
-`createConfig()` rejects API mocking in prod.
+`createConfig()` rejects API mocking in prod. Studio keeps the contract
+mocks as a lazily loaded chunk in its single artifact (ADR 0003: dev may mock,
+the same artifact is promoted to prod); `@radial-pulse/web:verify-bundle`
+fails the build if mock code reaches the startup path. Clinic prod builds
+replace the mocking module with a stub.
 
 ## §9 Types and contracts
 
@@ -99,7 +113,7 @@ defines no enum values of its own for assessment status or severity.
 
 Cognito Managed Login, email and password, Authorization Code + PKCE, with a
 public app client per app (ADR 0006, docs/phase-7-auth.md). One shared
-provider, `createCognitoAuth` in `platform-shell/core`; no Amplify. Studio tokens
+provider, `createCognitoAuth` in `@radial-pulse/auth`; no Amplify. Studio tokens
 in sessionStorage plus a strict CSP on CloudFront. Clinic tokens in
 expo-secure-store via a chunking adapter. The API client only sees an injected
 `AuthBridge`; the session comes from `GET /api/v1/auth/me`. Service-to-service

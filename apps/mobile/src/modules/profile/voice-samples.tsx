@@ -1,4 +1,4 @@
-import { useAssetDownloadUrl } from '@radial-pulse/api-client/react';
+import { useAssetDownloadUrl } from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
@@ -6,7 +6,7 @@ import {
   Badge,
   formatRelativeTime,
   textStyle,
-} from '@radial-pulse/ui/native';
+} from '@radial-pulse/mobile-ui';
 import { mediaReviewLabel, needsChanges, type MediaLabel } from '@radial-pulse/utils';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { AudioLines, Mic, Pause, Play, Plus, RefreshCw } from 'lucide-react-native';

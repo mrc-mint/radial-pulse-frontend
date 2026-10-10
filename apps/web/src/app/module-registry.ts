@@ -1,4 +1,4 @@
-import type { ModuleManifest } from '@radial-pulse/platform-shell/core';
+import type { ModuleManifest } from '@radial-pulse/shell-core';
 import { assessmentsModule } from '../modules/assessments/manifest';
 import { chatModule } from '../modules/chat/manifest';
 import { clinicsModule } from '../modules/clinics/manifest';

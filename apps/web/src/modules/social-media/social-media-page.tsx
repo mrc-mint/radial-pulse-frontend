@@ -1,5 +1,5 @@
-import { useConnections, useLatestSnapshots } from '@radial-pulse/api-client/react';
-import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
+import { useConnections, useLatestSnapshots } from '@radial-pulse/api-client-react';
+import { useClinicCan, useClinicId } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   Badge,
@@ -8,7 +8,7 @@ import {
   EmptyState,
   formatRelativeTime,
   MetricCard,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import {
   CONNECTION_STATUS_LABELS,
   formatMetric,

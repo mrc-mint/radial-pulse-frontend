@@ -1,4 +1,4 @@
-import type { ModuleManifest } from '@radial-pulse/platform-shell/core';
+import type { ModuleManifest } from '@radial-pulse/shell-core';
 
 /** The clinic's published Digital Presence Assessments (docs/scope-v1.md). */
 export const assessmentsModule: ModuleManifest = {

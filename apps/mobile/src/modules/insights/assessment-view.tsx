@@ -11,7 +11,7 @@ import {
   sortByPriority,
   Tabs,
   textStyle,
-} from '@radial-pulse/ui/native';
+} from '@radial-pulse/mobile-ui';
 import {
   ASSESSMENT_COMPONENT_LABELS,
   formatComponentScore,

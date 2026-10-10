@@ -1,5 +1,5 @@
 import type { AppConfig } from '@radial-pulse/config';
-import { createCognitoAuth, type CognitoAuthProvider } from '@radial-pulse/platform-shell/core';
+import { createCognitoAuth, type CognitoAuthProvider } from '@radial-pulse/auth';
 import * as Crypto from 'expo-crypto';
 import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';

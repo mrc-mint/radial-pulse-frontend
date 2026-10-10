@@ -6,11 +6,11 @@ import {
   usePractitioners,
   useSetClinicPhoto,
   useUploadAsset,
-} from '@radial-pulse/api-client/react';
+} from '@radial-pulse/api-client-react';
 import { tokens as t } from '@radial-pulse/design-tokens';
-import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
+import { useClinicCan, useClinicId } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
-import { Tabs, textStyle } from '@radial-pulse/ui/native';
+import { Tabs, textStyle } from '@radial-pulse/mobile-ui';
 import {
   buildMediaBoard,
   CLINIC_PHOTO_TARGET,

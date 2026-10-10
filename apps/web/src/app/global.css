@@ -1,6 +1,6 @@
 /*
  * App-level globals. Component styles live in @radial-pulse/ui and
- * @radial-pulse/platform-shell; this file only sets the document baseline
+ * @radial-pulse/web-shell; this file only sets the document baseline
  * they assume (border-box sizing, token font and background).
  */
 *,

@@ -1,11 +1,8 @@
 import type { ApiClient } from '@radial-pulse/api-client';
-import { ApiClientProvider, createQueryClient } from '@radial-pulse/api-client/react';
+import { ApiClientProvider, createQueryClient } from '@radial-pulse/api-client-react';
 import type { AppConfig } from '@radial-pulse/config';
-import {
-  ConfigProvider,
-  SessionProvider,
-  type SessionController,
-} from '@radial-pulse/platform-shell/core';
+import { ConfigProvider, SessionProvider } from '@radial-pulse/shell-core';
+import { type SessionController } from '@radial-pulse/auth';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';

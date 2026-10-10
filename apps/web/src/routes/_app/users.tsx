@@ -1,4 +1,4 @@
-import { RequireCapability } from '@radial-pulse/platform-shell/web';
+import { RequireCapability } from '@radial-pulse/web-shell';
 import { createFileRoute } from '@tanstack/react-router';
 import { UsersPage } from '../../modules/users/users-page';
 

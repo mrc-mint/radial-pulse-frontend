@@ -1,0 +1,28 @@
+{
+  "name": "@radial-pulse/auth",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Session boundary: sign-in providers (Cognito PKCE, mock personas), session controller from GET /auth/me, app services composition. No React.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:data-access",
+      "platform:neutral"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/api-client": "workspace:*",
+    "@radial-pulse/config": "workspace:*",
+    "@radial-pulse/shared-types": "workspace:*",
+    "@radial-pulse/utils": "workspace:*"
+  }
+}

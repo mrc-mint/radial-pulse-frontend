@@ -1,11 +1,7 @@
 import '@fontsource-variable/inter';
 import '@radial-pulse/design-tokens/css';
 import { isCognitoConfigured } from '@radial-pulse/config';
-import {
-  createAppServices,
-  unconfiguredAuth,
-  type AuthProvider,
-} from '@radial-pulse/platform-shell/core';
+import { createAppServices, unconfiguredAuth, type AuthProvider } from '@radial-pulse/auth';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/app';

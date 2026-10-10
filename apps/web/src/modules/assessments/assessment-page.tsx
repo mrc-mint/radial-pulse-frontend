@@ -2,8 +2,8 @@ import {
   useAssessment,
   useAssessments,
   useRequestAssessment,
-} from '@radial-pulse/api-client/react';
-import { useClinicCan, useClinicId } from '@radial-pulse/platform-shell/core';
+} from '@radial-pulse/api-client-react';
+import { useClinicCan, useClinicId } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   APPROVAL_STATE_TONES,
@@ -19,7 +19,7 @@ import {
   PUBLICATION_STATE_TONES,
   ScoreCard,
   Select,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import {
   APPROVAL_STATE_LABELS,
   ASSESSMENT_COMPONENT_LABELS,

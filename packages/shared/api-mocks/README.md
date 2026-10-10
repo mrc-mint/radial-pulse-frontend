@@ -1,0 +1,55 @@
+# @radial-pulse/api-mocks
+
+DEV/TEST ONLY. Tags: `type:mocks`, `platform:neutral`. MSW handlers used to build the UI while the backend contract is published and
+implemented. Every mock targets an operation that exists in the contract
+snapshot in `contracts/api/` (currently **0.3.1, unreleased local import**);
+responses are typed by the generated schemas and use only contract enum values.
+
+Rules:
+
+- Mock only operations present in the contract. A screen that needs something
+  the contract lacks is **blocked**, not mocked (see
+  `docs/phase-4-contract-dependency.md`).
+- Enabled only when `AppConfig.apiMocking` is true, which `createConfig()`
+  rejects in prod.
+- Only apps may depend on this library (Nx tag rule), and inside an app only
+  its mocking module and tests may import it (lint). `pnpm architecture:check`
+  proves both.
+- Studio imports it dynamically from `src/app/mocking.ts`. ADR 0003 promotes
+  one artifact from dev to prod and dev may mock, so the mocks stay in the
+  artifact as a lazy chunk plus `mockServiceWorker.js`; they are never
+  requested in prod. `@radial-pulse/web:verify-bundle` fails the build if mock
+  code becomes reachable from the startup path. Clinic swaps the mocking module
+  for a stub in prod builds (`metro.config.js`).
+- Remove a handler (and its row) when the real endpoint is available in the
+  environment the app runs against.
+
+Mock sign-in: the mock `/auth/me` resolves `Bearer dev-persona:<id>` tokens to
+three personas whose permissions mirror the backend RBAC table
+(Platform Administrator, Digital Success Manager, Clinic Administrator).
+`__mock-storage` stands in for pre-signed object-storage URLs.
+
+Studio runs the handlers in a service worker (`msw/browser`). React Native has
+none, so the Clinic app uses `createMockFetch()`: the API client's fetch asks
+the handlers first (`getResponse`), in-process.
+
+| Operation                                                                                         | Contract version | Reason                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/v1/auth/me`                                                                             | 0.3.0            | Backend not deployed; real sign-in is Cognito (mock persona tokens only here)                                                                                                    |
+| `GET /api/v1/dashboard/summary`                                                                   | 0.3.0            | Backend not deployed                                                                                                                                                             |
+| `GET/POST /api/v1/clinics`                                                                        | 0.3.0            | Backend not deployed                                                                                                                                                             |
+| `GET/PATCH /api/v1/clinics/{clinic_id}`                                                           | 0.3.0            | Backend not deployed                                                                                                                                                             |
+| `POST …/stage`, `POST …/archive`, `POST …/restore`                                                | 0.3.0            | Backend not deployed                                                                                                                                                             |
+| `GET …/practitioners`, `GET …/snapshots`, `GET …/audit-events`                                    | 0.3.0            | Backend not deployed. Snapshots use sample social metric keys (`instagram.followers`…); the real catalogue is unpublished (gap 6)                                                |
+| `GET …/assignments`, `PUT …/assignment`                                                           | 0.3.0            | Backend not deployed                                                                                                                                                             |
+| `GET/PUT …/profile`                                                                               | 0.3.1            | Backend not deployed. Practitioner Profile built from the clinic, its main practitioner and `services.items`; 409 on a stale `version`, 422 for overlapping consultation windows |
+| `GET/POST /api/v1/users`, `POST …/resend-invite`                                                  | 0.3.0            | Backend not deployed                                                                                                                                                             |
+| `GET/PATCH …/presence-profiles`                                                                   | 0.3.0            | Backend not deployed                                                                                                                                                             |
+| `GET/POST …/assessments`, `GET …/assessments/{id}`                                                | 0.3.0            | Backend not deployed                                                                                                                                                             |
+| `GET …/work-items`                                                                                | 0.3.0            | Backend not deployed                                                                                                                                                             |
+| `GET …/connections`, `GET …/connections/{platform}`, `POST …/start`, `…/complete`, `…/disconnect` | 0.3.0            | Backend not deployed. `start` returns a `mock-oauth` address; the mobile app's mock Connect flow hands its `state` straight back                                                 |
+| `GET /api/v1/chat/inbox`, `GET/POST …/chat/messages`, `POST …/chat/read`                          | 0.3.0            | Backend not deployed                                                                                                                                                             |
+| `GET …/assets`, `POST …/assets/uploads`, `POST …/confirm`, `GET …/download-url`                   | 0.3.0            | Backend not deployed. Confirming a photo, logo or voice sample opens a `submitted` approval (gap 22); `inlineMedia` returns `data:` URLs for React Native                        |
+| `GET …/approvals`, `GET …/approvals/{id}`, `POST …/approvals/actions`                             | 0.3.0            | Backend not deployed. Files use `resource_type: "asset"` (unpublished, gap 22); approve / reject / redo only from `submitted`, else 409                                          |
+| `GET/PATCH /api/v1/settings/platform`                                                             | 0.3.0            | Backend not deployed                                                                                                                                                             |
+| `GET /health`                                                                                     | 0.3.0            | Backend not deployed                                                                                                                                                             |

@@ -1,0 +1,38 @@
+{
+  "name": "@radial-pulse/mobile-ui",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Clinic (mobile) design-system components: React Native implementations of the shared UI contracts.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:ui",
+      "platform:mobile"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/design-tokens": "workspace:*",
+    "@radial-pulse/ui-shared": "workspace:*",
+    "@radial-pulse/utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.1.0",
+    "react-native": "*",
+    "react-native-svg": "*"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.10",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-svg": "15.12.1"
+  }
+}

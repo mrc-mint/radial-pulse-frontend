@@ -1,5 +1,5 @@
-import { useClinics, useDashboardSummary, useUsers } from '@radial-pulse/api-client/react';
-import { useCan, useCurrentSession } from '@radial-pulse/platform-shell/core';
+import { useClinics, useDashboardSummary, useUsers } from '@radial-pulse/api-client-react';
+import { useCan, useCurrentSession } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   Avatar,
@@ -17,7 +17,7 @@ import {
   Table,
   Tabs,
   type TableColumn,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import {
   CLINIC_STATUS_GROUP_LABELS,
   CLINIC_STATUS_GROUP,

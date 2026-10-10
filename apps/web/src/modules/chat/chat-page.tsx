@@ -3,8 +3,8 @@ import {
   useChatMessages,
   useMarkChatRead,
   useSendChatMessage,
-} from '@radial-pulse/api-client/react';
-import { useClinicCan, useClinicId, useCurrentSession } from '@radial-pulse/platform-shell/core';
+} from '@radial-pulse/api-client-react';
+import { useClinicCan, useClinicId, useCurrentSession } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   Avatar,
@@ -14,7 +14,7 @@ import {
   formatDate,
   IconButton,
   LoadingState,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import { MessageCircle, Paperclip, Send, X } from 'lucide-react';
 import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { mutationErrorMessage, QueryError } from '../../app/page-kit';

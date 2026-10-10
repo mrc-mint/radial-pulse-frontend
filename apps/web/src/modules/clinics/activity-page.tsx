@@ -1,5 +1,5 @@
-import { useClinicActivity, useUsers } from '@radial-pulse/api-client/react';
-import { useCan, useClinicId, useCurrentSession } from '@radial-pulse/platform-shell/core';
+import { useClinicActivity, useUsers } from '@radial-pulse/api-client-react';
+import { useCan, useClinicId, useCurrentSession } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   Card,
@@ -7,7 +7,7 @@ import {
   formatDateTime,
   formatRelativeTime,
   Pagination,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import {
   Activity,
   ArrowRightLeft,

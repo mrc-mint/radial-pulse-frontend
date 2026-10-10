@@ -1,6 +1,6 @@
-import { useClinic, usePractitioners } from '@radial-pulse/api-client/react';
-import { useClinicCan } from '@radial-pulse/platform-shell/core';
-import { Button, displayHost, PageHeader, Skeleton } from '@radial-pulse/ui/web';
+import { useClinic, usePractitioners } from '@radial-pulse/api-client-react';
+import { useClinicCan } from '@radial-pulse/shell-core';
+import { Button, displayHost, PageHeader, Skeleton } from '@radial-pulse/web-ui';
 import { Globe, Mail, MapPin, Pencil, Phone } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { ClinicStatusBadge, ExternalLink, mapsUrl, QueryError } from '../../app/page-kit';

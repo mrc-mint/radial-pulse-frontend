@@ -11,7 +11,7 @@ import { resolve } from 'node:path';
 import openapiTS, { astToString } from 'openapi-typescript';
 
 const spec = resolve('contracts/api/openapi.json');
-const out = resolve('packages/shared-types/src/contract/generated.ts');
+const out = resolve('packages/shared/types/src/contract/generated.ts');
 
 if (!existsSync(spec)) {
   console.log('No contracts/api/openapi.json yet — keeping the placeholder contract types.');

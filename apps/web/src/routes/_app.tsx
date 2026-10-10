@@ -1,10 +1,6 @@
-import {
-  productExperience,
-  roleLabel,
-  useConfig,
-  useSession,
-} from '@radial-pulse/platform-shell/core';
-import { FullPageError, FullPageLoading, WebAppShell } from '@radial-pulse/platform-shell/web';
+import { productExperience, roleLabel } from '@radial-pulse/auth';
+import { useConfig, useSession } from '@radial-pulse/shell-core';
+import { FullPageError, FullPageLoading, WebAppShell } from '@radial-pulse/web-shell';
 import { createFileRoute, Outlet, useRouter } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { ClinicAccountBlocked } from '../app/clinic-account-blocked';

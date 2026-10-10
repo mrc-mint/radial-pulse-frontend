@@ -1,5 +1,5 @@
-import { FullPageStatus, NotFound } from '@radial-pulse/platform-shell/web';
-import { buttonClassName } from '@radial-pulse/ui/web';
+import { FullPageStatus, NotFound } from '@radial-pulse/web-shell';
+import { buttonClassName } from '@radial-pulse/web-ui';
 import { createRouter, Link, type RouterHistory } from '@tanstack/react-router';
 import { routeTree } from '../routeTree.gen';
 

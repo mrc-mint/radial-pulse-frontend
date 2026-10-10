@@ -1,13 +1,12 @@
 import {
   clinicAdministratorClinicIds,
-  ClinicSelectionProvider,
   productExperience,
-  useSession,
   type ClinicSummary,
   type Session,
-} from '@radial-pulse/platform-shell/core';
-import { FullScreenLoading, FullScreenMessage } from '@radial-pulse/platform-shell/native';
-import { Button } from '@radial-pulse/ui/native';
+} from '@radial-pulse/auth';
+import { ClinicSelectionProvider, useSession } from '@radial-pulse/shell-core';
+import { FullScreenLoading, FullScreenMessage } from '@radial-pulse/mobile-shell';
+import { Button } from '@radial-pulse/mobile-ui';
 import { Redirect } from 'expo-router';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAccessibleClinics } from './clinic-data';

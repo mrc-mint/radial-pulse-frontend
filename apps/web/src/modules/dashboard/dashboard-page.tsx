@@ -5,8 +5,8 @@ import {
   useClinicsAssessments,
   useClinicsPresence,
   useDashboardSummary,
-} from '@radial-pulse/api-client/react';
-import { useCurrentSession } from '@radial-pulse/platform-shell/core';
+} from '@radial-pulse/api-client-react';
+import { useCurrentSession } from '@radial-pulse/shell-core';
 import type { Schema } from '@radial-pulse/shared-types';
 import {
   Avatar,
@@ -17,7 +17,7 @@ import {
   MetricCard,
   PageHeader,
   Skeleton,
-} from '@radial-pulse/ui/web';
+} from '@radial-pulse/web-ui';
 import { Link } from '@tanstack/react-router';
 import {
   Activity,
