@@ -245,13 +245,63 @@ Commands from the root `package.json` (Nx runs each project's own target):
 | Formatting                                  | `pnpm format:check` (fix: `pnpm format`)                          |
 | Contract types in sync                      | `pnpm contract:check`                                             |
 | One project                                 | `pnpm nx run-many -t lint typecheck test -p @radial-pulse/mobile` |
+| One target of one project                   | `pnpm nx run @radial-pulse/web:typecheck`                         |
 | Dependency graph                            | `pnpm graph`                                                      |
+
+Nx is the supported way to run project-level `lint`, `typecheck`, `test`
+and `build` targets, for example:
+
+```bash
+pnpm nx run @radial-pulse/web:typecheck
+```
+
+Nx runs each target's dependencies first, such as Studio's `generate-routes`
+before `build`, `typecheck` and `test`. Running a package script directly
+(`pnpm --filter <package> typecheck`) skips them and is not supported; on a
+fresh checkout Studio's typecheck then fails because `src/routeTree.gen.ts`
+does not exist yet.
 
 CI (`.github/workflows/ci.yml`) runs `format:check`, `contract:check` and
 `nx affected -t lint typecheck test build`.
 
 `contract:check` compares the regenerated types with the committed
 `generated.ts` (`git diff`), so it fails until a regenerated file is committed.
+
+### Studio route tree
+
+`apps/web/src/routeTree.gen.ts` is generated (git-ignored, never edited by
+hand). Both writers use the same TanStack Router generator
+(`@tanstack/router-generator`):
+
+- the Nx target `@radial-pulse/web:generate-routes` runs `tsr generate` in
+  `apps/web`. It reads only `tsr.config.json` and runs before `build`,
+  `typecheck` and `test`;
+- the TanStack Router Vite plugin in `vite.config.ts` (also loaded by Vitest)
+  regenerates the file in the dev server. During `vite build` it also builds
+  the route map that route-level code splitting needs.
+
+The generator rewrites the route tree only when the new content differs from
+the file on disk, so after `generate-routes` the plugin leaves it untouched.
+
+Both must produce the same file. Keep `tsr.config.json` as the source of truth
+for every setting that changes the generated output (`routesDirectory`,
+`generatedRouteTree`, `quoteStyle`, `routeFilePrefix`, `target`, and so on);
+the CLI reads all of them from it. The plugin reads `tsr.config.json` too, but
+options passed to `tanstackRouter()` override it for the plugin only.
+`vite.config.ts` currently passes `target: 'react'`, the same value the CLI uses
+by default, and `autoCodeSplitting`, which changes bundling but not the
+generated file. Do not add other output-affecting options there. Generator
+plugins and function-valued options cannot be written in JSON, so adding one
+would make the two outputs differ; treat that as a build change, not a
+configuration tweak. If the outputs differ, `vite build` or Vitest rewrites the
+file while another task may be reading it.
+
+Avoid editing route files while generation is running (an Nx run, or the dev
+server reacting to a change). The generator writes to a temporary file under
+`apps/web/.tanstack/tmp` and renames it over the target. On Windows that rename
+has failed with `EPERM` when several generator processes ran at once. If it
+happens, stop the conflicting process (dev server, watch mode or a second Nx
+run) and run the command again.
 
 Local dev: `pnpm dev:web` (Studio, http://localhost:4200),
 `pnpm dev:mobile` (Clinic, V2, Expo), `pnpm dev:mobile:web` (Clinic in a browser,
