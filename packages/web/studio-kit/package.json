@@ -1,0 +1,39 @@
+{
+  "name": "@radial-pulse/studio-kit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Studio (web) building blocks shared by its feature libraries. No feature code.",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:feature-kit",
+      "platform:web"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/api-client": "workspace:*",
+    "@radial-pulse/api-client-react": "workspace:*",
+    "@radial-pulse/shared-types": "workspace:*",
+    "@radial-pulse/utils": "workspace:*",
+    "@radial-pulse/web-ui": "workspace:*",
+    "lucide-react": "^1.48.0"
+  },
+  "peerDependencies": {
+    "react": "19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.10",
+    "react": "19.1.0"
+  }
+}

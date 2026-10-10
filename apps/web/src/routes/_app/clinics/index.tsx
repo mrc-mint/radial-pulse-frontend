@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ClinicsPage } from '../../../modules/clinics/clinics-page';
+import { ClinicsPage } from '@radial-pulse/studio-clinics';
 
 export const Route = createFileRoute('/_app/clinics/')({
   component: ClinicsPage,

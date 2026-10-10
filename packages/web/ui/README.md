@@ -12,14 +12,14 @@ imports everything UI-related from `@radial-pulse/web-ui`.
 
 Each layer may use the ones above it, never the ones below.
 
-| Layer              | Where                                                         | Examples                                                                   |
-| ------------------ | ------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Design tokens      | `@radial-pulse/design-tokens`                                 | colours, spacing, radii, type scale, chart colours                         |
-| Primitives         | `web-ui` / `mobile-ui`                                        | Button, IconButton, Input, Select, Card, Badge, Avatar                     |
-| Components         | `web-ui` / `mobile-ui`                                        | Table, Tabs, Modal, MetricCard, ScoreCard, FindingCard, EmptyState, charts |
-| App patterns       | `apps/web/src/app` (Studio), `apps/mobile/src/shell` (Clinic) | page kit (QueryError, DefinitionList), clinic photo, assessment kit        |
-| Feature components | `apps/*/src/modules/<feature>`                                | clinic header, attention list, assessment view                             |
-| Pages              | `apps/*/src/modules/<feature>`, routes                        | clinic overview, dashboard                                                 |
+| Layer              | Where                                        | Examples                                                                   |
+| ------------------ | -------------------------------------------- | -------------------------------------------------------------------------- |
+| Design tokens      | `@radial-pulse/design-tokens`                | colours, spacing, radii, type scale, chart colours                         |
+| Primitives         | `web-ui` / `mobile-ui`                       | Button, IconButton, Input, Select, Card, Badge, Avatar                     |
+| Components         | `web-ui` / `mobile-ui`                       | Table, Tabs, Modal, MetricCard, ScoreCard, FindingCard, EmptyState, charts |
+| App patterns       | `studio-kit` (Studio), `clinic-kit` (Clinic) | page kit (QueryError, DefinitionList), clinic photo, assessment kit        |
+| Feature components | feature libraries (`studio-*`, `clinic-*`)   | clinic header, attention list, assessment view                             |
+| Pages              | feature libraries, routes in the apps        | clinic overview, dashboard                                                 |
 
 ## Rules
 
@@ -59,7 +59,7 @@ Rules:
 - Public props stay platform-neutral (`ui-shared` `contracts.ts`); RAC props are
   an implementation detail. Keep the existing API when migrating.
 - Tailwind runs without preflight and only scans this package
-  (`source(none)` + `@source`). Apps and feature modules do not use Tailwind
+  (`source(none)` + `@source`). Apps and feature libraries do not use Tailwind
   classes; they use these components.
 - Colours, spacing, radii, shadows and type come from tokens via the theme.
   No literal colours (`styles.test.ts`).

@@ -2,7 +2,7 @@ import { createMockFetch, MOCK_PERSONAS, MOCK_TOKEN_PREFIX } from '@radial-pulse
 import type { StorageFetch } from '@radial-pulse/api-client';
 import type { AppConfig } from '@radial-pulse/config';
 import { createMockAuth, type AuthProvider } from '@radial-pulse/auth';
-import type { ConnectBrowser } from './connect-browser';
+import type { ConnectBrowser } from '@radial-pulse/clinic-kit';
 import { mockConnectBrowser } from './mock-connect-browser';
 
 export interface MockServices {

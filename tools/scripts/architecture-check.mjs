@@ -11,7 +11,7 @@
  * Run: pnpm architecture:check (also a CI step).
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { ESLint } from 'eslint';
@@ -212,6 +212,151 @@ const CASES = [
   ],
 ];
 
+/** Feature libraries (ADR 0010): [file, code, rule | null]. */
+const FEATURE_CASES = [
+  // A feature never imports another feature, in any import form.
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "import { ClinicsPage } from '@radial-pulse/studio-clinics';",
+    NX,
+  ],
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "import { clinicsModule } from '@radial-pulse/studio-clinics/manifest';",
+    NX,
+  ],
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "import { x } from '../../studio-clinics/src/clinics-page';",
+    NX,
+  ],
+  ['packages/web/studio-dashboard/src/probe.ts', "export * from '@radial-pulse/studio-users';", NX],
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "export const m = import('@radial-pulse/studio-chat');",
+    NX,
+  ],
+  [
+    'packages/mobile/clinic-home/src/probe.ts',
+    "import { CHAT_PERMISSION } from '@radial-pulse/clinic-chat/manifest';",
+    NX,
+  ],
+  [
+    'packages/mobile/clinic-home/src/probe.ts',
+    "import { x } from '../../clinic-profile/src/profile-screen';",
+    NX,
+  ],
+  [
+    'packages/mobile/clinic-insights/src/probe.ts',
+    "import { AssessmentsScreen } from '@radial-pulse/clinic-assessments';",
+    NX,
+  ],
+  // Features build on their platform's kit and lower libraries.
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "import { QueryError } from '@radial-pulse/studio-kit';",
+    null,
+  ],
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "import { WebAppShell } from '@radial-pulse/web-shell';",
+    null,
+  ],
+  [
+    'packages/mobile/clinic-home/src/probe.ts',
+    "import { ListRow } from '@radial-pulse/clinic-kit';",
+    null,
+  ],
+  [
+    'packages/mobile/clinic-home/src/probe.ts',
+    "import { Screen } from '@radial-pulse/mobile-shell';",
+    null,
+  ],
+  // Platform separation for features and kits.
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "import { ListRow } from '@radial-pulse/clinic-kit';",
+    NX,
+  ],
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "import { HomeScreen } from '@radial-pulse/clinic-home';",
+    NX,
+  ],
+  [
+    'packages/mobile/clinic-home/src/probe.ts',
+    "import { QueryError } from '@radial-pulse/studio-kit';",
+    NX,
+  ],
+  [
+    'packages/mobile/clinic-home/src/probe.ts',
+    "import { Button } from '@radial-pulse/web-ui';",
+    NX,
+  ],
+  // Lower layers and kits never depend on features.
+  [
+    'packages/web/studio-kit/src/probe.ts',
+    "import { DashboardPage } from '@radial-pulse/studio-dashboard';",
+    NX,
+  ],
+  [
+    'packages/mobile/clinic-kit/src/probe.ts',
+    "import { HomeScreen } from '@radial-pulse/clinic-home';",
+    NX,
+  ],
+  ['packages/web/shell/src/probe.ts', "import { QueryError } from '@radial-pulse/studio-kit';", NX],
+  [
+    'packages/shared/shell-core/src/probe.ts',
+    "import { DashboardPage } from '@radial-pulse/studio-dashboard';",
+    NX,
+  ],
+  // Features never import apps, mocks or MSW, the raw API client, or call fetch.
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "import { App } from '@radial-pulse/web';",
+    IMPORTS,
+  ],
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "import { x } from '../../../../apps/web/src/app/shell';",
+    NX,
+  ],
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "import { MOCK_PERSONAS } from '@radial-pulse/api-mocks';",
+    NX,
+  ],
+  ['packages/mobile/clinic-home/src/probe.ts', "import { http } from 'msw';", NX],
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "import createClient from 'openapi-fetch';",
+    IMPORTS,
+  ],
+  [
+    'packages/mobile/clinic-home/src/probe.ts',
+    "import { useApiClient } from '@radial-pulse/api-client-react';",
+    IMPORTS,
+  ],
+  [
+    'packages/web/studio-dashboard/src/probe.ts',
+    "export const a = fetch('/api/v1/clinics');",
+    GLOBALS,
+  ],
+  ['packages/mobile/clinic-home/src/probe.ts', "export const a = globalThis.fetch('/x');", PROPS],
+  ['packages/mobile/clinic-home/src/probe.ts', 'export const a = document.title;', GLOBALS],
+  // Apps compose features through their public entry points.
+  [
+    'apps/web/src/routes/probe.tsx',
+    "import { DashboardPage } from '@radial-pulse/studio-dashboard';",
+    null,
+  ],
+  [
+    'apps/mobile/app/probe.tsx',
+    "export { HomeScreen as default } from '@radial-pulse/clinic-home';",
+    null,
+  ],
+];
+
 /** Platform globals: [file, code, rule | null]. Extended by the platform-boundary rules. */
 const GLOBAL_CASES = [
   ['packages/shared/utils/src/probe.ts', 'export const a = window.location.href;', GLOBALS],
@@ -293,6 +438,18 @@ async function runCases(title, cases) {
 
 await runCases('Import and dependency rules', CASES);
 await runCases('Platform globals', GLOBAL_CASES);
+await runCases('Feature libraries', FEATURE_CASES);
+
+// ── Features are libraries, not app folders (ADR 0010) ─────────────────────────
+console.log('\nFeature folders inside apps');
+for (const app of ['web', 'mobile']) {
+  const dir = `apps/${app}/src/modules`;
+  const ok = !existsSync(dir);
+  if (!ok) failures++;
+  console.log(
+    `  ${ok ? 'ok  ' : 'FAIL'} ${dir} ${ok ? 'absent' : 'exists: move features into packages/' + app + '/'}`,
+  );
+}
 
 // ── Declared workspace dependencies vs actual imports ────────────────────────
 console.log('\nWorkspace dependencies (declared vs imported)');

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { AssessmentPage } from '../../../../../modules/assessments/assessment-page';
+import { AssessmentPage } from '@radial-pulse/studio-assessments';
 
 /** Canonical Digital Presence Assessment URL (architecture §6). */
 export const Route = createFileRoute('/_app/clinics/$clinicId/assessment/$assessmentId')({

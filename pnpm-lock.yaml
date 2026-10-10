@@ -63,6 +63,33 @@ importers:
       '@radial-pulse/auth':
         specifier: workspace:*
         version: link:../../packages/shared/auth
+      '@radial-pulse/clinic-assessments':
+        specifier: workspace:*
+        version: link:../../packages/mobile/clinic-assessments
+      '@radial-pulse/clinic-auth':
+        specifier: workspace:*
+        version: link:../../packages/mobile/clinic-auth
+      '@radial-pulse/clinic-chat':
+        specifier: workspace:*
+        version: link:../../packages/mobile/clinic-chat
+      '@radial-pulse/clinic-connect-accounts':
+        specifier: workspace:*
+        version: link:../../packages/mobile/clinic-connect-accounts
+      '@radial-pulse/clinic-home':
+        specifier: workspace:*
+        version: link:../../packages/mobile/clinic-home
+      '@radial-pulse/clinic-insights':
+        specifier: workspace:*
+        version: link:../../packages/mobile/clinic-insights
+      '@radial-pulse/clinic-kit':
+        specifier: workspace:*
+        version: link:../../packages/mobile/clinic-kit
+      '@radial-pulse/clinic-profile':
+        specifier: workspace:*
+        version: link:../../packages/mobile/clinic-profile
+      '@radial-pulse/clinic-social-media':
+        specifier: workspace:*
+        version: link:../../packages/mobile/clinic-social-media
       '@radial-pulse/config':
         specifier: workspace:*
         version: link:../../packages/shared/config
@@ -75,15 +102,9 @@ importers:
       '@radial-pulse/mobile-ui':
         specifier: workspace:*
         version: link:../../packages/mobile/ui
-      '@radial-pulse/shared-types':
-        specifier: workspace:*
-        version: link:../../packages/shared/types
       '@radial-pulse/shell-core':
         specifier: workspace:*
         version: link:../../packages/shared/shell-core
-      '@radial-pulse/utils':
-        specifier: workspace:*
-        version: link:../../packages/shared/utils
       '@react-native-async-storage/async-storage':
         specifier: 2.2.0
         version: 2.2.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))
@@ -190,15 +211,33 @@ importers:
       '@radial-pulse/design-tokens':
         specifier: workspace:*
         version: link:../../packages/shared/design-tokens
-      '@radial-pulse/shared-types':
-        specifier: workspace:*
-        version: link:../../packages/shared/types
       '@radial-pulse/shell-core':
         specifier: workspace:*
         version: link:../../packages/shared/shell-core
-      '@radial-pulse/utils':
+      '@radial-pulse/studio-assessments':
         specifier: workspace:*
-        version: link:../../packages/shared/utils
+        version: link:../../packages/web/studio-assessments
+      '@radial-pulse/studio-chat':
+        specifier: workspace:*
+        version: link:../../packages/web/studio-chat
+      '@radial-pulse/studio-clinics':
+        specifier: workspace:*
+        version: link:../../packages/web/studio-clinics
+      '@radial-pulse/studio-dashboard':
+        specifier: workspace:*
+        version: link:../../packages/web/studio-dashboard
+      '@radial-pulse/studio-kit':
+        specifier: workspace:*
+        version: link:../../packages/web/studio-kit
+      '@radial-pulse/studio-settings':
+        specifier: workspace:*
+        version: link:../../packages/web/studio-settings
+      '@radial-pulse/studio-social-media':
+        specifier: workspace:*
+        version: link:../../packages/web/studio-social-media
+      '@radial-pulse/studio-users':
+        specifier: workspace:*
+        version: link:../../packages/web/studio-users
       '@radial-pulse/web-shell':
         specifier: workspace:*
         version: link:../../packages/web/shell
@@ -260,6 +299,471 @@ importers:
       vite:
         specifier: ^7.1.0
         version: 7.3.6(@types/node@26.6.3)(jiti@2.7.0)(lightningcss@1.33.0)(terser@5.51.2)(yaml@2.9.1)
+
+  packages/mobile/clinic-assessments:
+    dependencies:
+      '@radial-pulse/clinic-kit':
+        specifier: workspace:*
+        version: link:../clinic-kit
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
+      '@radial-pulse/mobile-shell':
+        specifier: workspace:*
+        version: link:../shell
+      '@radial-pulse/mobile-ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      expo-router:
+        specifier: ~6.0.0
+        version: 6.0.24(@expo/metro-runtime@6.1.2)(@types/react-dom@19.1.11(@types/react@19.1.17))(@types/react@19.1.17)(expo-constants@18.0.14)(expo-linking@8.0.12)(expo@54.0.37)(react-dom@19.1.0(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-screens@4.16.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-web@0.21.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      jest:
+        specifier: ~29.7.0
+        version: 29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0)
+      jest-expo:
+        specifier: ~54.0.0
+        version: 54.0.18(@babel/core@7.29.7)(expo@54.0.37)(jest@29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      lucide-react-native:
+        specifier: ^1.48.0
+        version: 1.48.0(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-native:
+        specifier: 0.81.5
+        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
+
+  packages/mobile/clinic-auth:
+    dependencies:
+      '@radial-pulse/clinic-kit':
+        specifier: workspace:*
+        version: link:../clinic-kit
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
+      '@radial-pulse/mobile-shell':
+        specifier: workspace:*
+        version: link:../shell
+      '@radial-pulse/mobile-ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      expo-router:
+        specifier: ~6.0.0
+        version: 6.0.24(@expo/metro-runtime@6.1.2)(@types/react-dom@19.1.11(@types/react@19.1.17))(@types/react@19.1.17)(expo-constants@18.0.14)(expo-linking@8.0.12)(expo@54.0.37)(react-dom@19.1.0(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-screens@4.16.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-web@0.21.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      jest:
+        specifier: ~29.7.0
+        version: 29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0)
+      jest-expo:
+        specifier: ~54.0.0
+        version: 54.0.18(@babel/core@7.29.7)(expo@54.0.37)(jest@29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      lucide-react-native:
+        specifier: ^1.48.0
+        version: 1.48.0(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-native:
+        specifier: 0.81.5
+        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
+      react-native-safe-area-context:
+        specifier: ~5.6.0
+        version: 5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+
+  packages/mobile/clinic-chat:
+    dependencies:
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/clinic-kit':
+        specifier: workspace:*
+        version: link:../clinic-kit
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
+      '@radial-pulse/mobile-ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      expo-document-picker:
+        specifier: ~14.0.8
+        version: 14.0.8(expo@54.0.37)
+      expo-router:
+        specifier: ~6.0.0
+        version: 6.0.24(@expo/metro-runtime@6.1.2)(@types/react-dom@19.1.11(@types/react@19.1.17))(@types/react@19.1.17)(expo-constants@18.0.14)(expo-linking@8.0.12)(expo@54.0.37)(react-dom@19.1.0(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-screens@4.16.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-web@0.21.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      expo-web-browser:
+        specifier: ~15.0.11
+        version: 15.0.11(expo@54.0.37)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))
+      jest:
+        specifier: ~29.7.0
+        version: 29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0)
+      jest-expo:
+        specifier: ~54.0.0
+        version: 54.0.18(@babel/core@7.29.7)(expo@54.0.37)(jest@29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      lucide-react-native:
+        specifier: ^1.48.0
+        version: 1.48.0(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-native:
+        specifier: 0.81.5
+        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
+      react-native-safe-area-context:
+        specifier: ~5.6.0
+        version: 5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+
+  packages/mobile/clinic-connect-accounts:
+    dependencies:
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/clinic-kit':
+        specifier: workspace:*
+        version: link:../clinic-kit
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
+      '@radial-pulse/mobile-shell':
+        specifier: workspace:*
+        version: link:../shell
+      '@radial-pulse/mobile-ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      expo-router:
+        specifier: ~6.0.0
+        version: 6.0.24(@expo/metro-runtime@6.1.2)(@types/react-dom@19.1.11(@types/react@19.1.17))(@types/react@19.1.17)(expo-constants@18.0.14)(expo-linking@8.0.12)(expo@54.0.37)(react-dom@19.1.0(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-screens@4.16.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-web@0.21.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      jest:
+        specifier: ~29.7.0
+        version: 29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0)
+      jest-expo:
+        specifier: ~54.0.0
+        version: 54.0.18(@babel/core@7.29.7)(expo@54.0.37)(jest@29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      lucide-react-native:
+        specifier: ^1.48.0
+        version: 1.48.0(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-native:
+        specifier: 0.81.5
+        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
+
+  packages/mobile/clinic-home:
+    dependencies:
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/clinic-kit':
+        specifier: workspace:*
+        version: link:../clinic-kit
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
+      '@radial-pulse/mobile-shell':
+        specifier: workspace:*
+        version: link:../shell
+      '@radial-pulse/mobile-ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      expo-router:
+        specifier: ~6.0.0
+        version: 6.0.24(@expo/metro-runtime@6.1.2)(@types/react-dom@19.1.11(@types/react@19.1.17))(@types/react@19.1.17)(expo-constants@18.0.14)(expo-linking@8.0.12)(expo@54.0.37)(react-dom@19.1.0(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-screens@4.16.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-web@0.21.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      jest:
+        specifier: ~29.7.0
+        version: 29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0)
+      jest-expo:
+        specifier: ~54.0.0
+        version: 54.0.18(@babel/core@7.29.7)(expo@54.0.37)(jest@29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      lucide-react-native:
+        specifier: ^1.48.0
+        version: 1.48.0(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-native:
+        specifier: 0.81.5
+        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
+
+  packages/mobile/clinic-insights:
+    dependencies:
+      '@radial-pulse/clinic-kit':
+        specifier: workspace:*
+        version: link:../clinic-kit
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
+      '@radial-pulse/mobile-shell':
+        specifier: workspace:*
+        version: link:../shell
+      '@radial-pulse/mobile-ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      expo-router:
+        specifier: ~6.0.0
+        version: 6.0.24(@expo/metro-runtime@6.1.2)(@types/react-dom@19.1.11(@types/react@19.1.17))(@types/react@19.1.17)(expo-constants@18.0.14)(expo-linking@8.0.12)(expo@54.0.37)(react-dom@19.1.0(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-screens@4.16.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-web@0.21.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      jest:
+        specifier: ~29.7.0
+        version: 29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0)
+      jest-expo:
+        specifier: ~54.0.0
+        version: 54.0.18(@babel/core@7.29.7)(expo@54.0.37)(jest@29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      lucide-react-native:
+        specifier: ^1.48.0
+        version: 1.48.0(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-native:
+        specifier: 0.81.5
+        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
+
+  packages/mobile/clinic-kit:
+    dependencies:
+      '@radial-pulse/api-client':
+        specifier: workspace:*
+        version: link:../../shared/api-client
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
+      '@radial-pulse/mobile-ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+    devDependencies:
+      '@react-native-async-storage/async-storage':
+        specifier: 2.2.0
+        version: 2.2.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      expo-linking:
+        specifier: ~8.0.0
+        version: 8.0.12(expo@54.0.37)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      expo-web-browser:
+        specifier: ~15.0.11
+        version: 15.0.11(expo@54.0.37)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))
+      jest:
+        specifier: ~29.7.0
+        version: 29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0)
+      jest-expo:
+        specifier: ~54.0.0
+        version: 54.0.18(@babel/core@7.29.7)(expo@54.0.37)(jest@29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      lucide-react-native:
+        specifier: ^1.48.0
+        version: 1.48.0(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-native:
+        specifier: 0.81.5
+        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
+
+  packages/mobile/clinic-profile:
+    dependencies:
+      '@radial-pulse/api-client':
+        specifier: workspace:*
+        version: link:../../shared/api-client
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/clinic-kit':
+        specifier: workspace:*
+        version: link:../clinic-kit
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
+      '@radial-pulse/mobile-shell':
+        specifier: workspace:*
+        version: link:../shell
+      '@radial-pulse/mobile-ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      expo-audio:
+        specifier: ~1.1.1
+        version: 1.1.1(expo-asset@12.0.13(expo@54.0.37)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3))(expo@54.0.37)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      expo-constants:
+        specifier: ~18.0.0
+        version: 18.0.14(expo@54.0.37)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))
+      expo-document-picker:
+        specifier: ~14.0.8
+        version: 14.0.8(expo@54.0.37)
+      expo-image-picker:
+        specifier: ~17.0.11
+        version: 17.0.11(expo@54.0.37)
+      expo-router:
+        specifier: ~6.0.0
+        version: 6.0.24(@expo/metro-runtime@6.1.2)(@types/react-dom@19.1.11(@types/react@19.1.17))(@types/react@19.1.17)(expo-constants@18.0.14)(expo-linking@8.0.12)(expo@54.0.37)(react-dom@19.1.0(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-screens@4.16.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-web@0.21.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      jest:
+        specifier: ~29.7.0
+        version: 29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0)
+      jest-expo:
+        specifier: ~54.0.0
+        version: 54.0.18(@babel/core@7.29.7)(expo@54.0.37)(jest@29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      lucide-react-native:
+        specifier: ^1.48.0
+        version: 1.48.0(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: 19.1.0
+        version: 19.1.0(react@19.1.0)
+      react-native:
+        specifier: 0.81.5
+        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
+
+  packages/mobile/clinic-social-media:
+    dependencies:
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/clinic-kit':
+        specifier: workspace:*
+        version: link:../clinic-kit
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
+      '@radial-pulse/mobile-shell':
+        specifier: workspace:*
+        version: link:../shell
+      '@radial-pulse/mobile-ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      expo-router:
+        specifier: ~6.0.0
+        version: 6.0.24(@expo/metro-runtime@6.1.2)(@types/react-dom@19.1.11(@types/react@19.1.17))(@types/react@19.1.17)(expo-constants@18.0.14)(expo-linking@8.0.12)(expo@54.0.37)(react-dom@19.1.0(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-screens@4.16.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-web@0.21.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      jest:
+        specifier: ~29.7.0
+        version: 29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0)
+      jest-expo:
+        specifier: ~54.0.0
+        version: 54.0.18(@babel/core@7.29.7)(expo@54.0.37)(jest@29.7.0(@types/node@26.6.3)(babel-plugin-macros@3.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      lucide-react-native:
+        specifier: ^1.48.0
+        version: 1.48.0(react-native-svg@15.12.1(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-native:
+        specifier: 0.81.5
+        version: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)
 
   packages/mobile/shell:
     dependencies:
@@ -490,6 +994,257 @@ importers:
       react-dom:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
+
+  packages/web/studio-assessments:
+    dependencies:
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/studio-kit':
+        specifier: workspace:*
+        version: link:../studio-kit
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+      '@radial-pulse/web-ui':
+        specifier: workspace:*
+        version: link:../ui
+      lucide-react:
+        specifier: ^1.48.0
+        version: 1.48.0(react@19.1.0)
+    devDependencies:
+      '@tanstack/react-router':
+        specifier: ^1.131.0
+        version: 1.170.39(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+
+  packages/web/studio-chat:
+    dependencies:
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/studio-kit':
+        specifier: workspace:*
+        version: link:../studio-kit
+      '@radial-pulse/web-ui':
+        specifier: workspace:*
+        version: link:../ui
+      lucide-react:
+        specifier: ^1.48.0
+        version: 1.48.0(react@19.1.0)
+    devDependencies:
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+
+  packages/web/studio-clinics:
+    dependencies:
+      '@radial-pulse/api-client':
+        specifier: workspace:*
+        version: link:../../shared/api-client
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/studio-kit':
+        specifier: workspace:*
+        version: link:../studio-kit
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+      '@radial-pulse/web-ui':
+        specifier: workspace:*
+        version: link:../ui
+      lucide-react:
+        specifier: ^1.48.0
+        version: 1.48.0(react@19.1.0)
+    devDependencies:
+      '@tanstack/react-router':
+        specifier: ^1.131.0
+        version: 1.170.39(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+
+  packages/web/studio-dashboard:
+    dependencies:
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/design-tokens':
+        specifier: workspace:*
+        version: link:../../shared/design-tokens
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/studio-kit':
+        specifier: workspace:*
+        version: link:../studio-kit
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+      '@radial-pulse/web-ui':
+        specifier: workspace:*
+        version: link:../ui
+      lucide-react:
+        specifier: ^1.48.0
+        version: 1.48.0(react@19.1.0)
+    devDependencies:
+      '@tanstack/react-router':
+        specifier: ^1.131.0
+        version: 1.170.39(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+
+  packages/web/studio-kit:
+    dependencies:
+      '@radial-pulse/api-client':
+        specifier: workspace:*
+        version: link:../../shared/api-client
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+      '@radial-pulse/web-ui':
+        specifier: workspace:*
+        version: link:../ui
+      lucide-react:
+        specifier: ^1.48.0
+        version: 1.48.0(react@19.1.0)
+    devDependencies:
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+
+  packages/web/studio-settings:
+    dependencies:
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/auth':
+        specifier: workspace:*
+        version: link:../../shared/auth
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/studio-kit':
+        specifier: workspace:*
+        version: link:../studio-kit
+      '@radial-pulse/web-ui':
+        specifier: workspace:*
+        version: link:../ui
+    devDependencies:
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+
+  packages/web/studio-social-media:
+    dependencies:
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/studio-kit':
+        specifier: workspace:*
+        version: link:../studio-kit
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+      '@radial-pulse/web-ui':
+        specifier: workspace:*
+        version: link:../ui
+    devDependencies:
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+
+  packages/web/studio-users:
+    dependencies:
+      '@radial-pulse/api-client-react':
+        specifier: workspace:*
+        version: link:../../shared/api-client-react
+      '@radial-pulse/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+      '@radial-pulse/shell-core':
+        specifier: workspace:*
+        version: link:../../shared/shell-core
+      '@radial-pulse/studio-kit':
+        specifier: workspace:*
+        version: link:../studio-kit
+      '@radial-pulse/utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+      '@radial-pulse/web-ui':
+        specifier: workspace:*
+        version: link:../ui
+      lucide-react:
+        specifier: ^1.48.0
+        version: 1.48.0(react@19.1.0)
+    devDependencies:
+      '@types/react':
+        specifier: ~19.1.10
+        version: 19.1.17
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
 
   packages/web/ui:
     dependencies:

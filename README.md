@@ -12,7 +12,7 @@ through the published API contract (`contracts/api/`), via API Gateway.
 **V1 = Studio only.** The Clinic app, Client Collaboration (chat) and voice
 samples are V2: their code stays here and keeps passing CI, but they are not
 part of V1 deployment or acceptance. Studio switches its V2 features off in
-`apps/web/src/app/release.ts`, and clinic accounts get a "can't use Studio"
+`packages/web/studio-kit/src/release.ts`, and clinic accounts get a "can't use Studio"
 screen. Media in V1 is photos only. Scope:
 [docs/scope-v1.md](docs/scope-v1.md).
 
@@ -64,11 +64,13 @@ the app's registered scheme (Expo Go uses an `exp://` address).
 
 ```
       Studio: apps/web (staff)          Clinic: apps/mobile (Clinic Administrator)
-   modules: dashboard, clinics,         modules: home, insights, social-media,
-   assessments, social-media, chat,     assessments, profile, chat, connect-accounts
-   users, settings
+   routes + composition only            routes + composition only
             |                                         |
-   packages/web: web-shell, web-ui      packages/mobile: mobile-shell, mobile-ui
+   packages/web: studio-<feature>       packages/mobile: clinic-<feature>
+   (dashboard, clinics, assessments,    (home, insights, assessments,
+   social-media, users, settings, chat) social-media, profile, chat,
+   studio-kit, web-shell, web-ui        connect-accounts, auth), clinic-kit,
+                                        mobile-shell, mobile-ui
              \                                       /
               \                                     /
    packages/shared (platform-neutral)
@@ -85,8 +87,8 @@ UI is layered the same way on both platforms:
 
 ```
 design-tokens  ->  ui primitives  ->  ui components  ->  app patterns  ->  feature pages
-(colours,         (Button, Input,    (MetricCard,        (page-kit,         (modules/*)
- spacing, type)    Card, Badge)       FindingCard,        shell kit)
+(colours,         (Button, Input,    (MetricCard,        (studio-kit,       (studio-*,
+ spacing, type)    Card, Badge)       FindingCard,        clinic-kit)         clinic-*)
                    web-ui /           charts)
                    mobile-ui
 ```
@@ -99,7 +101,7 @@ Details: [docs/architecture.md](docs/architecture.md),
 
 | I'm adding…                                          | Put it in                                                                                                            |
 | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| A screen or feature-specific component               | `apps/web/src/modules/<feature>/` (Studio), `apps/mobile/src/modules/<feature>/` (Clinic)                            |
+| A screen or feature-specific component               | its feature library: `packages/web/studio-<feature>/` (Studio), `packages/mobile/clinic-<feature>/` (Clinic)         |
 | A new navigation entry or clinic tab                 | that module's `manifest.ts`, registered in the app's `module-registry.ts`                                            |
 | Something two modules of one app share               | `apps/web/src/app/` (Studio) or `apps/mobile/src/shell/` (Clinic); modules never import each other                   |
 | A call to a new API operation                        | `packages/shared/api-client/src/services/<domain>.ts` + a hook in `packages/shared/api-client-react/src/<domain>.ts` |

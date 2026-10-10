@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { DashboardPage } from '../../modules/dashboard/dashboard-page';
+import { DashboardPage } from '@radial-pulse/studio-dashboard';
 
 export const Route = createFileRoute('/_app/dashboard')({
   component: DashboardPage,

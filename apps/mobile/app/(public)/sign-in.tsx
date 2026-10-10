@@ -1,1 +1,1 @@
-export { SignInScreen as default } from '../../src/modules/auth/sign-in-screen';
+export { SignInScreen as default } from '@radial-pulse/clinic-auth';

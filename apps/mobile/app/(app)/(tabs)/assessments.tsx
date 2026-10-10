@@ -1,1 +1,1 @@
-export { AssessmentsScreen as default } from '../../../src/modules/assessments/assessments-screen';
+export { AssessmentsScreen as default } from '@radial-pulse/clinic-assessments';

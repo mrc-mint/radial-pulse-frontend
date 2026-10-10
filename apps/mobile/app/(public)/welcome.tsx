@@ -1,1 +1,1 @@
-export { WelcomeScreen as default } from '../../src/modules/auth/welcome-screen';
+export { WelcomeScreen as default } from '@radial-pulse/clinic-auth';

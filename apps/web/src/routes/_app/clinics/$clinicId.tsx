@@ -11,9 +11,10 @@ import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
 import { useMemo } from 'react';
 import { webModules } from '../../../app/module-registry';
-import { renderShellLink, useNavLabel, usePathname } from '../../../app/shell';
-import { STUDIO_FEATURES } from '../../../app/release';
-import { ClinicHeader } from '../../../modules/clinics/clinic-header';
+import { renderShellLink, usePathname } from '../../../app/shell';
+import { useNavLabel } from '@radial-pulse/studio-kit';
+import { STUDIO_FEATURES } from '@radial-pulse/studio-kit';
+import { ClinicHeader } from '@radial-pulse/studio-clinics';
 
 /**
  * Clinic workspace: every route below /clinics/$clinicId runs inside this

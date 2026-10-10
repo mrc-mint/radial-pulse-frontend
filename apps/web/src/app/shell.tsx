@@ -42,11 +42,6 @@ export function useAppNavigation() {
   );
 }
 
-/** The label the current user sees for a nav entry (e.g. "My Client Portfolio"). */
-export function useNavLabel(id: string, fallback: string): string {
-  return useAppNavigation().find((e) => e.id === id)?.label ?? fallback;
-}
-
 export function environmentLabel(env: AppEnv): string | null {
   if (env === 'prod') return null;
   return env === 'local' ? 'Local' : 'Dev';

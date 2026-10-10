@@ -52,9 +52,34 @@ const depConstraints = [
       'type:types',
     ],
   },
+  // Feature libraries (ADR 0010): one per business domain, never another
+  // feature. Shared feature building blocks live in the app's kit.
+  {
+    sourceTag: 'type:feature',
+    onlyDependOnLibsWithTags: [
+      'type:feature-kit',
+      'type:shell',
+      'type:ui',
+      'type:data-access',
+      'type:util',
+      'type:types',
+    ],
+  },
+  {
+    sourceTag: 'type:feature-kit',
+    onlyDependOnLibsWithTags: [
+      'type:shell',
+      'type:ui',
+      'type:data-access',
+      'type:util',
+      'type:types',
+    ],
+  },
   {
     sourceTag: 'type:app',
     onlyDependOnLibsWithTags: [
+      'type:feature',
+      'type:feature-kit',
       'type:shell',
       'type:ui',
       'type:data-access',
@@ -94,6 +119,8 @@ const depConstraints = [
   { sourceTag: 'type:ui', bannedExternalImports: NO_MSW },
   { sourceTag: 'type:data-access', bannedExternalImports: NO_MSW },
   { sourceTag: 'type:shell', bannedExternalImports: NO_MSW },
+  { sourceTag: 'type:feature', bannedExternalImports: NO_MSW },
+  { sourceTag: 'type:feature-kit', bannedExternalImports: NO_MSW },
 ];
 
 // ── Platform globals ──────────────────────────────────────────────────────────
@@ -134,8 +161,16 @@ const MOBILE_BANNED = ['document', 'localStorage', 'sessionStorage', 'indexedDB'
  * themselves: API data comes from the resource hooks in
  * @radial-pulse/api-client-react, built on the one API client (ADR 0009).
  */
-const WEB_SCREENS = ['apps/web/src/modules/**/*.{ts,tsx}', 'apps/web/src/routes/**/*.{ts,tsx}'];
-const MOBILE_SCREENS = ['apps/mobile/src/modules/**/*.{ts,tsx}', 'apps/mobile/app/**/*.{ts,tsx}'];
+const WEB_SCREENS = [
+  'packages/web/studio-*/src/**/*.{ts,tsx}',
+  'apps/web/src/modules/**/*.{ts,tsx}',
+  'apps/web/src/routes/**/*.{ts,tsx}',
+];
+const MOBILE_SCREENS = [
+  'packages/mobile/clinic-*/src/**/*.{ts,tsx}',
+  'apps/mobile/src/modules/**/*.{ts,tsx}',
+  'apps/mobile/app/**/*.{ts,tsx}',
+];
 const FETCH_MESSAGE =
   'Screens never call fetch: use the resource hooks from @radial-pulse/api-client-react.';
 const NO_FETCH_GLOBAL = [{ name: 'fetch', message: FETCH_MESSAGE }];
@@ -324,7 +359,33 @@ export default tseslint.config(
     },
   },
 
-  // Feature folders inside an app never import each other (any import form).
+  // Feature libraries and kits: like screens in the apps, they never build or
+  // reach the raw API client (repeats the app ban: one rule value per file).
+  {
+    files: ['packages/web/studio-*/**/*.{ts,tsx}', 'packages/mobile/clinic-*/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: NO_DIRECT_HTTP,
+          patterns: [
+            {
+              group: [
+                '@radial-pulse/web',
+                '@radial-pulse/web/*',
+                '@radial-pulse/mobile',
+                '@radial-pulse/mobile/*',
+              ],
+              message: 'Libraries never import apps.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // Legacy guard: features are libraries now (ADR 0010); if a feature folder
+  // reappears inside an app, its folders still may not import each other.
   {
     files: [`apps/web/src/modules/${TS}`, `apps/mobile/src/modules/${TS}`],
     plugins: { local },

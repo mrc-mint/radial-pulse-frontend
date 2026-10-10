@@ -18,7 +18,7 @@ Sign-in providers, the session controller and `createAppServices` live in
 ## Does not belong here
 
 - Anything about a feature: assessments, findings, social metrics, reports,
-  chat content, work items. That lives in the app's `modules/`.
+  chat content, work items. That lives in the feature libraries.
 - Layout components: `web-shell` / `mobile-shell`. Generic components: `web-ui`
   / `mobile-ui`.
 - API calls (use `@radial-pulse/api-client-react`) and hand-written domain types

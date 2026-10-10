@@ -1,0 +1,40 @@
+{
+  "name": "@radial-pulse/studio-social-media",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Studio (web) feature: social-media. Pages/screens and navigation manifest; routes stay in the app.",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:feature",
+      "platform:web"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/api-client-react": "workspace:*",
+    "@radial-pulse/shared-types": "workspace:*",
+    "@radial-pulse/shell-core": "workspace:*",
+    "@radial-pulse/studio-kit": "workspace:*",
+    "@radial-pulse/utils": "workspace:*",
+    "@radial-pulse/web-ui": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.10",
+    "react": "19.1.0"
+  }
+}

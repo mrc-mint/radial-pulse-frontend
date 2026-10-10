@@ -1,1 +1,1 @@
-export { HomeScreen as default } from '../../../src/modules/home/home-screen';
+export { HomeScreen as default } from '@radial-pulse/clinic-home';

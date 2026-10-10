@@ -1,0 +1,43 @@
+{
+  "name": "@radial-pulse/studio-assessments",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Studio (web) feature: assessments. Pages/screens and navigation manifest; routes stay in the app.",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "nx": {
+    "tags": [
+      "type:feature",
+      "platform:web"
+    ]
+  },
+  "dependencies": {
+    "@radial-pulse/api-client-react": "workspace:*",
+    "@radial-pulse/shared-types": "workspace:*",
+    "@radial-pulse/shell-core": "workspace:*",
+    "@radial-pulse/studio-kit": "workspace:*",
+    "@radial-pulse/utils": "workspace:*",
+    "@radial-pulse/web-ui": "workspace:*",
+    "lucide-react": "^1.48.0"
+  },
+  "peerDependencies": {
+    "@tanstack/react-router": "^1.131.0",
+    "react": "19.1.0"
+  },
+  "devDependencies": {
+    "@tanstack/react-router": "^1.131.0",
+    "@types/react": "~19.1.10",
+    "react": "19.1.0"
+  }
+}
