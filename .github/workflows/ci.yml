@@ -7,6 +7,9 @@ on:
 
 permissions:
   contents: read
+  # nrwl/nx-set-shas reads past workflow runs to find the last green main;
+  # private repositories need this to be granted explicitly.
+  actions: read
 
 concurrency:
   group: ci-${{ github.ref }}
