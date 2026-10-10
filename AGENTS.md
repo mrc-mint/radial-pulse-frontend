@@ -178,8 +178,9 @@ Rules (all lint errors; `pnpm architecture:check` proves they reject violations)
   code only.
 - **API access goes through `@radial-pulse/api-client`.** Screens use resource
   hooks from `@radial-pulse/api-client-react`. Apps never import
-  `openapi-fetch`, `createApiClient` or `useApiClient`, and never use `fetch`
-  for the API. The client is built once by `createAppServices`
+  `openapi-fetch`, `createApiClient` or `useApiClient`, and screens (feature
+  modules and route files) never call `fetch` (lint). The only exceptions are
+  commented one-liners that read a local file URI, never the API. The client is built once by `createAppServices`
   (`@radial-pulse/auth`).
 - **Mocks are dev/test only.** Only apps may depend on `@radial-pulse/api-mocks`,
   and inside an app only its mocking module (`apps/web/src/app/mocking.ts`,

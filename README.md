@@ -126,7 +126,7 @@ Lint fails the build if any of these is broken (`eslint.config.mjs`), and
 - Libraries never import apps, never reach into another project by path, and
   never form cycles.
 - Apps never talk HTTP themselves: no `openapi-fetch`, `createApiClient` or
-  `useApiClient` in apps; screens use resource hooks.
+  `useApiClient` in apps, and no raw `fetch` in screens; screens use resource hooks.
 - Contract mocks and MSW are used only by an app's mocking module and tests;
   Studio's `verify-bundle` keeps them off the startup path.
 - Only the app config modules read environment variables.

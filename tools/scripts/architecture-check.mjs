@@ -235,6 +235,26 @@ const GLOBAL_CASES = [
   ['packages/shared/api-client/src/probe.ts', "export const a = fetch('/x');", null],
   ['packages/shared/api-client/src/probe.ts', 'export const a = new URL("https://x.test");', null],
   ['packages/web/ui/src/probe.ts', 'export const a = document.title;', null],
+  // Screens never call fetch (API data comes from api-client-react hooks).
+  [
+    'apps/web/src/modules/dashboard/probe.ts',
+    "export const a = fetch('/api/v1/clinics');",
+    GLOBALS,
+  ],
+  [
+    'apps/web/src/routes/_app/probe.tsx',
+    "export const a = window.fetch('/api/v1/clinics');",
+    PROPS,
+  ],
+  ['apps/mobile/src/modules/home/probe.ts', "export const a = fetch('/api/v1/clinics');", GLOBALS],
+  ['apps/mobile/app/(app)/probe.tsx', "export const a = globalThis.fetch('/x');", PROPS],
+  // ...without dropping the mobile bans on the same files.
+  ['apps/mobile/src/modules/home/probe.ts', 'export const a = document.title;', GLOBALS],
+  ['apps/mobile/src/shell/probe.ts', "export const a = localStorage.getItem('k');", GLOBALS],
+  // Composition and config code may still use fetch (runtime config, API client wiring).
+  ['apps/web/src/lib/probe.ts', "export const a = fetch('/config.json');", null],
+  ['apps/mobile/src/shell/probe.ts', "export const a = fetch('file:///x');", null],
+  ['apps/web/src/modules/dashboard/probe.test.ts', "export const a = fetch('/x');", null],
   ['apps/web/src/app/probe.ts', 'export const a = window.location.href;', null],
 ];
 

@@ -40,13 +40,13 @@ ones; mocks are used only by apps.
 
 Enforcement, all lint errors in CI (`eslint.config.mjs`):
 
-| Rule                                    | Enforces                                                                                                        |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `@nx/enforce-module-boundaries`         | tag constraints, banned external packages per tag, no relative/absolute imports into another project, no cycles |
-| `local/feature-boundaries`              | feature folders inside an app never import each other, whatever the import form                                 |
-| `no-restricted-imports` (apps)          | no raw HTTP client in apps; mocks and MSW only in the app mocking module and tests                              |
-| `no-restricted-globals` / `-properties` | no browser or Node globals in `packages/shared/*/src`; no `document` or web storage in mobile code              |
-| `no-restricted-syntax`                  | only the app config modules read env                                                                            |
+| Rule                                    | Enforces                                                                                                                          |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `@nx/enforce-module-boundaries`         | tag constraints, banned external packages per tag, no relative/absolute imports into another project, no cycles                   |
+| `local/feature-boundaries`              | feature folders inside an app never import each other, whatever the import form                                                   |
+| `no-restricted-imports` (apps)          | no raw HTTP client in apps; mocks and MSW only in the app mocking module and tests                                                |
+| `no-restricted-globals` / `-properties` | no browser or Node globals in `packages/shared/*/src`; no `document` or web storage in mobile code; no raw `fetch` in app screens |
+| `no-restricted-syntax`                  | only the app config modules read env                                                                                              |
 
 `pnpm architecture:check` lints known-bad and known-good snippets through the
 real config and compares declared workspace dependencies with actual imports,
@@ -96,7 +96,9 @@ sends `x-request-id` on every request.
 ## §8 Environments
 
 local, dev, prod. Studio: build once, runtime `/config.json` per environment.
-Clinic (V2, not deployed in V1): EAS profiles `development`, `dev`, `prod` set `APP_ENV`.
+Clinic (V2, not deployed in V1): EAS profiles `development`, `dev`, `prod` set `APP_ENV`; `prod` also sets
+`EXPO_PUBLIC_APP_ENV=prod`, so the app config refuses mocking there
+(`apps/mobile/src/lib/prod-profile.test.ts`).
 `createConfig()` rejects API mocking in prod. Studio keeps the contract
 mocks as a lazily loaded chunk in its single artifact (ADR 0003: dev may mock,
 the same artifact is promoted to prod); `@radial-pulse/web:verify-bundle`

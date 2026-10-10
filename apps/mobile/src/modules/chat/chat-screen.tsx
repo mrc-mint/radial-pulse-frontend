@@ -226,6 +226,7 @@ function Composer({ clinicId, bottomInset }: { clinicId: string; bottomInset: nu
     if (!asset) return;
     try {
       // Read the picked file as a Blob for the pre-signed upload.
+      // eslint-disable-next-line no-restricted-globals -- reads a local file URI from the picker, not an API call
       const data = await (await fetch(asset.uri)).blob();
       setFile({ data, name: asset.name, size: asset.size ?? data.size });
     } catch {
